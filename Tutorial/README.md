@@ -117,7 +117,7 @@ bash diabeticKidney/allele_specific_analysis/step2_merge_geno.sh
 --threads 4
 ```
 
-**(Optional) STEP 3:** If you want to perform your analysis with phased genotypes you will need a phased reference. This is not stricly required, but it increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for either SNV or SNV and indels from ftp.1000genomes.ebi.ac.uk . Navigate to the corresponding directory depending on your selected reference. If you are only analyzing RNA data then select the SNV reference. For ATAC or Multiome data select the SNV and INDEL reference:
+**(Recommended) STEP 3:** If you want to perform your analysis with phased genotypes you will need a phased reference. This is not stricly required, but it increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for either SNV or SNV and indels from ftp.1000genomes.ebi.ac.uk . Navigate to the corresponding directory depending on your selected reference. If you are only analyzing RNA data then select the SNV reference. For ATAC or Multiome data select the SNV and INDEL reference:
 
 a) SNV only: /vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV </br>
 b) SNV and INDEL: /vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL
@@ -190,6 +190,86 @@ bash diabeticKidney/allele_specific_analysis/step4_gatk_anno_vcf.sh \
 --threads 10 \
 --funcotation reference/funcotator_dataSources.v1.6.20190124g
 ```
+
+**(Recommended) STEP 5:** Use barcode celltype annotations to filter the coordinate-sorted cellranger bam using the CB tag. This step is required if you want to analyze cell-specific effects. The barcode annotation file has three columns where the first column is the barcode, the second column is the library_id, and the third column is the celltype annotation. If you have analyzed your dataset using Seurat you could generate a barcode annotation csv in R as follows (the Seurat package is not included in the SALSA containers):
+```
+library(Seurat)
+library(stringr)
+celltype <- Idents(seurat_obj)
+barcode <- str_split(rownames(seurat_obj@meta.data), pattern="-", simplify=TRUE)[,1]
+library_id <- seurat_obj@meta.data$orig.ident
+anno <- data.frame(barcode=barcode, library_id=library_id, celltype=celltype)
+write.csv(anno, file="rna_barcodes.csv", row.names=FALSE, quote=FALSE)
+```
+Mount the barcodes directory and filter the cellranger bam using the 10X Genomics subset-bam utility. For the purposes of the tutorial, we will only filter chromosome 10. The --validate flag runs GATK ValidateSamFile on the output to ensure the bam file meets specifications.
+```
+SCRATCH1=/g/scratch
+docker run \
+--workdir $HOME
+-v $HOME:$HOME
+-v g/diabneph/cellranger_rna_counts/version_4.0:$HOME/rna_counts
+-v g/diabneph/cellranger_atac_counts/version_1.2:$HOME/atac_counts
+-v g/diabneph/github_repository/diabeticKidney:$HOME/diabeticKidney \
+-v g/diabneph/analysis/combined_adv/barcodes:$HOME/barcodes \
+-v g/diabneph/analysis/combined_adv:$HOME/project \
+-v $SCRATCH1:$SCRATCH1 \
+-e SCRATCH1="/g/scratch" \
+--rm -it p4rkerw/salsa:count_1.0
+
+library_id=sample_1
+interval=chr10
+modality=rna
+bash diabeticKidney/allele_specific_analysis/step5_filterbam.sh
+--library_id $sample
+--validate
+--inputbam ${modality}_counts/$sample/outs/possorted_*.bam
+--modality $modality
+--interval $interval
+--barcodes barcodes/${modality}_barcodes.csv
+--threads 10
+--outputdir project/wasp_${modality}
+--outputbam $sample.bcfilter.${interval}.bam
+--validate
+```
+
+**STEP 6: Perform variant-aware realignment with WASP** 
+```
+SCRATCH1=/g/scratch
+docker run
+--workdir $HOME
+-v $HOME:$HOME
+-v g/diabneph/cellranger_rna_counts/version_4.0:$HOME/rna_counts
+-v g/diabneph/cellranger_atac_counts/version_1.2:$HOME/atac_counts
+-v g/reference/GRCh38-2020-A.premrna:$HOME/rna_ref
+-v g/reference/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref
+-v g/diabneph/analysis/combined_adv/vcf_filtered:$HOME/vcfdir
+-v g/diabneph/github_repository/diabeticKidney:$HOME/diabeticKidney
+-v g/reference/gatk:$HOME/gatk_bundle
+-v g/reference/phasing/biallelic_SNV_and_INDEL/ucsc:$HOME/phasing
+-v g/reference:$HOME/reference
+-v g/diabneph/analysis/combined_adv/barcodes:$HOME/barcodes
+-v g/diabneph/analysis/combined_adv:$HOME/project
+-v $SCRATCH1:$SCRATCH1
+-e SCRATCH1="/g/scratch"
+--rm -it p4rkerw/salsa:count_1.0
+
+library_id=sample_1
+modality=rna
+interval=chr10
+bash repo/allele_specific_analysis/step6_wasp.sh
+--inputvcf vcfdir/funcotation/$sample.pass.joint.hcphase.funco.vcf.gz
+--inputbam project/wasp_${modality}/$sample.bcfilter.bam
+--outputdir project/wasp_${modality}/joint_genotype
+--outputbam $sample.phase.${interval}wasp.bam
+--genotype joint
+--stargenome rna_ref/star
+--library_id $sample
+--modality $modality
+--threads 8
+--isphased
+--interval $interval
+```
+
 
 
 
