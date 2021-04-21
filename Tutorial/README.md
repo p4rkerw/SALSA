@@ -65,9 +65,9 @@ docker run --memory 64g \
 
 **STEP 4a: Genotype a single chromosome for a single cell gene expression dataset**
 
-sample=Control_1
-interval=chr10
-modality=rna
+sample=Control_1 \
+interval=chr10 \
+modality=rna \
 bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh \
 --bam ${modality}_counts/$sample/outs/possorted*.bam \
 --library_id $sample \
@@ -79,9 +79,9 @@ bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh \
 
 **STEP 4b: Genotype a single chromosome for a single cell ATAC dataset**
 
-sample=Control_1
-interval=chr10
-modality=atac
+sample=Control_1 \
+interval=chr10 \
+modality=atac \
 bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh \
 --bam ${modality}_counts/$sample/outs/possorted*.bam \
 --library_id $sample \
