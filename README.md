@@ -40,5 +40,5 @@ Each step has additional documentation and a README in its corresponding folder.
 7. Obtain pseudobulk, cell-specific, or single cell allele-specific counts with GATK ASEReadCounter  
 8. Analyze allele-specific expression across multiple samples with ASEP
 
-To get started follow along with our short tutorial: 
+To get started follow along with our abbreviated tutorial: 
 
