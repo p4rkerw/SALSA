@@ -232,22 +232,29 @@ bash diabeticKidney/allele_specific_analysis/step5_filterbam.sh
 --validate
 ```
 
-**STEP 6: Perform variant-aware realignment with WASP** 
+**STEP 6: Perform variant-aware realignment with WASP** This step takes a genotyped vcf and performs variant-aware realignment on a coordinate-sorted and indexed bam file with WASP. WASP is a tool to perform unbiased allele-specific read mapping and you can read more about it here: https://github.com/bmvdgeijn/WASP . For the purposes of the tutorial, we will only analyze chromosome 10. For RNA analysis, this step requires a STAR index of the cellranger reference. A STAR index can be built ahead of time using the following command:
+```
+STAR \
+--runMode genomeGenerate \
+--runThreadN $threads \
+--genomeDir rna_ref/star \
+--genomeFastaFiles rna_ref/fasta/genome.fa \
+--sjdbGTFfile rna_ref/genes/genes.gtf
+```
+Similarly, if you are analyzing ATAC data you will need to create an index for bwa. A bwa index can be built ahead of time using the following command:
+```
+bwa index atac_ref/fasta/genome.fa 
+```
+Alternatively, these references will be built at runtime and placed in the $SCRATCH directory. To perform variant aware realignment with WASP run:
 ```
 SCRATCH1=/g/scratch
 docker run
 --workdir $HOME
 -v $HOME:$HOME
--v g/diabneph/cellranger_rna_counts/version_4.0:$HOME/rna_counts
--v g/diabneph/cellranger_atac_counts/version_1.2:$HOME/atac_counts
 -v g/reference/GRCh38-2020-A.premrna:$HOME/rna_ref
 -v g/reference/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref
 -v g/diabneph/analysis/combined_adv/vcf_filtered:$HOME/vcfdir
 -v g/diabneph/github_repository/diabeticKidney:$HOME/diabeticKidney
--v g/reference/gatk:$HOME/gatk_bundle
--v g/reference/phasing/biallelic_SNV_and_INDEL/ucsc:$HOME/phasing
--v g/reference:$HOME/reference
--v g/diabneph/analysis/combined_adv/barcodes:$HOME/barcodes
 -v g/diabneph/analysis/combined_adv:$HOME/project
 -v $SCRATCH1:$SCRATCH1
 -e SCRATCH1="/g/scratch"
@@ -256,20 +263,21 @@ docker run
 library_id=sample_1
 modality=rna
 interval=chr10
-bash repo/allele_specific_analysis/step6_wasp.sh
---inputvcf vcfdir/funcotation/$sample.pass.joint.hcphase.funco.vcf.gz
---inputbam project/wasp_${modality}/$sample.bcfilter.bam
+bash diabeticKidney/allele_specific_analysis/step6_wasp.sh
+--inputvcf vcfdir/funcotation/$library_id.pass.joint.hcphase.funco.vcf.gz
+--inputbam project/wasp_${modality}/$library_id.bcfilter.bam
 --outputdir project/wasp_${modality}/joint_genotype
 --outputbam $sample.phase.${interval}wasp.bam
 --genotype joint
 --stargenome rna_ref/star
---library_id $sample
+--library_id $library_id
 --modality $modality
 --threads 8
 --isphased
 --interval $interval
 ```
 
+**STEP 7: Obtain allele-specific read counts with GATK**
 
 
 
