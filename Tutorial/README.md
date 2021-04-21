@@ -5,13 +5,12 @@ SALSA is run in two stages:
 2. Analyze allele-specific counts 
 
 STAGE 1: 
-p4rkerw/salsa:count_1.0 has the following dependencies:
+p4rkerw/salsa:count_1.0 is build on the broadinstitue/gatk:4.2.0.0 docker image and has the following additional dependencies pre-installed:
 GATK 4.2.0.0
-bwa
-STAR
-bcftools
-hdf5 \
-pysam
+bwa 1.8
+STAR 2.7.8a
+bcftools 1.8 
+pysam 0.15.3
 shapeit 4.2
 WASP 0.3.4
 
@@ -42,34 +41,34 @@ resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
 For analyzing single cell gene expression datasets:
 ```
 SCRATCH1=path/to/scratch
-docker run --memory 64g
---workdir $HOME
--v $HOME:$HOME
--v path/to/cellranger_rna_counts:$HOME/rna_counts
--v path/to/GRCh38-2020-A.premrna:$HOME/rna_ref
--v path/to/vcf_output:$HOME/vcfdir
--v path/to/SALSA:$HOME/SALSA
--v path/to/gatk_bundle_reference:$HOME/gatk_bundle
--v $SCRATCH1:$SCRATCH1
--e SCRATCH1="path/to/scratch"
+docker run --memory 64g \
+--workdir $HOME \
+-v $HOME:$HOME \
+-v path/to/cellranger_rna_counts:$HOME/rna_counts \
+-v path/to/GRCh38-2020-A.premrna:$HOME/rna_ref \
+-v path/to/vcf_output:$HOME/vcfdir \
+-v path/to/SALSA:$HOME/SALSA \
+-v path/to/gatk_bundle_reference:$HOME/gatk_bundle \
+-v $SCRATCH1:$SCRATCH1 \
+-e SCRATCH1="path/to/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
 ```
 
 For analyzing single cell gene expression, single cell ATAC and single cell Multiome datasets mount additional volumes for the ATAC reference and counts:
 ```
 SCRATCH1=path/to/scratch
-docker run --memory 64g
---workdir $HOME
--v $HOME:$HOME
--v path/to/cellranger_rna_counts:$HOME/rna_counts
--v path/to/cellranger_atac_counts:$HOME/atac_counts
--v path/to/GRCh38-2020-A.premrna:$HOME/rna_ref
--v path/to/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref
--v path/to/vcf_output:$HOME/vcfdir
--v path/to/SALSA:$HOME/SALSA
--v path/to/gatk_bundle_reference:$HOME/gatk_bundle
--v $SCRATCH1:$SCRATCH1
--e SCRATCH1="path/to/scratch"
+docker run --memory 64g \
+--workdir $HOME \
+-v $HOME:$HOME \
+-v path/to/cellranger_rna_counts:$HOME/rna_counts \
+-v path/to/cellranger_atac_counts:$HOME/atac_counts \
+-v path/to/GRCh38-2020-A.premrna:$HOME/rna_ref \
+-v path/to/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref \
+-v path/to/vcf_output:$HOME/vcfdir \
+-v path/to/SALSA:$HOME/SALSA \
+-v path/to/gatk_bundle_reference:$HOME/gatk_bundle \
+-v $SCRATCH1:$SCRATCH1 \
+-e SCRATCH1="path/to/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
 ```
 
@@ -78,13 +77,13 @@ docker run --memory 64g
 library_id=sample_1
 interval=chr10
 modality=rna
-bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh
+bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh \
 --bam ${modality}_counts/$library_id/outs/possorted*.bam \
---library_id $library_id
---outputdir vcfdir/${modality}_genotype
---outputvcf $library_id.$modality.$interval.vcf.gz
---interval $interval
---modality $modality
+--library_id $library_id \
+--outputdir vcfdir/${modality}_genotype \
+--outputvcf $library_id.$modality.$interval.vcf.gz \
+--interval $interval \
+--modality $modality \
 --threads 4
 ```
 
@@ -93,13 +92,13 @@ bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh
 library_id=sample_1
 interval=chr10
 modality=atac
-bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh
---bam ${modality}_counts/$library_id/outs/possorted*.bam
---library_id $library_id
---outputdir vcfdir/${modality}_genotype
---outputvcf $library_id.$modality.$interval.vcf.gz
---interval $interval
---modality $modality
+bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh \
+--bam ${modality}_counts/$library_id/outs/possorted*.bam \
+--library_id $library_id \
+--outputdir vcfdir/${modality}_genotype \
+--outputvcf $library_id.$modality.$interval.vcf.gz \
+--interval $interval \
+--modality $modality \
 --threads 4
 ```
 
@@ -108,12 +107,12 @@ bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh
 modalityone=atac
 modalitytwo=rna
 library_id=sample_1
-bash diabeticKidney/allele_specific_analysis/step2_merge_geno.sh
---library_id $library_id
---vcfone vcfdir/${modalityone}_genotype/$library_id.$modalityone.$interval.vcf.gz
---vcftwo vcfdir/${modalitytwo}_genotype/$library_id.$modalitytwo.$interval.vcf.gz
---outputdir vcfdir/joint_genotype
---outputvcf $library_id.pass.joint.$interval.vcf.gz
+bash diabeticKidney/allele_specific_analysis/step2_merge_geno.sh \
+--library_id $library_id \
+--vcfone vcfdir/${modalityone}_genotype/$library_id.$modalityone.$interval.vcf.gz \
+--vcftwo vcfdir/${modalitytwo}_genotype/$library_id.$modalitytwo.$interval.vcf.gz \
+--outputdir vcfdir/joint_genotype \
+--outputvcf $library_id.pass.joint.$interval.vcf.gz \
 --threads 4
 ```
 
@@ -137,26 +136,26 @@ bcftools index --threads 4 phasing/$inputvcf
 Mount the directory with the 1000G reference and phase the genotypes
 ```
 SCRATCH1=path/to/scratch
-docker run
---workdir $HOME
--v $HOME:$HOME
--v path/to/vcf_output:$HOME/vcfdir
--v path/to/SALSA:$HOME/SALSA
--v path/to/phasing/biallelic_SNV/ucsc:$HOME/phasing
--v $SCRATCH1:$SCRATCH1
--e SCRATCH1="path/to/scratch"
+docker run \
+--workdir $HOME \
+-v $HOME:$HOME \
+-v path/to/vcf_output:$HOME/vcfdir \
+-v path/to/SALSA:$HOME/SALSA \
+-v path/to/phasing/biallelic_SNV/ucsc:$HOME/phasing \
+-v $SCRATCH1:$SCRATCH1 \
+-e SCRATCH1="path/to/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
 
 library_id=sample_1
 interval=chr10
-bash diabeticKidney/allele_specific_analysis/step3_phase_vcf.sh
---library_id $library_id
---inputvcf vcfdir/joint_genotype/$library_id.pass.joint.$interval.vcf.gz
---outputdir vcfdir/phasing
---outputvcf $library_id.pass.joint.${interval}hcphase.vcf.gz
---interval $interval
---hcphase
---threads 4
+bash diabeticKidney/allele_specific_analysis/step3_phase_vcf.sh \
+--library_id $library_id \
+--inputvcf vcfdir/joint_genotype/$library_id.pass.joint.$interval.vcf.gz \
+--outputdir vcfdir/phasing \
+--outputvcf $library_id.pass.joint.${interval}hcphase.vcf.gz \
+--interval $interval \
+--hcphase \
+--threads 4 \
 --snvonly
 ```
 
@@ -166,32 +165,32 @@ Mount the reference directory to the docker container and annotate the vcf
 
 ```
 SCRATCH1=path/to/scratch
-docker run
---workdir $HOME
--v $HOME:$HOME
--v path/to/GRCh38-2020-A.premrna:$HOME/rna_ref
--v path/to/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref
--v path/to/vcf_output:$HOME/vcfdir
--v path/to/SALSA:$HOME/SALSA
--v path/to/reference:$HOME/reference
--v $SCRATCH1:$SCRATCH1
--e SCRATCH1="path/to/scratch"
+docker run \
+--workdir $HOME \
+-v $HOME:$HOME \
+-v path/to/GRCh38-2020-A.premrna:$HOME/rna_ref \
+-v path/to/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref \
+-v path/to/vcf_output:$HOME/vcfdir \
+-v path/to/SALSA:$HOME/SALSA \
+-v path/to/reference:$HOME/reference \
+-v $SCRATCH1:$SCRATCH1 \
+-e SCRATCH1="path/to/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
 
 library_id=sample_1
 interval=chr10
-bash diabeticKidney/allele_specific_analysis/step4_gatk_anno_vcf.sh
---library_id $library_id
---inputvcf vcfdir/phasing/$library_id.pass.joint.${interval}hcphase.vcf.gz
---outputdir vcfdir/funcotation
---outputvcf $library_id.pass.joint.${interval}hcphase.funco.vcf.gz
---output_table $library_id.pass.joint.${interval}hcphase.formatted.csv
---modality atac
---threads 10
+bash diabeticKidney/allele_specific_analysis/step4_gatk_anno_vcf.sh \
+--library_id $library_id \
+--inputvcf vcfdir/phasing/$library_id.pass.joint.${interval}hcphase.vcf.gz \
+--outputdir vcfdir/funcotation \
+--outputvcf $library_id.pass.joint.${interval}hcphase.funco.vcf.gz \
+--output_table $library_id.pass.joint.${interval}hcphase.formatted.csv \
+--modality atac \
+--threads 4 \
 --funcotation reference/funcotator_dataSources.v1.6.20190124g
 ```
 
-**(Recommended) STEP 5:** Use barcode celltype annotations to filter the coordinate-sorted cellranger bam using the CB tag. This step is required if you want to analyze cell-specific effects. The barcode annotation file has three columns where the first column is the barcode, the second column is the library_id, and the third column is the celltype annotation. If you have analyzed your dataset using Seurat you could generate a barcode annotation csv in R as follows (the Seurat package is not included in the SALSA containers):
+**(Recommended) STEP 5:** Use barcode celltype annotations to filter the coordinate-sorted cellranger bam using the CB tag. This step is required if you want to analyze cell-specific or single cell allelic effects. The barcode annotation file has three columns where the first column is the barcode, the second column is the library_id, and the third column is the celltype annotation. If you have analyzed your dataset using Seurat you could generate a barcode annotation csv in R as follows (the Seurat package is not included in the SALSA containers):
 ```
 library(Seurat)
 library(stringr)
@@ -204,73 +203,72 @@ write.csv(anno, file="rna_barcodes.csv", row.names=FALSE, quote=FALSE)
 Mount the barcodes directory and filter the cellranger bam using the 10X Genomics subset-bam utility. For the purposes of the tutorial, we will only filter chromosome 10. The --validate flag runs GATK ValidateSamFile on the output to ensure the bam file meets specifications.
 ```
 SCRATCH1=path/to/scratch
-docker run
---workdir $HOME
--v $HOME:$HOME
--v path/to/cellranger_rna_counts:$HOME/rna_counts
--v path/to/cellranger_atac_counts:$HOME/atac_counts
--v path/to/SALSA:$HOME/SALSA
--v path/to/barcodes:$HOME/barcodes
--v path/to/project:$HOME/project
--v $SCRATCH1:$SCRATCH1
--e SCRATCH1="path/to/scratch"
+docker run \
+--workdir $HOME \
+-v $HOME:$HOME \
+-v path/to/cellranger_rna_counts:$HOME/rna_counts \
+-v path/to/cellranger_atac_counts:$HOME/atac_counts \
+-v path/to/SALSA:$HOME/SALSA \
+-v path/to/barcodes:$HOME/barcodes \
+-v path/to/project:$HOME/project \
+-v $SCRATCH1:$SCRATCH1 \
+-e SCRATCH1="path/to/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
 
 library_id=sample_1
 interval=chr10
 modality=rna
-bash diabeticKidney/allele_specific_analysis/step5_filterbam.sh
---library_id $library_id
---validate
---inputbam ${modality}_counts/$library_id/outs/possorted_*.bam
---modality $modality
---interval $interval
---barcodes barcodes/${modality}_barcodes.csv
---threads 10
---outputdir project/wasp_${modality}
---outputbam $library_id.bcfilter.${interval}.bam
---validate
+bash diabeticKidney/allele_specific_analysis/step5_filterbam.sh \
+--library_id $library_id \
+--validate \
+--inputbam ${modality}_counts/$library_id/outs/possorted_*.bam \
+--modality $modality \
+--interval $interval \
+--barcodes barcodes/${modality}_barcodes.csv \
+--threads 4 \
+--outputdir project/wasp_${modality} \
+--outputbam $library_id.bcfilter.${interval}.bam 
 ```
 
 **STEP 6: Perform variant-aware realignment with WASP** This step takes a genotyped vcf and performs variant-aware realignment on a coordinate-sorted and indexed bam file with WASP. WASP is a tool to perform unbiased allele-specific read mapping and you can read more about it here: https://github.com/bmvdgeijn/WASP . For the purposes of the tutorial, we will only analyze chromosome 10. For RNA analysis, this step requires a STAR index of the cellranger reference. A STAR index can be built ahead of time using the following command:
 ```
 STAR
---runMode genomeGenerate
---runThreadN $threads
---genomeDir rna_ref/star
---genomeFastaFiles rna_ref/fasta/genome.fa
+--runMode genomeGenerate \
+--runThreadN $threads \
+--genomeDir rna_ref/star \
+--genomeFastaFiles rna_ref/fasta/genome.fa \
 --sjdbGTFfile rna_ref/genes/genes.gtf
 ```
 
 Alternatively, these references will be built at runtime and placed in the $SCRATCH directory. To perform variant aware realignment on a single cell gene expression dataset with WASP run:
 ```
 SCRATCH1=path/to/scratch
-docker run
---workdir $HOME
--v $HOME:$HOME
--v path/to/GRCh38-2020-A.premrna:$HOME/rna_ref
--v path/to/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref
--v path/to/vcf_output:$HOME/vcfdir
--v path/to/SALSA:$HOME/SALSA
--v path/to/project:$HOME/project
--v $SCRATCH1:$SCRATCH1
--e SCRATCH1="path/to/scratch"
+docker run \
+--workdir $HOME \
+-v $HOME:$HOME \
+-v path/to/GRCh38-2020-A.premrna:$HOME/rna_ref \
+-v path/to/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref \
+-v path/to/vcf_output:$HOME/vcfdir \
+-v path/to/SALSA:$HOME/SALSA \
+-v path/to/project:$HOME/project \
+-v $SCRATCH1:$SCRATCH1 \
+-e SCRATCH1="path/to/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
 
 library_id=sample_1
 modality=rna
 interval=chr10
-bash diabeticKidney/allele_specific_analysis/step6_wasp.sh
---inputvcf vcfdir/funcotation/$library_id.pass.joint.hcphase.funco.vcf.gz
---inputbam project/wasp_${modality}/$library_id.bcfilter.bam
---outputdir project/wasp_${modality}/joint_genotype
---outputbam $library_id.phase.${interval}wasp.bam
---genotype joint
---stargenome rna_ref/star
---library_id $library_id
---modality $modality
---threads 4
---isphased
+bash diabeticKidney/allele_specific_analysis/step6_wasp.sh \
+--inputvcf vcfdir/funcotation/$library_id.pass.joint.hcphase.funco.vcf.gz \
+--inputbam project/wasp_${modality}/$library_id.bcfilter.bam \
+--outputdir project/wasp_${modality}/joint_genotype \
+--outputbam $library_id.phase.${interval}wasp.bam \
+--genotype joint \
+--stargenome rna_ref/star \
+--library_id $library_id \
+--modality $modality \
+--threads 4 \
+--isphased \
 --interval $interval
 ```
 
@@ -283,15 +281,15 @@ To perform variant aware realignment on a single cell ATAC dataset with WASP run
 library_id=sample_1
 modality=atac
 interval=chr10
-bash diabeticKidney/allele_specific_analysis/step6_wasp.sh
---inputvcf vcfdir/funcotation/$sample.pass.joint.${interval}hcphase.funco.vcf.gz
---inputbam project/wasp_${modality}/$library_id.bcfilter.${interval}.bam
---outputdir project/wasp_${modality}
---outputbam $library_id.phase.${interval}wasp.bam
---genotype joint
---library_id $library_id
---modality $modality
---threads 4
+bash diabeticKidney/allele_specific_analysis/step6_wasp.sh \
+--inputvcf vcfdir/funcotation/$sample.pass.joint.${interval}hcphase.funco.vcf.gz \
+--inputbam project/wasp_${modality}/$library_id.bcfilter.${interval}.bam \
+--outputdir project/wasp_${modality} \
+--outputbam $library_id.phase.${interval}wasp.bam \
+--genotype joint \
+--library_id $library_id \
+--modality $modality \
+--threads 4 \
 --isphased
 ```
 
@@ -300,35 +298,35 @@ bash diabeticKidney/allele_specific_analysis/step6_wasp.sh
 To perform pseudobulk, celltype pseudobulk, and single cell allele-specific counts with a phased input vcf:
 ```
 SCRATCH1=path/to/scratch
-docker run
---workdir $HOME
--v $HOME:$HOME
--v path/to/GRCh38-2020-A.premrna:$HOME/rna_ref
--v path/to/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref
--v path/to/vcf_output:$HOME/vcfdir
--v path/to/SALSA:$HOME/SALSA
--v path/to/barcodes:$HOME/barcodes
--v path/to/project:$HOME/project
--v $SCRATCH1:$SCRATCH1
--e SCRATCH1="path/to/scratch"
+docker run \
+--workdir $HOME \
+-v $HOME:$HOME \
+-v path/to/GRCh38-2020-A.premrna:$HOME/rna_ref \
+-v path/to/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref \
+-v path/to/vcf_output:$HOME/vcfdir \
+-v path/to/SALSA:$HOME/SALSA \
+-v path/to/barcodes:$HOME/barcodes \
+-v path/to/project:$HOME/project \
+-v $SCRATCH1:$SCRATCH1 \
+-e SCRATCH1="path/to/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
 
 library_id=sample_1
 modality=rna
 interval=chr10
-bash diabeticKidney/allele_specific_analysis/step7_gatk_alleleCount.sh
---inputvcf vcfdir/funcotation/$library_id.pass.joint.${interval}hcphase.funco.vcf.gz
---inputbam project/wasp_${modality}/$library_id.phase.${interval}wasp.bam
---outputdir project/wasp_${modality}/counts
---barcodes barcodes/${modality}_barcodes.csv
---genotype joint_genotype
---library_id $library_id
---modality $modality
---pseudobulk_counts
---single_cell_counts
---celltype_counts
---threads 10
---interval $interval
+bash diabeticKidney/allele_specific_analysis/step7_gatk_alleleCount.sh \
+--inputvcf vcfdir/funcotation/$library_id.pass.joint.${interval}hcphase.funco.vcf.gz \
+--inputbam project/wasp_${modality}/$library_id.phase.${interval}wasp.bam \
+--outputdir project/wasp_${modality}/counts \
+--barcodes barcodes/${modality}_barcodes.csv \
+--genotype joint_genotype \
+--library_id $library_id \
+--modality $modality \
+--pseudobulk_counts \
+--single_cell_counts \
+--celltype_counts \
+--threads 4 \
+--interval $interval \
 --isphased
 ```
 
