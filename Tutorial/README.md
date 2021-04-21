@@ -66,7 +66,7 @@ docker run --memory 64g \
 -v path/to/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref \
 -v path/to/vcf_output:$HOME/vcfdir \
 -v path/to/SALSA:$HOME/SALSA \
--v path/to/gatk_bundle_reference:$HOME/gatk_bundle \
+-v path/to/gatk_bundle_resource_files:$HOME/gatk_bundle \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="path/to/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
