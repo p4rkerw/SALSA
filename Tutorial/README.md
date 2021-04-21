@@ -299,6 +299,20 @@ bash diabeticKidney/allele_specific_analysis/step6_wasp.sh
 
 To perform pseudobulk, celltype pseudobulk, and single cell allele-specific counts with a phased input vcf:
 ```
+SCRATCH1=/g/scratch
+docker run
+--workdir $HOME
+-v $HOME:$HOME
+-v g/reference/GRCh38-2020-A.premrna:$HOME/rna_ref
+-v g/reference/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref
+-v g/diabneph/analysis/combined_adv/vcf_filtered:$HOME/vcfdir
+-v g/diabneph/github_repository/diabeticKidney:$HOME/diabeticKidney
+-v g/diabneph/analysis/combined_adv/barcodes:$HOME/barcodes
+-v g/diabneph/analysis/combined_adv:$HOME/project
+-v $SCRATCH1:$SCRATCH1
+-e SCRATCH1="/g/scratch"
+--rm -it p4rkerw/salsa:count_1.0
+
 library_id=sample_1
 modality=rna
 interval=chr10
