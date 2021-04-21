@@ -134,7 +134,18 @@ bcftools annotate phasing/$inputvcf --threads 4 --rename-chrs /tmp/rename_chrm.t
 mv $SCRATCH1/$inputvcf phasing/
 bcftools index --threads 4 phasing/$inputvcf
 ```
-
+Phase the genotypes using the 1000G reference
+```
+bash diabeticKidney/allele_specific_analysis/step3_phase_vcf.sh
+--library_id $library_id
+--inputvcf vcfdir/joint_genotype/$library_id.pass.joint.$interval.vcf.gz
+--outputdir vcfdir/phasing
+--outputvcf $library_id.pass.joint.${interval}hcphase.vcf.gz
+--interval $interval
+--hcphase
+--threads 4
+--snvonly
+```
 
 
 
