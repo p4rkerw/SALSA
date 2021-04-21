@@ -295,7 +295,31 @@ bash diabeticKidney/allele_specific_analysis/step6_wasp.sh
 --isphased
 ```
 
-**STEP 7: Obtain allele-specific read counts with GATK**
+**STEP 7: Obtain allele-specific read counts with GATK** This step will filter a phased and genotyped vcf for heterozygous SNV to perform allele-specific counting in a coordinate-sorted and indexed bam file after WASP realignment. There are multiple options for count table outputs. The --pseudobulk option will group all barcodes together to perform allele-specific counting. This is analogous to bulk RNA-seq. The --celltype_pseudobulk option will use the barcode annotations to split the bam into cell-type-specific bam files before performing allele-specific counting. The --single_cell_counts option will split the bam file into individual single cell bam files and perform allele-specific counting. If your input vcf is phased you can select the --isphased option to add a phased genotype to the count tables.
+
+To perform pseudobulk, celltype pseudobulk, and single cell allele-specific counts with a phased input vcf:
+```
+library_id=sample_1
+modality=rna
+interval=chr10
+bash diabeticKidney/allele_specific_analysis/step7_gatk_alleleCount.sh
+--inputvcf vcfdir/funcotation/$sample.pass.joint.${interval}hcphase.funco.vcf.gz
+--inputbam project/wasp_${modality}/$sample.phase.${interval}wasp.bam
+--outputdir project/wasp_${modality}/counts
+--barcodes barcodes/${modality}_barcodes.csv
+--genotype joint_genotype
+--library_id $sample
+--modality $modality
+--pseudobulk_counts
+--single_cell_counts
+--celltype_counts
+--threads 10
+--interval $interval
+--isphased
+```
+
+
+
 
 
 
