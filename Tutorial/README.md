@@ -41,23 +41,23 @@ resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
 
 For analyzing single cell gene expression datasets:
 ```
-SCRATCH1=/g/scratch
+SCRATCH1=path/to/scratch
 docker run --memory 64g
 --workdir $HOME
 -v $HOME:$HOME
 -v path/to/cellranger_rna_counts:$HOME/rna_counts
 -v path/to/GRCh38-2020-A.premrna:$HOME/rna_ref
--v path/to/vcf_filtered:$HOME/vcfdir
+-v path/to/vcf_output:$HOME/vcfdir
 -v path/to/SALSA:$HOME/SALSA
 -v path/to/gatk_bundle_reference:$HOME/gatk_bundle
 -v $SCRATCH1:$SCRATCH1
--e SCRATCH1="/g/scratch"
+-e SCRATCH1="path/to/scratch"
 --rm -it p4rkerw/salsa:count_1.0
 ```
 
 For analyzing single cell gene expression, single cell ATAC and single cell Multiome datasets mount additional volumes for the ATAC reference and counts:
 ```
-SCRATCH1=/g/scratch
+SCRATCH1=path/to/scratch
 docker run --memory 64g
 --workdir $HOME
 -v $HOME:$HOME
@@ -65,11 +65,11 @@ docker run --memory 64g
 -v path/to/cellranger_atac_counts:$HOME/atac_counts
 -v path/to/GRCh38-2020-A.premrna:$HOME/rna_ref
 -v path/to/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref
--v path/to/vcf_filtered:$HOME/vcfdir
+-v path/to/vcf_output:$HOME/vcfdir
 -v path/to/SALSA:$HOME/SALSA
 -v path/to/gatk_bundle_reference:$HOME/gatk_bundle
 -v $SCRATCH1:$SCRATCH1
--e SCRATCH1="/g/scratch"
+-e SCRATCH1="path/to/scratch"
 --rm -it p4rkerw/salsa:count_1.0
 ```
 
@@ -136,15 +136,15 @@ bcftools index --threads 4 phasing/$inputvcf
 ```
 Mount the directory with the 1000G reference and phase the genotypes
 ```
-SCRATCH1=/g/scratch
+SCRATCH1=path/to/scratch
 docker run
 --workdir $HOME
 -v $HOME:$HOME
--v g/diabneph/analysis/combined_adv/vcf_filtered:$HOME/vcfdir
--v g/diabneph/github_repository/diabeticKidney:$HOME/diabeticKidney
--v g/reference/phasing/biallelic_SNV/ucsc:$HOME/phasing
+-v path/to/vcf_output:$HOME/vcfdir
+-v path/to/SALSA:$HOME/SALSA
+-v path/to/phasing/biallelic_SNV/ucsc:$HOME/phasing
 -v $SCRATCH1:$SCRATCH1
--e SCRATCH1="/g/scratch"
+-e SCRATCH1="path/to/scratch"
 --rm -it p4rkerw/salsa:count_1.0
 
 library_id=sample_1
@@ -165,17 +165,17 @@ bash diabeticKidney/allele_specific_analysis/step3_phase_vcf.sh
 Mount the reference directory to the docker container and annotate the vcf
 
 ```
-SCRATCH1=/g/scratch
+SCRATCH1=path/to/scratch
 docker run
 --workdir $HOME
 -v $HOME:$HOME
--v g/reference/GRCh38-2020-A.premrna:$HOME/rna_ref
--v g/reference/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref
--v g/diabneph/analysis/combined_adv/vcf_filtered:$HOME/vcfdir
--v g/diabneph/github_repository/diabeticKidney:$HOME/diabeticKidney
--v g/reference:$HOME/reference
+-v path/to/GRCh38-2020-A.premrna:$HOME/rna_ref
+-v path/to/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref
+-v path/to/vcf_output:$HOME/vcfdir
+-v path/to/SALSA:$HOME/SALSA
+-v path/to/reference:$HOME/reference
 -v $SCRATCH1:$SCRATCH1
--e SCRATCH1="/g/scratch"
+-e SCRATCH1="path/to/scratch"
 --rm -it p4rkerw/salsa:count_1.0
 
 library_id=sample_1
@@ -203,17 +203,17 @@ write.csv(anno, file="rna_barcodes.csv", row.names=FALSE, quote=FALSE)
 ```
 Mount the barcodes directory and filter the cellranger bam using the 10X Genomics subset-bam utility. For the purposes of the tutorial, we will only filter chromosome 10. The --validate flag runs GATK ValidateSamFile on the output to ensure the bam file meets specifications.
 ```
-SCRATCH1=/g/scratch
+SCRATCH1=path/to/scratch
 docker run
 --workdir $HOME
 -v $HOME:$HOME
--v g/diabneph/cellranger_rna_counts/version_4.0:$HOME/rna_counts
--v g/diabneph/cellranger_atac_counts/version_1.2:$HOME/atac_counts
--v g/diabneph/github_repository/diabeticKidney:$HOME/diabeticKidney
--v g/diabneph/analysis/combined_adv/barcodes:$HOME/barcodes
--v g/diabneph/analysis/combined_adv:$HOME/project
+-v path/to/cellranger_rna_counts:$HOME/rna_counts
+-v path/to/cellranger_atac_counts:$HOME/atac_counts
+-v path/to/SALSA:$HOME/SALSA
+-v path/to/barcodes:$HOME/barcodes
+-v path/to/project:$HOME/project
 -v $SCRATCH1:$SCRATCH1
--e SCRATCH1="/g/scratch"
+-e SCRATCH1="path/to/scratch"
 --rm -it p4rkerw/salsa:count_1.0
 
 library_id=sample_1
@@ -244,17 +244,17 @@ STAR
 
 Alternatively, these references will be built at runtime and placed in the $SCRATCH directory. To perform variant aware realignment on a single cell gene expression dataset with WASP run:
 ```
-SCRATCH1=/g/scratch
+SCRATCH1=path/to/scratch
 docker run
 --workdir $HOME
 -v $HOME:$HOME
--v g/reference/GRCh38-2020-A.premrna:$HOME/rna_ref
--v g/reference/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref
--v g/diabneph/analysis/combined_adv/vcf_filtered:$HOME/vcfdir
--v g/diabneph/github_repository/diabeticKidney:$HOME/diabeticKidney
--v g/diabneph/analysis/combined_adv:$HOME/project
+-v path/to/GRCh38-2020-A.premrna:$HOME/rna_ref
+-v path/to/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref
+-v path/to/vcf_output:$HOME/vcfdir
+-v path/to/SALSA:$HOME/SALSA
+-v path/to/project:$HOME/project
 -v $SCRATCH1:$SCRATCH1
--e SCRATCH1="/g/scratch"
+-e SCRATCH1="path/to/scratch"
 --rm -it p4rkerw/salsa:count_1.0
 
 library_id=sample_1
@@ -299,18 +299,18 @@ bash diabeticKidney/allele_specific_analysis/step6_wasp.sh
 
 To perform pseudobulk, celltype pseudobulk, and single cell allele-specific counts with a phased input vcf:
 ```
-SCRATCH1=/g/scratch
+SCRATCH1=path/to/scratch
 docker run
 --workdir $HOME
 -v $HOME:$HOME
--v g/reference/GRCh38-2020-A.premrna:$HOME/rna_ref
--v g/reference/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref
--v g/diabneph/analysis/combined_adv/vcf_filtered:$HOME/vcfdir
--v g/diabneph/github_repository/diabeticKidney:$HOME/diabeticKidney
--v g/diabneph/analysis/combined_adv/barcodes:$HOME/barcodes
--v g/diabneph/analysis/combined_adv:$HOME/project
+-v path/to/GRCh38-2020-A.premrna:$HOME/rna_ref
+-v path/to/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref
+-v path/to/vcf_output:$HOME/vcfdir
+-v path/to/SALSA:$HOME/SALSA
+-v path/to/barcodes:$HOME/barcodes
+-v path/to/project:$HOME/project
 -v $SCRATCH1:$SCRATCH1
--e SCRATCH1="/g/scratch"
+-e SCRATCH1="path/to/scratch"
 --rm -it p4rkerw/salsa:count_1.0
 
 library_id=sample_1
