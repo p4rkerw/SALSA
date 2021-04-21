@@ -147,6 +147,8 @@ docker run
 -e SCRATCH1="/g/scratch"
 --rm -it p4rkerw/salsa:count_1.0
 
+library_id=sample_1
+interval=chr10
 bash diabeticKidney/allele_specific_analysis/step3_phase_vcf.sh
 --library_id $library_id
 --inputvcf vcfdir/joint_genotype/$library_id.pass.joint.$interval.vcf.gz
