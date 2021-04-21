@@ -89,46 +89,50 @@ bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh
 ```
 
 **STEP 4b: Genotype a single chromosome for a single cell ATAC dataset**
-
-library_id=sample_1 \
-interval=chr10 \
-modality=atac \
-bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh \
---bam ${modality}_counts/$sample/outs/possorted*.bam \
---library_id $library_id \
---outputdir vcfdir/${modality}_genotype \
---outputvcf $library_id.$modality.$interval.vcf.gz \
---interval $interval \
---modality $modality \
+```
+library_id=sample_1
+interval=chr10
+modality=atac
+bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh
+--bam ${modality}_counts/$sample/outs/possorted*.bam
+--library_id $library_id
+--outputdir vcfdir/${modality}_genotype
+--outputvcf $library_id.$modality.$interval.vcf.gz
+--interval $interval
+--modality $modality
 --threads 4
+```
 
-**(Optional) STEP 5:** If you genotyped a paired single cell gene expression and ATAC dataset (or a single cell Multiome) for the same patient you can merge these genotypes:
-
+**(Optional) STEP 5:** If you genotyped a paired single cell gene expression and ATAC dataset (or a single cell Multiome) for the same patient you can merge these genotypes into a single vcf:
+```
 modalityone=atac
 modalitytwo=rna
 library_id=sample_1
-bash diabeticKidney/allele_specific_analysis/step2_merge_geno.sh \
---library_id $library_id \
---vcfone vcfdir/${modalityone}_genotype/$library_id.$modalityone.$interval.vcf.gz \
---vcftwo vcfdir/${modalitytwo}_genotype/$library_id.$modalitytwo.$interval.vcf.gz \
---outputdir vcfdir/joint_genotype \
---outputvcf $library_id.pass.joint.$interval.vcf.gz \
+bash diabeticKidney/allele_specific_analysis/step2_merge_geno.sh
+--library_id $library_id
+--vcfone vcfdir/${modalityone}_genotype/$library_id.$modalityone.$interval.vcf.gz
+--vcftwo vcfdir/${modalitytwo}_genotype/$library_id.$modalitytwo.$interval.vcf.gz
+--outputdir vcfdir/joint_genotype
+--outputvcf $library_id.pass.joint.$interval.vcf.gz
 --threads 4
+```
 
 **(Optional) STEP 6:** If you want to perform your analysis with phased genotypes you will need a phased reference. This is not stricly required, but it increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for either SNV or SNV and indels from ftp.1000genomes.ebi.ac.uk . Navigate to the corresponding directory depending on your selected reference. If you are only analyzing RNA data then select the SNV reference. For ATAC or Multiome data select the SNV and INDEL reference:
 a) SNV only: /vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV
 b) SNV and INDEL: /vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL
 
 You will eventually need to download the vcf for every chromosome, but for the purposes of the tutorial just download the SNV reference for chromosome10:
+```
 ALL.chr10.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz
-
+```
 The 1000G do not have the same contig style as the cellranger references. Update the 1000G contig style using bcftools in the stage 1 container. For the tutorial we will only do chromosome 10.
-
+```
 for i in {1..22} X;do echo "${i} chr${i}";done > /tmp/rename_chrm.txt
 inputvcf=ALL.chr10.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz
 bcftools annotate phasing/$inputvcf --threads 4 --rename-chrs /tmp/rename_chrm.txt -Oz -o $SCRATCH1/$inputvcf
 mv $SCRATCH1/$inputvcf phasing/
 bcftools index --threads 4 phasing/$inputvcf
+```
 
 
 
