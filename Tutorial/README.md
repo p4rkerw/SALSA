@@ -180,14 +180,14 @@ docker run
 
 library_id=sample_1
 interval=chr10
-bash diabeticKidney/allele_specific_analysis/step4_gatk_anno_vcf.sh \
---library_id $library_id \
---inputvcf vcfdir/phasing/$library_id.pass.joint.${interval}hcphase.vcf.gz \
---outputdir vcfdir/funcotation \
---outputvcf $library_id.pass.joint.${interval}hcphase.funco.vcf.gz \
---output_table $library_id.pass.joint.${interval}hcphase.formatted.csv \
---modality atac \
---threads 10 \
+bash diabeticKidney/allele_specific_analysis/step4_gatk_anno_vcf.sh
+--library_id $library_id
+--inputvcf vcfdir/phasing/$library_id.pass.joint.${interval}hcphase.vcf.gz
+--outputdir vcfdir/funcotation
+--outputvcf $library_id.pass.joint.${interval}hcphase.funco.vcf.gz
+--output_table $library_id.pass.joint.${interval}hcphase.formatted.csv
+--modality atac
+--threads 10
 --funcotation reference/funcotator_dataSources.v1.6.20190124g
 ```
 
@@ -204,16 +204,16 @@ write.csv(anno, file="rna_barcodes.csv", row.names=FALSE, quote=FALSE)
 Mount the barcodes directory and filter the cellranger bam using the 10X Genomics subset-bam utility. For the purposes of the tutorial, we will only filter chromosome 10. The --validate flag runs GATK ValidateSamFile on the output to ensure the bam file meets specifications.
 ```
 SCRATCH1=/g/scratch
-docker run \
+docker run
 --workdir $HOME
 -v $HOME:$HOME
 -v g/diabneph/cellranger_rna_counts/version_4.0:$HOME/rna_counts
 -v g/diabneph/cellranger_atac_counts/version_1.2:$HOME/atac_counts
--v g/diabneph/github_repository/diabeticKidney:$HOME/diabeticKidney \
--v g/diabneph/analysis/combined_adv/barcodes:$HOME/barcodes \
--v g/diabneph/analysis/combined_adv:$HOME/project \
--v $SCRATCH1:$SCRATCH1 \
--e SCRATCH1="/g/scratch" \
+-v g/diabneph/github_repository/diabeticKidney:$HOME/diabeticKidney
+-v g/diabneph/analysis/combined_adv/barcodes:$HOME/barcodes
+-v g/diabneph/analysis/combined_adv:$HOME/project
+-v $SCRATCH1:$SCRATCH1
+-e SCRATCH1="/g/scratch"
 --rm -it p4rkerw/salsa:count_1.0
 
 library_id=sample_1
@@ -234,18 +234,15 @@ bash diabeticKidney/allele_specific_analysis/step5_filterbam.sh
 
 **STEP 6: Perform variant-aware realignment with WASP** This step takes a genotyped vcf and performs variant-aware realignment on a coordinate-sorted and indexed bam file with WASP. WASP is a tool to perform unbiased allele-specific read mapping and you can read more about it here: https://github.com/bmvdgeijn/WASP . For the purposes of the tutorial, we will only analyze chromosome 10. For RNA analysis, this step requires a STAR index of the cellranger reference. A STAR index can be built ahead of time using the following command:
 ```
-STAR \
---runMode genomeGenerate \
---runThreadN $threads \
---genomeDir rna_ref/star \
---genomeFastaFiles rna_ref/fasta/genome.fa \
+STAR
+--runMode genomeGenerate
+--runThreadN $threads
+--genomeDir rna_ref/star
+--genomeFastaFiles rna_ref/fasta/genome.fa
 --sjdbGTFfile rna_ref/genes/genes.gtf
 ```
-Similarly, if you are analyzing ATAC data you will need to create an index for bwa. A bwa index can be built ahead of time using the following command:
-```
-bwa index atac_ref/fasta/genome.fa 
-```
-Alternatively, these references will be built at runtime and placed in the $SCRATCH directory. To perform variant aware realignment with WASP run:
+
+Alternatively, these references will be built at runtime and placed in the $SCRATCH directory. To perform variant aware realignment on a single cell gene expression dataset with WASP run:
 ```
 SCRATCH1=/g/scratch
 docker run
@@ -272,9 +269,30 @@ bash diabeticKidney/allele_specific_analysis/step6_wasp.sh
 --stargenome rna_ref/star
 --library_id $library_id
 --modality $modality
---threads 8
+--threads 4
 --isphased
 --interval $interval
+```
+
+Similarly, if you are analyzing ATAC data you will need to create an index for bwa. A bwa index can be built ahead of time using the following command:
+```
+bwa index atac_ref/fasta/genome.fa 
+```
+To perform variant aware realignment on a single cell ATAC dataset with WASP run:
+```
+library_id=sample_1
+modality=atac
+interval=chr10
+bash diabeticKidney/allele_specific_analysis/step6_wasp.sh
+--inputvcf vcfdir/funcotation/$sample.pass.joint.${interval}hcphase.funco.vcf.gz
+--inputbam project/wasp_${modality}/$sample.bcfilter.${interval}.bam
+--outputdir project/wasp_${modality}
+--outputbam $sample.phase.${interval}wasp.bam
+--genotype joint
+--library_id $sample
+--modality $modality
+--threads 4
+--isphased
 ```
 
 **STEP 7: Obtain allele-specific read counts with GATK**
