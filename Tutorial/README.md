@@ -79,7 +79,7 @@ library_id=sample_1
 interval=chr10
 modality=rna
 bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh
---bam ${modality}_counts/$sample/outs/possorted*.bam \
+--bam ${modality}_counts/$library_id/outs/possorted*.bam \
 --library_id $library_id
 --outputdir vcfdir/${modality}_genotype
 --outputvcf $library_id.$modality.$interval.vcf.gz
@@ -94,7 +94,7 @@ library_id=sample_1
 interval=chr10
 modality=atac
 bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh
---bam ${modality}_counts/$sample/outs/possorted*.bam
+--bam ${modality}_counts/$library_id/outs/possorted*.bam
 --library_id $library_id
 --outputdir vcfdir/${modality}_genotype
 --outputvcf $library_id.$modality.$interval.vcf.gz
@@ -220,15 +220,15 @@ library_id=sample_1
 interval=chr10
 modality=rna
 bash diabeticKidney/allele_specific_analysis/step5_filterbam.sh
---library_id $sample
+--library_id $library_id
 --validate
---inputbam ${modality}_counts/$sample/outs/possorted_*.bam
+--inputbam ${modality}_counts/$library_id/outs/possorted_*.bam
 --modality $modality
 --interval $interval
 --barcodes barcodes/${modality}_barcodes.csv
 --threads 10
 --outputdir project/wasp_${modality}
---outputbam $sample.bcfilter.${interval}.bam
+--outputbam $library_id.bcfilter.${interval}.bam
 --validate
 ```
 
@@ -264,7 +264,7 @@ bash diabeticKidney/allele_specific_analysis/step6_wasp.sh
 --inputvcf vcfdir/funcotation/$library_id.pass.joint.hcphase.funco.vcf.gz
 --inputbam project/wasp_${modality}/$library_id.bcfilter.bam
 --outputdir project/wasp_${modality}/joint_genotype
---outputbam $sample.phase.${interval}wasp.bam
+--outputbam $library_id.phase.${interval}wasp.bam
 --genotype joint
 --stargenome rna_ref/star
 --library_id $library_id
@@ -285,11 +285,11 @@ modality=atac
 interval=chr10
 bash diabeticKidney/allele_specific_analysis/step6_wasp.sh
 --inputvcf vcfdir/funcotation/$sample.pass.joint.${interval}hcphase.funco.vcf.gz
---inputbam project/wasp_${modality}/$sample.bcfilter.${interval}.bam
+--inputbam project/wasp_${modality}/$library_id.bcfilter.${interval}.bam
 --outputdir project/wasp_${modality}
---outputbam $sample.phase.${interval}wasp.bam
+--outputbam $library_id.phase.${interval}wasp.bam
 --genotype joint
---library_id $sample
+--library_id $library_id
 --modality $modality
 --threads 4
 --isphased
@@ -317,12 +317,12 @@ library_id=sample_1
 modality=rna
 interval=chr10
 bash diabeticKidney/allele_specific_analysis/step7_gatk_alleleCount.sh
---inputvcf vcfdir/funcotation/$sample.pass.joint.${interval}hcphase.funco.vcf.gz
---inputbam project/wasp_${modality}/$sample.phase.${interval}wasp.bam
+--inputvcf vcfdir/funcotation/$library_id.pass.joint.${interval}hcphase.funco.vcf.gz
+--inputbam project/wasp_${modality}/$library_id.phase.${interval}wasp.bam
 --outputdir project/wasp_${modality}/counts
 --barcodes barcodes/${modality}_barcodes.csv
 --genotype joint_genotype
---library_id $sample
+--library_id $library_id
 --modality $modality
 --pseudobulk_counts
 --single_cell_counts
