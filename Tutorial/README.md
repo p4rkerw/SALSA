@@ -64,6 +64,7 @@ docker run --memory 64g \
 --rm -it p4rkerw/salsa:count_1.0
 
 **STEP 4a: Genotype a single chromosome for a single cell gene expression dataset**
+
 sample=Control_1
 interval=chr10
 modality=rna
@@ -77,6 +78,7 @@ bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh \
 --threads 4
 
 **STEP 4b: Genotype a single chromosome for a single cell ATAC dataset**
+
 sample=Control_1
 interval=chr10
 modality=atac
