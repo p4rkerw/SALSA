@@ -36,7 +36,7 @@ resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
 For analyzing single cell gene expression datasets:
 `SCRATCH1=/g/scratch
 docker run --memory 64g
---workdir $HOME \
+--workdir $HOME
 -v $HOME:$HOME \
 -v path/to/cellranger_rna_counts:$HOME/rna_counts \
 -v path/to/GRCh38-2020-A.premrna:$HOME/rna_ref \
