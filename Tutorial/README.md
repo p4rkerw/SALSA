@@ -92,6 +92,7 @@ bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh \
 --threads 4
 
 **(Optional) STEP 5:** If you genotyped a paired single cell gene expression and ATAC dataset (or a single cell Multiome) for the same patient you can merge these genotypes:
+
 modalityone=atac
 modalitytwo=rna
 library_id=sample_1
@@ -109,6 +110,15 @@ b) SNV and INDEL: /vol1/ftp/data_collections/1000_genomes_project/release/201903
 
 You will eventually need to download the vcf for every chromosome, but for the purposes of the tutorial just download the SNV reference for chromosome10:
 ALL.chr10.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz
+
+The 1000G do not have the same contig style as the cellranger references. Update the 1000G contig style using bcftools in the stage 1 container. For the tutorial we will only do chromosome 10.
+
+for i in {1..22} X;do echo "${i} chr${i}";done > /tmp/rename_chrm.txt
+inputvcf=ALL.chr10.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz
+bcftools annotate phasing/$inputvcf --threads 4 --rename-chrs /tmp/rename_chrm.txt -Oz -o $SCRATCH1/$inputvcf
+mv $SCRATCH1/$inputvcf phasing/
+bcftools index --threads 4 phasing/$inputvcf
+
 
 
 
