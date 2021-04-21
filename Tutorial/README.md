@@ -134,8 +134,19 @@ bcftools annotate phasing/$inputvcf --threads 4 --rename-chrs /tmp/rename_chrm.t
 mv $SCRATCH1/$inputvcf phasing/
 bcftools index --threads 4 phasing/$inputvcf
 ```
-Phase the genotypes using the 1000G reference
+Mount the directory with the 1000G reference and phase the genotypes
 ```
+SCRATCH1=/g/scratch
+docker run
+--workdir $HOME
+-v $HOME:$HOME
+-v g/diabneph/analysis/combined_adv/vcf_filtered:$HOME/vcfdir
+-v g/diabneph/github_repository/diabeticKidney:$HOME/diabeticKidney
+-v g/reference/phasing/biallelic_SNV_and_INDEL/ucsc:$HOME/phasing
+-v $SCRATCH1:$SCRATCH1
+-e SCRATCH1="/g/scratch"
+--rm -it p4rkerw/salsa:count_1.0
+
 bash diabeticKidney/allele_specific_analysis/step3_phase_vcf.sh
 --library_id $library_id
 --inputvcf vcfdir/joint_genotype/$library_id.pass.joint.$interval.vcf.gz
