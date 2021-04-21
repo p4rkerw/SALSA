@@ -142,7 +142,7 @@ docker run
 -v $HOME:$HOME
 -v g/diabneph/analysis/combined_adv/vcf_filtered:$HOME/vcfdir
 -v g/diabneph/github_repository/diabeticKidney:$HOME/diabeticKidney
--v g/reference/phasing/biallelic_SNV_and_INDEL/ucsc:$HOME/phasing
+-v g/reference/phasing/biallelic_SNV/ucsc:$HOME/phasing
 -v $SCRATCH1:$SCRATCH1
 -e SCRATCH1="/g/scratch"
 --rm -it p4rkerw/salsa:count_1.0
