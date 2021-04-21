@@ -160,7 +160,9 @@ bash diabeticKidney/allele_specific_analysis/step3_phase_vcf.sh
 --snvonly
 ```
 
-**(Optional) STEP 4:** If you would like to annotate your vcf with gnomAD MAF you will first need to download the GATK Funcotator resource following the directions located here: https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial . The gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124]) and mount it to the docker container:
+**(Optional) STEP 4:** If you would like to annotate your vcf with gnomAD MAF you will first need to download the GATK Funcotator resource following the directions located here: https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial . The gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124])
+
+Mount the reference directory to the docker container and annotate the vcf
 
 ```
 SCRATCH1=/g/scratch
@@ -175,9 +177,7 @@ docker run
 -v $SCRATCH1:$SCRATCH1
 -e SCRATCH1="/g/scratch"
 --rm -it p4rkerw/salsa:count_1.0
-```
-Annotate the vcf with GATK Funcotator
-```
+
 library_id=sample_1
 interval=chr10
 bash diabeticKidney/allele_specific_analysis/step4_gatk_anno_vcf.sh \
