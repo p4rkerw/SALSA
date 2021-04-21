@@ -1,34 +1,21 @@
-# SALSA
-Single Cell Allele-Specific Analysis
+SALSA runs in publicly-available docker containers that contain all the necessary dependencies for code execution.
 
-Welcome to SALSA!  
-Here you will find a workflow and models for analyzing single cell allele-specific expression and chromatin accessibility obtained from 10X Genomics Single Cell Gene Expression, Single Cell ATAC, or Single Cell Multiome datasets. An earlier version of this software was written as part of the following manuscript:
+The first container is build on the broadinstitute/gatk image and will generate phased and annotated single cell allele-specific counts from 10X Genomics single cell gene expression, single cell ATAC or single cell Multiome libraries. 
 
-Muto, Y., Wilson, P.C., Ledru, N. et al. Single cell transcriptional and chromatin accessibility profiling redefine cellular heterogeneity in the adult human kidney. Nat Commun 12, 2190 (2021). https://doi.org/10.1038/s41467-021-22368-w
+The following dependencies are included in the p4rkerw/salsa:count_1.0 container:
 
-Thanks,  
-Parker
-<br/><br/>
-![alt text](http://humphreyslab.com/wp-content/uploads/2015/12/favicon-H.jpg)  
-Visit the Humphrey's lab website:   
-www.humphreyslab.com  
-<br/>
-Check out our interactive datasets with Kidney Interactive mulTiomics (KIT):  
-http://humphreyslab.com/SingleCell/
-<br/><br/>
-Find us on Twitter: 
-<br/>
-  <a href="https://twitter.com/parkercwilson?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false"> @parkercwilson</a>
-  <a href="https://twitter.com/HumphreysLab?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false"> @HumphreysLab</a>
-<br/><br/>
-Find us on Docker Hub:  
-[p4rkerw@dockerhub](https://hub.docker.com/search?q=p4rkerw&type=image)
-<br/>
+GATK 4.2.0.0
+bwa
+STAR
+bcftools
+hdf5
+pysam
+shapeit 4.2
+WASP 0.3.4
 
-**Allele Specific Analysis:**    
-These scripts can be run in publicly-available docker containers found here: [p4rkerw@dockerhub](https://hub.docker.com/search?q=p4rkerw&type=image)
+This workflow assumes that you have already aligned your raw data with cellranger, cellranger-atac, or cellranger-arc to generate coordinate-sorted bam files. For additional information, please consult the 10X Genomics website: https://www.10xgenomics.com/
 
-Each step has additional documentation and a README in its corresponding folder.  
+
 
 (Follow the steps in order) 
 1. Genotype the snRNA or snATAC libraries using GATK (or obtain a vcf from another method)
@@ -40,5 +27,4 @@ Each step has additional documentation and a README in its corresponding folder.
 7. Obtain pseudobulk, cell-specific, or single cell allele-specific counts with GATK ASEReadCounter  
 8. Analyze allele-specific expression across multiple samples with ASEP
 
-To get started follow along with our abbreviated tutorial: 
 
