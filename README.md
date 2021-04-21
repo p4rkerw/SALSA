@@ -28,7 +28,7 @@ Find us on Docker Hub:
 **Allele Specific Analysis:**    
 These scripts can be run in publicly-available docker containers found here: [p4rkerw@dockerhub](https://hub.docker.com/search?q=p4rkerw&type=image)
 
-Each script has an example command to run the corresponding docker container  
+Each step has a short tutorial and README in its corresponding folder.  
 
 (Follow the steps in order) 
 1. Genotype the snRNA or snATAC libraries using GATK (or obtain a vcf from another method)
@@ -37,6 +37,6 @@ Each script has an example command to run the corresponding docker container
 4. (Optional) - Annotate the vcf with GATK Funcotator to evaluate gnomAD MAF and variant context  
 5. Filter the 10X genomics positions sorted bam file by cell barcode using the subsetbam utility  
 6. Apply the WASP pipeline to barcode-filtered bam files to perform variant-aware realignment  
-9. Obtain pseudobulk, cell-specific, or single cell allele-specific counts with GATK ASEReadCounter  
-10. Analyze allele-specific expression across multiple samples with ASEP  
+7. Obtain pseudobulk, cell-specific, or single cell allele-specific counts with GATK ASEReadCounter  
+8. Analyze allele-specific expression across multiple samples with ASEP  
 
