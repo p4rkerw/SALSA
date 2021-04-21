@@ -118,7 +118,8 @@ bash diabeticKidney/allele_specific_analysis/step2_merge_geno.sh
 ```
 
 **(Optional) STEP 6:** If you want to perform your analysis with phased genotypes you will need a phased reference. This is not stricly required, but it increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for either SNV or SNV and indels from ftp.1000genomes.ebi.ac.uk . Navigate to the corresponding directory depending on your selected reference. If you are only analyzing RNA data then select the SNV reference. For ATAC or Multiome data select the SNV and INDEL reference:
-a) SNV only: /vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV
+
+a) SNV only: /vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV </br>
 b) SNV and INDEL: /vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL
 
 You will eventually need to download the vcf for every chromosome, but for the purposes of the tutorial just download the SNV reference for chromosome10:
