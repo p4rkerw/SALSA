@@ -5,14 +5,14 @@ SALSA is run in two stages:
 2. Analyze allele-specific counts 
 
 STAGE 1: 
-p4rkerw/salsa:count_1.0 has the following dependencies: \
-GATK 4.2.0.0 \
-bwa \
-STAR \
-bcftools \
+p4rkerw/salsa:count_1.0 has the following dependencies:
+GATK 4.2.0.0
+bwa
+STAR
+bcftools
 hdf5 \
-pysam \
-shapeit 4.2 \
+pysam
+shapeit 4.2
 WASP 0.3.4
 
 **STEP 1: Download cellranger references** If you don't already have the reference files that were used to align your datasets then download them from the cellranger website. For example, if you are analyzing human single cell gene expression and ATAC data on GRCh38 you should have the following folders:
@@ -38,14 +38,14 @@ For analyzing single cell gene expression datasets:
 SCRATCH1=/g/scratch
 docker run --memory 64g
 --workdir $HOME
--v $HOME:$HOME \
--v path/to/cellranger_rna_counts:$HOME/rna_counts \
--v path/to/GRCh38-2020-A.premrna:$HOME/rna_ref \
--v path/to/vcf_output:$HOME/vcfdir \
--v path/to/SALSA:$HOME/SALSA \
--v path/to/gatk_bundle_reference:$HOME/gatk_bundle \
--v $SCRATCH1:$SCRATCH1 \
--e SCRATCH1="/g/scratch" \
+-v $HOME:$HOME
+-v path/to/cellranger_rna_counts:$HOME/rna_counts
+-v path/to/GRCh38-2020-A.premrna:$HOME/rna_ref
+-v path/to/vcf_output:$HOME/vcfdir
+-v path/to/SALSA:$HOME/SALSA
+-v path/to/gatk_bundle_reference:$HOME/gatk_bundle
+-v $SCRATCH1:$SCRATCH1
+-e SCRATCH1="/g/scratch"
 --rm -it p4rkerw/salsa:count_1.0
 ```
 
