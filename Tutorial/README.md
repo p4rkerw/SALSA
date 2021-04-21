@@ -5,14 +5,14 @@ SALSA is run in two stages:
 2. Analyze allele-specific counts 
 
 STAGE 1: 
-p4rkerw/salsa:count_1.0 has the following dependencies:
-GATK 4.2.0.0
-bwa
-STAR
-bcftools
-hdf5
-pysam
-shapeit 4.2
+p4rkerw/salsa:count_1.0 has the following dependencies: \
+GATK 4.2.0.0 \
+bwa \
+STAR \
+bcftools \
+hdf5 \
+pysam \
+shapeit 4.2 \
 WASP 0.3.4
 
 **STEP 1: Download cellranger references** If you don't already have the reference files that were used to align your datasets then download them from the cellranger website. For example, if you are analyzing human single cell gene expression and ATAC data on GRCh38 you should have the following folders:
