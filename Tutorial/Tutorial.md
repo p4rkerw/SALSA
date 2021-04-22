@@ -67,7 +67,7 @@ docker run \
 wget -P path/to/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_1k_v3/pbmc_1k_v3_possorted_genome_bam.bam
 wget -P path/to/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_1k_v3/pbmc_1k_v3_possorted_genome_bam.bam.bai
 ```
-Usage:
+**Usage:**
 ```
 Usage: step1_gatk_genotype.sh [-indomlt]
    -i  | --bam                STR   path/to/input.bam eg. [rna_counts/sample_1/possorted*.bam]
@@ -79,6 +79,7 @@ Usage: step1_gatk_genotype.sh [-indomlt]
    -t  | --threads            INT   number of threads. Default=[1]
    -h  | --help                     show usage
 ```
+**Launch container**
 ```
 SCRATCH1=path/to/scratch
 docker run --memory 64g \
@@ -92,8 +93,9 @@ docker run --memory 64g \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="path/to/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
-
-# genotype 
+```
+**Genotype a sample**
+```
 library_id=sample_1
 interval=chr10
 modality=rna
