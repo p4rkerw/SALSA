@@ -70,7 +70,7 @@ wget -P path/to/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-ex
 **Usage:**
 ```
 Usage: step1_gatk_genotype.sh [-indomlt]
-   -i  | --bam                STR   path/to/input.bam eg. [rna_counts/sample_1/possorted*.bam]
+   -i  | --bam                STR   path/to/input.bam eg. [rna_counts/sample_1/outs/possorted*.bam]
    -n  | --library_id         STR   library_id: eg. [sample_1]
    -d  | --outputdir          STR   output directory name eg. [vcfdir/rna_genotype]
    -o  | --outputvcf          STR   name of output vcf eg. [sample_1.rna.vcf.gz]
