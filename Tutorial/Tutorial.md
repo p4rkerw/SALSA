@@ -110,7 +110,7 @@ bash SALSA/step1_gatk_genotype.sh \
 
 **Align the files with cellranger-atac** To do this you can use a separate cellranger-atac docker container
 ```
-docker pull p4rkerw/cellranger-atac:1.2.0
+docker pull p4rkerw/cellranger-atac:1.2
 ```
 ```
 reference=/g/reference
