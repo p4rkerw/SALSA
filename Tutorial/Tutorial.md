@@ -22,7 +22,7 @@ GRCh38-2020-A.premrna
 refdata-cellranger-atac-GRCh38-1.2.0
 ```
 
-**STEP 0: Download GATK resource bundle files** Download GATK resource bundle files from the GATK google cloud bucket: https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false
+**STEP 0: Download GATK resource bundle files** Download GATK resource bundle files from the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false)
 
 The following files are required for GATK HaplotypeCaller:
 ```
