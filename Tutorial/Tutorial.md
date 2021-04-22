@@ -5,7 +5,7 @@
 2. Analyze allele-specific counts 
 
 STAGE 1: 
-p4rkerw/salsa:count_1.0 is built on the broadinstitue/gatk:4.2.0.0 docker image and has the following additional dependencies pre-installed:
+p4rkerw/salsa:count_1.0 is built on the broadinstitue/gatk:4.2.0.0 docker image with additional dependencies pre-installed:
 ```
 GATK 4.2.0.0
 bwa 0.7.17
