@@ -8,7 +8,7 @@ STAGE 1:
 p4rkerw/salsa:count_1.0 is build on the broadinstitue/gatk:4.2.0.0 docker image and has the following additional dependencies pre-installed:
 ```
 GATK 4.2.0.0
-bwa 1.8
+bwa 0.7.17
 STAR 2.7.8a
 bcftools 1.8 
 pysam 0.15.3
