@@ -96,7 +96,7 @@ Usage: step1_gatk_genotype.sh [-indomlt]
    -t  | --threads            INT   number of threads. Default=[1]
    -h  | --help                     show usage
 ```
-**Launch container**
+**Launch GATK container**
 ```
 SCRATCH1=/g/scratch
 project=/g/salsa
@@ -111,7 +111,7 @@ docker run \
 -v $reference/gatk:$HOME/gatk_bundle \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="/g/scratch" \
---rm -it p4rkerw/salsa:count_1.0
+--rm -it broadinstitute/gatk:4.2.0.0
 ```
 **Genotype an RNA sample**
 ```
@@ -140,22 +140,22 @@ docker run \
 -v $reference/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref \
 --rm -it p4rkerw/cellranger-atac:1.2
 
-```
-# Download a single cell ATAC dataset
-```
+#Download a single cell ATAC dataset
 wget -P atac_counts https://cf.10xgenomics.com/samples/cell-atac/1.2.0/atac_pbmc_1k_v1/atac_pbmc_1k_v1_fastqs.tar
 tar -C atac_counts -xvf atac_counts/atac_pbmc_1k_v1_fastqs.tar
 
-# run cellranger-atac count
+# run cellranger-atac count to align the fastq
 cellranger-atac count \
 --fastqs=atac_counts/atac_pbmc_1k_v1_fastqs \
 --sample=atac_pbmc_1k_v1 \
 --id=atac_pbmc \
 --reference=atac_ref \
 --localcores 8
+
+# exit container
 ```
 
-**Launch genotype container**
+**Launch GATK container**
 ```
 SCRATCH1=/g/scratch
 project=/g/salsa
@@ -169,16 +169,14 @@ docker run \
 -v $reference/gatk:$HOME/gatk_bundle \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="/g/scratch" \
---rm -it p4rkerw/salsa:count_1.0
+--rm -it broadinstitute/gatk:4.2.0.0
 ```
-
-
 **Genotype an ATAC sample**
 ```
 library_id=sample_1
 interval=chr10
 modality=atac
-bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh \
+bash SALSA/step1_gatk_genotype.sh \
 --bam ${modality}_counts/$library_id/outs/possorted*.bam \
 --library_id $library_id \
 --outputdir vcfdir/${modality}_genotype \
@@ -189,6 +187,7 @@ bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh \
 ```
 
 **(Optional) STEP 2:** If you genotyped a paired single cell gene expression and ATAC dataset (or a single cell Multiome) for the same patient you can merge these genotypes into a single vcf. **Do not do this if you're using the tutorial datasets from 10X Genomics**.
+**Launch SALSA container**
 ```
 SCRATCH1=path/to/scratch
 docker run --memory 64g \
@@ -203,7 +202,7 @@ docker run --memory 64g \
 modalityone=atac
 modalitytwo=rna
 library_id=sample_1
-bash diabeticKidney/allele_specific_analysis/step2_merge_geno.sh \
+bash SALSA/step2_merge_geno.sh \
 --library_id $library_id \
 --vcfone vcfdir/${modalityone}_genotype/$library_id.$modalityone.$interval.vcf.gz \
 --vcftwo vcfdir/${modalitytwo}_genotype/$library_id.$modalitytwo.$interval.vcf.gz \
