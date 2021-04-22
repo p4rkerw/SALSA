@@ -1,6 +1,6 @@
 :hot_pepper: SALSA runs in publicly-available docker containers with all the necessary dependencies for code execution. This workflow assumes that you have already aligned your raw data with cellranger or cellranger-atac to generate coordinate-sorted bam files. For additional information, please consult the 10X Genomics website: https://www.10xgenomics.com/ . To analyze individual cell types or single cells you will also need cell type barcode annotations.
 
-:hot_pepper: SALSA is run in two stages:
+There are two stages in the workflow:
 1. Generate phased and annotated single cell allele-specific counts from a cellranger bam
 2. Analyze allele-specific counts 
 
