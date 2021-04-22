@@ -96,7 +96,7 @@ docker run \
 -v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
 -v $project/vcf_output:$HOME/vcfdir \
 -v g/SALSA:$HOME/SALSA \
--v $reference/gatk_bundle_reference:$HOME/gatk_bundle \
+-v $reference/gatk_bundle:$HOME/gatk_bundle \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="/g/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
