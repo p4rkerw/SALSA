@@ -28,8 +28,6 @@ Find us on Docker Hub:
 **Allele Specific Analysis:**    
 These scripts can be run in publicly-available docker containers found here: [p4rkerw@dockerhub](https://hub.docker.com/search?q=p4rkerw&type=image)
 
-Each step has additional documentation and a README in its corresponding folder.  
-
 (Follow the steps in order) 
 1. Genotype the snRNA or snATAC libraries using GATK (or obtain a vcf from another method)
 2. (Optional) - Merge genotypes obtained from matched snRNA-snATAC or multimodal libraries
@@ -40,6 +38,5 @@ Each step has additional documentation and a README in its corresponding folder.
 7. Obtain pseudobulk, cell-specific, or single cell allele-specific counts with GATK ASEReadCounter  
 8. Analyze allele-specific expression across multiple samples with ASEP
 
-To get started follow along with our abbreviated tutorial:
-https://github.com/p4rkerw/SALSA/tree/main/Tutorial
+To get started follow along with our [tutorial](https://github.com/p4rkerw/SALSA/tree/main/Tutorial)
 
