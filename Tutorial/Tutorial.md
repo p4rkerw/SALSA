@@ -74,7 +74,7 @@ wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-e
 ```
 **Clone the SALSA github repository**
 ```
-git clone -C $project https://github.com/p4rkerw/SALSA
+git -C $project clone https://github.com/p4rkerw/SALSA
 ```
 
 **Usage:**
