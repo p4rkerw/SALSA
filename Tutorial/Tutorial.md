@@ -16,15 +16,22 @@ shapeit 4.2
 WASP 0.3.4
 ```
 
-**STEP 0: Download cellranger references** If you don't already have the reference files that were used to align your datasets then download them from the 10X Genomics website. For example, if you are analyzing human single cell gene expression and ATAC data on GRCh38 you may have used the following references:
+**STEP 0: Download cellranger references** If you don't already have the reference files that were used to align your datasets then download them from the 10X Genomics website. For example, if you are analyzing human single cell gene expression and ATAC data you may have used the following references. This tutorial uses GRCh38 cellranger references and GATK bundle resources. If you're using hg19 then make sure to download the files that match your reference.
 ```
+# RNA GRCh38 / hg38
 GRCh38-2020-A.premrna
-refdata-cellranger-atac-GRCh38-1.2.0
+
+# ATAC GRCh38 / hg38
+wget https://cf.10xgenomics.com/supp/cell-atac/refdata-cellranger-atac-GRCh38-1.2.0.tar.gz
+
+# ATAC GRCh37 / hg19
+wget https://cf.10xgenomics.com/supp/cell-atac/refdata-cellranger-atac-hg19-1.2.0.tar.gz
+
 ```
 
 **STEP 0: Download GATK resource bundle files** Download GATK resource bundle files from the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false)
 
-The following files are required for GATK HaplotypeCaller:
+The following files are required for GATK HaplotypeCaller using GRCh38:
 ```
 resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz
 resources_broad_hg38_v0_Homo_sapiens_assembly38.known_indels.vcf.gz
@@ -44,7 +51,7 @@ docker pull p4rkerw/salsa:count_1.0
 ```
 **Mount all the volumes at once**
 ```
-# This mounts all required volumes for both RNA and ATAC analyses for steps 1-7:
+# This mounts all required volumes for both RNA and ATAC analyses for steps 1-7 (for the specified GRCh38 references):
 SCRATCH1=path/to/scratch
 docker run \
 --workdir $HOME \
@@ -121,17 +128,38 @@ bash SALSA/step1_gatk_genotype.sh \
 --threads 4
 ```
 
-**(Optional) STEP 1b: Genotype a single chromosome for a single cell ATAC dataset**
-**Download a single cell ATAC dataset**
+**(Optional) STEP 1b: Genotype a single chromosome for a single cell ATAC dataset** The datasets on the 10X Genomics website are all aligned to hg19 so we will download some fastq files and realign to GRCh38 using our ATAC reference
+
+**Align the files with cellranger-atac** To do this you can use a separate cellranger-atac docker container
 ```
-# download to your project directory
-wget -P $project/cellranger_atac_counts https://cf.10xgenomics.com/samples/cell-atac/1.2.0/atac_pbmc_1k_v1/atac_pbmc_1k_v1_possorted_bam.bam
-wget -P $project/cellranger_atac_counts https://cf.10xgenomics.com/samples/cell-atac/1.2.0/atac_pbmc_1k_v1/atac_pbmc_1k_v1_possorted_bam.bam.bai
+reference=/g/reference
+project=/g/salsa
+docker run \
+--workdir $HOME \
+-v $project/cellranger_atac_counts:$HOME/atac_counts \
+-v $reference/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref \
+--rm -it p4rkerw/cellranger-atac:1.2
+
 ```
-**Launch Container**
+# Download a single cell ATAC dataset
 ```
-SCRATCH1=path/to/scratch
-docker run --memory 64g \
+wget -P atac_counts https://cf.10xgenomics.com/samples/cell-atac/1.2.0/atac_pbmc_1k_v1/atac_pbmc_1k_v1_fastqs.tar
+tar -C atac_counts -xvf atac_counts/atac_pbmc_1k_v1_fastqs.tar
+
+# run cellranger-atac count
+cellranger-atac count \
+--fastqs=atac_counts/atac_pbmc_1k_v1_fastqs \
+--sample=atac_pbmc_1k_v1 \
+--id=atac_pbmc \
+--reference=atac_ref \
+--localcores 8
+```
+
+**Launch genotype container**
+```
+SCRATCH1=/g/scratch
+project=/g/salsa
+docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
 -v $project/cellranger_atac_counts:$HOME/atac_counts \
@@ -140,9 +168,11 @@ docker run --memory 64g \
 -v $project/SALSA:$HOME/SALSA \
 -v $reference/gatk:$HOME/gatk_bundle \
 -v $SCRATCH1:$SCRATCH1 \
--e SCRATCH1="path/to/scratch" \
+-e SCRATCH1="/g/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
 ```
+
+
 **Genotype an ATAC sample**
 ```
 library_id=sample_1
