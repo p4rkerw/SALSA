@@ -86,17 +86,19 @@ Usage: step1_gatk_genotype.sh [-indomlt]
 ```
 **Launch container**
 ```
-SCRATCH1=path/to/scratch
-docker run --memory 64g \
+SCRATCH1=/g/scratch
+project=/g/salsa
+reference=/g/reference
+docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v path/to/cellranger_rna_counts:$HOME/rna_counts \
--v path/to/GRCh38-2020-A.premrna:$HOME/rna_ref \
--v path/to/vcf_output:$HOME/vcfdir \
--v path/to/SALSA:$HOME/SALSA \
--v path/to/gatk_bundle_reference:$HOME/gatk_bundle \
+-v $project/cellranger_rna_counts:$HOME/rna_counts \
+-v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
+-v $project/vcf_output:$HOME/vcfdir \
+-v g/SALSA:$HOME/SALSA \
+-v $reference/gatk_bundle_reference:$HOME/gatk_bundle \
 -v $SCRATCH1:$SCRATCH1 \
--e SCRATCH1="path/to/scratch" \
+-e SCRATCH1="/g/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
 ```
 **Genotype a sample**
