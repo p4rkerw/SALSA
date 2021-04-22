@@ -69,8 +69,8 @@ docker run \
 ```
 # navigate to your project directory
 project=$PWD/salsa
-wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_1k_v3/pbmc_1k_v3_possorted_genome_bam.bam
-wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_1k_v3/pbmc_1k_v3_possorted_genome_bam.bam.bai
+wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam
+wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam.bai
 ```
 **Clone the SALSA github repository**
 ```
@@ -100,19 +100,19 @@ docker run \
 -v $project/cellranger_rna_counts:$HOME/rna_counts \
 -v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
 -v $project/vcf_output:$HOME/vcfdir \
--v g/SALSA:$HOME/SALSA \
--v $reference/gatk_bundle:$HOME/gatk_bundle \
+-v $project/SALSA:$HOME/SALSA \
+-v $reference/gatk:$HOME/gatk_bundle \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="/g/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
 ```
 **Genotype an RNA sample**
 ```
-library_id=sample_1
+library_id=pbmc
 interval=chr10
 modality=rna
-bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh \
---bam ${modality}_counts/$library_id/outs/possorted*.bam \
+bash SALSA/step1_gatk_genotype.sh \
+--bam ${modality}_counts/pbmc_1k_v3_possorted_genome_bam.bam \
 --library_id $library_id \
 --outputdir vcfdir/${modality}_genotype \
 --outputvcf $library_id.$modality.$interval.vcf.gz \
@@ -124,7 +124,7 @@ bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh \
 **(Optional) STEP 1b: Genotype a single chromosome for a single cell ATAC dataset**
 **Download a single cell ATAC dataset**
 ```
-# navigate to your project directory
+# download to your project directory
 wget -P $project/cellranger_atac_counts https://cf.10xgenomics.com/samples/cell-atac/1.2.0/atac_pbmc_1k_v1/atac_pbmc_1k_v1_possorted_bam.bam
 wget -P $project/cellranger_atac_counts https://cf.10xgenomics.com/samples/cell-atac/1.2.0/atac_pbmc_1k_v1/atac_pbmc_1k_v1_possorted_bam.bam.bai
 ```
@@ -134,11 +134,11 @@ SCRATCH1=path/to/scratch
 docker run --memory 64g \
 --workdir $HOME \
 -v $HOME:$HOME \
--v path/to/cellranger_atac_counts:$HOME/atac_counts \
--v path/to/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref \
--v path/to/vcf_output:$HOME/vcfdir \
--v path/to/SALSA:$HOME/SALSA \
--v path/to/gatk_bundle_resource_files:$HOME/gatk_bundle \
+-v $project/cellranger_atac_counts:$HOME/atac_counts \
+-v $reference/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref \
+-v $project/vcf_output:$HOME/vcfdir \
+-v $project/SALSA:$HOME/SALSA \
+-v $reference/gatk:$HOME/gatk_bundle \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="path/to/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
