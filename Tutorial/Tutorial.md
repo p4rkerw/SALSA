@@ -112,7 +112,7 @@ library_id=pbmc
 interval=chr10
 modality=rna
 bash SALSA/step1_gatk_genotype.sh \
---bam ${modality}_counts/pbmc_1k_v3_possorted_genome_bam.bam \
+--bam ${modality}_counts/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam \
 --library_id $library_id \
 --outputdir vcfdir/${modality}_genotype \
 --outputvcf $library_id.$modality.$interval.vcf.gz \
