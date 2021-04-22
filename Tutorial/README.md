@@ -6,6 +6,7 @@ SALSA is run in two stages:
 
 STAGE 1: 
 p4rkerw/salsa:count_1.0 is build on the broadinstitue/gatk:4.2.0.0 docker image and has the following additional dependencies pre-installed:
+```
 GATK 4.2.0.0
 bwa 1.8
 STAR 2.7.8a
@@ -13,6 +14,7 @@ bcftools 1.8
 pysam 0.15.3
 shapeit 4.2
 WASP 0.3.4
+```
 
 **STEP 0: Download cellranger references** If you don't already have the reference files that were used to align your datasets then download them from the cellranger website. For example, if you are analyzing human single cell gene expression and ATAC data on GRCh38 you should have the following folders mounted to the rna_ref and atac_ref directories:
 ```
