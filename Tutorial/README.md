@@ -12,6 +12,7 @@ bwa 0.7.17
 STAR 2.7.8a
 bcftools 1.8 
 pysam 0.15.3
+pytables 3.6.1
 shapeit 4.2
 WASP 0.3.4
 ```
