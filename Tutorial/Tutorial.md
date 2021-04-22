@@ -121,7 +121,14 @@ bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh \
 --threads 4
 ```
 
-**STEP 1b: Genotype a single chromosome for a single cell ATAC dataset**
+**(Optional) STEP 1b: Genotype a single chromosome for a single cell ATAC dataset**
+**Download some single cell ATAC data**
+```
+# navigate to your project directory
+wget -P $project/cellranger_atac_counts https://cf.10xgenomics.com/samples/cell-atac/1.2.0/atac_pbmc_1k_v1/atac_pbmc_1k_v1_possorted_bam.bam
+wget -P $project/cellranger_atac_counts https://cf.10xgenomics.com/samples/cell-atac/1.2.0/atac_pbmc_1k_v1/atac_pbmc_1k_v1_possorted_bam.bam.bai
+```
+**Launch Container**
 ```
 SCRATCH1=path/to/scratch
 docker run --memory 64g \
@@ -135,7 +142,9 @@ docker run --memory 64g \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="path/to/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
-
+```
+**Genotype a sample**
+```
 library_id=sample_1
 interval=chr10
 modality=atac
