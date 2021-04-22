@@ -81,6 +81,16 @@ docker run --memory 64g \
 -e SCRATCH1="path/to/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
 
+Usage: step1_gatk_genotype.sh [-indomlt]
+   -i  | --bam                STR   path/to/input.bam eg. [rna_counts/Control_1/possorted*.bam]
+   -n  | --library_id         STR   library_id: eg. [Control_1]
+   -d  | --outputdir          STR   output directory name eg. [vcfdir/rna_genotype]
+   -o  | --outputvcf          STR   name of output vcf eg. [Control_1.rna.vcf.gz]
+   -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
+   -l  | --interval           STR   optional: genotype a single chromosome eg. [chr10]
+   -t  | --threads            INT   number of threads. Default=[1]
+   -h  | --help                     show usage
+
 library_id=sample_1
 interval=chr10
 modality=rna
