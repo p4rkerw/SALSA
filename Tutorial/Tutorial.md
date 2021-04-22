@@ -16,7 +16,7 @@ shapeit 4.2
 WASP 0.3.4
 ```
 
-**STEP 0: Download cellranger references** If you don't already have the reference files that were used to align your datasets then download them from the cellranger website. For example, if you are analyzing human single cell gene expression and ATAC data on GRCh38 you should have the following folders mounted to the rna_ref and atac_ref directories:
+**STEP 0: Download cellranger references** If you don't already have the reference files that were used to align your datasets then download them from the 10X Genomics website. For example, if you are analyzing human single cell gene expression and ATAC data on GRCh38 you may have used the following references:
 ```
 GRCh38-2020-A.premrna
 refdata-cellranger-atac-GRCh38-1.2.0
