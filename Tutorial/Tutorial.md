@@ -122,7 +122,7 @@ bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh \
 ```
 
 **(Optional) STEP 1b: Genotype a single chromosome for a single cell ATAC dataset**
-**Download some single cell ATAC data**
+**Download a single cell ATAC dataset**
 ```
 # navigate to your project directory
 wget -P $project/cellranger_atac_counts https://cf.10xgenomics.com/samples/cell-atac/1.2.0/atac_pbmc_1k_v1/atac_pbmc_1k_v1_possorted_bam.bam
@@ -158,7 +158,7 @@ bash diabeticKidney/allele_specific_analysis/step1_gatk_genotype.sh \
 --threads 4
 ```
 
-**(Optional) STEP 2:** If you genotyped a paired single cell gene expression and ATAC dataset (or a single cell Multiome) for the same patient you can merge these genotypes into a single vcf. ++Do not do this if you're using the tutorial datasets from 10X Genomics++.
+**(Optional) STEP 2:** If you genotyped a paired single cell gene expression and ATAC dataset (or a single cell Multiome) for the same patient you can merge these genotypes into a single vcf. **Do not do this if you're using the tutorial datasets from 10X Genomics**.
 ```
 SCRATCH1=path/to/scratch
 docker run --memory 64g \
