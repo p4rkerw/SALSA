@@ -103,11 +103,11 @@ bash SALSA/step1_gatk_genotype.sh \
 **Usage**
 ```
 Usage: step2_merge_geno.sh [-nabdit]
-   -n  | --library_id         STR   library_id: eg. [Control_1]
-   -a  | --vcfone             STR   path/to/first.vcf.gz eg. [vcfdir/atac_genotype/Control_1.atac.vcf.gz]. Prioritize annotations from first vcf if there is overlap.
-   -b  | --vcftwo                               STR   path/to/second.vcf.gz eg. [vcfdir/rna_genotype/Control_1.rna.vcf.gz]
-         -d  | --outputdir                      STR   output directory [vcfdir/joint_genotype]
-   -o  | --outputvcf          STR   name of output vcf eg. [Control_1.pass.joint.vcf.gz]
+   -n  | --library_id         STR   library_id: eg. [sample_1]
+   -a  | --vcfone             STR   path/to/first.vcf.gz eg. [vcfdir/atac_genotype/sample_1.atac.vcf.gz]. Prioritize annotations from first vcf if there is overlap.
+   -b  | --vcftwo             STR   path/to/second.vcf.gz eg. [vcfdir/rna_genotype/sample_1.rna.vcf.gz]
+   -d  | --outputdir          STR   output directory [vcfdir/joint_genotype]
+   -o  | --outputvcf          STR   name of output vcf eg. [sample_1.pass.joint.vcf.gz]
    -i  | --includefiltered          optional: include filtered variants in output vcf. Default=[false]
    -t  | --threads            INT   number of threads. Default=[1]
    -h  | --help                     show usage
@@ -146,10 +146,10 @@ ALL.chr10.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz
 **Usage**
 ```
 Usage: step3_phase_vcf.sh [-nvdolpsitrh]
-   -n  | --library_id         STR   library_id: eg. [Control_1]
-   -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [vcfdir/joint_genotype/Control_1.pass.joint.vcf.gz]
+   -n  | --library_id         STR   library_id: eg. [sample_1]
+   -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [vcfdir/joint_genotype/sample_1.pass.joint.vcf.gz]
    -d  | --outputdir          STR   output directory name eg. [vcfdir/phasing]
-   -o  | --outputvcf          STR   name of output vcf eg. [Control_1.pass.joint.phase.vcf.gz]
+   -o  | --outputvcf          STR   name of output vcf eg. [sample_1.pass.joint.phase.vcf.gz]
    -l  | --interval           STR   optional: phase a single chromosome eg. [chr22]
    -p  | --hcphase                  optional: recover haplotypecaller physical phasing variants that are not in shapeit reference. Default=[false]
    -s  | --snvonly            STR   use the biallelic_SNV reference for phasing
@@ -196,9 +196,7 @@ bash SALSA/step3_phase_vcf.sh \
 --snvonly
 ```
 **(Optional) STEP 4: Annotate vcf with GATK Funcotator** If you would like to annotate your vcf with gnomAD MAF you will first need to download the GATK Funcotator resource following the directions located here: https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial . The gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124])
-
-Mount the reference directory to the docker container and annotate the vcf
-
+**Launch GATK container**
 ```
 SCRATCH1=path/to/scratch
 docker run \
