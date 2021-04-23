@@ -38,13 +38,11 @@ resources_broad_hg38_v0_Homo_sapiens_assembly38.known_indels.vcf.gz
 resources_broad_hg38_v0_1000G_phase1.snps.high_confidence.hg38.vcf.gz
 resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
 ```
-
-The following additional files are required if you are analyzing single cell ATAC datasets:
+The following additional files are required if you are analyzing single cell ATAC datasets (not needed for the tutorial):
 ```
 resources_broad_hg38_v0_wgs_calling_regions.hg38
 resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
 ```
-
 **STEP 0: Pull the docker containers** Pull the containers from dockerhub. 
 ```
 docker pull p4rkerw/salsa:count_1.0
@@ -61,7 +59,6 @@ wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-e
 ```
 git -C $project clone https://github.com/p4rkerw/SALSA
 ```
-
 **Usage:**
 ```
 Usage: step1_gatk_genotype.sh [-indomlt]
@@ -102,8 +99,7 @@ bash SALSA/step1_gatk_genotype.sh \
 --modality rna \
 --threads 4
 ```
-
-**(Optional) STEP 2: Merge genotypes from the same patient** If you genotyped a paired single cell gene expression and ATAC dataset from a split sample (or a single cell Multiome) you can merge these genotypes into a single vcf. If you're following the tutorial, you can skip this step.
+**(Not required for tutorial) STEP 2: Merge genotypes from the same patient** If you genotyped a paired single cell gene expression and ATAC dataset from a split sample (or a single cell Multiome) you can merge these genotypes into a single vcf. If you're following the tutorial, you can skip this step.
 **Usage**
 ```
 Usage: step2_merge_geno.sh [-nabdit]
@@ -138,25 +134,32 @@ bash SALSA/step2_merge_geno.sh \
 --outputvcf sample_1.pass.joint.chr10.vcf.gz \
 --threads 4
 ```
-
 **(Recommended) STEP 3: Phase genotype** If you want to perform your analysis with phased genotypes you will need a phased reference. This is not stricly required, but it increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for either SNV or SNV and indels from ftp.1000genomes.ebi.ac.uk . Navigate to the corresponding directory depending on your selected reference. If you are only analyzing RNA data then select the SNV reference. For ATAC data select the SNV and INDEL reference:
 
 a) SNV only: /vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV </br>
 b) SNV and INDEL: /vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL
 
-You will eventually need to download the vcf for every chromosome, but for the purposes of the tutorial just download the SNV reference for chromosome10:
+You will eventually need to download the vcf for every chromosome, but for the purposes of the tutorial just download the SNV reference for chromosome10 to reference/phasing:
 ```
 ALL.chr10.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz
 ```
-The 1000G do not have the same contig style as the cellranger references. Update the 1000G contig style using bcftools in the stage 1 container. For the tutorial we will only do chromosome 10.
+**Usage**
 ```
-for i in {1..22} X;do echo "${i} chr${i}";done > /tmp/rename_chrm.txt
-inputvcf=ALL.chr10.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz
-bcftools annotate phasing/$inputvcf --threads 4 --rename-chrs /tmp/rename_chrm.txt -Oz -o $SCRATCH1/$inputvcf
-mv $SCRATCH1/$inputvcf phasing/
-bcftools index --threads 4 phasing/$inputvcf
+Usage: step3_phase_vcf.sh [-nvdolpsitrh]
+   -n  | --library_id         STR   library_id: eg. [Control_1]
+   -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [vcfdir/joint_genotype/Control_1.pass.joint.vcf.gz]
+   -d  | --outputdir          STR   output directory name eg. [vcfdir/phasing]
+   -o  | --outputvcf          STR   name of output vcf eg. [Control_1.pass.joint.phase.vcf.gz]
+   -l  | --interval           STR   optional: phase a single chromosome eg. [chr22]
+   -p  | --hcphase                  optional: recover haplotypecaller physical phasing variants that are not in shapeit reference. Default=[false]
+   -s  | --snvonly            STR   use the biallelic_SNV reference for phasing
+   -i  | --snvindel           STR   use the biallelic_SNV_and_INDEL reference for phasing
+   -r  | --reproduce                optional: run shapeit with a single thread for reproducibility. Default=[false]
+   -t  | --threads            INT   number of threads. Default=[1]
+   -h  | --help                     show usage
 ```
-Mount the directory with the 1000G reference and phase the genotypes. For the tutorial we do not set the --reproduce flag, which is required to set a seed for reproducible results with shapeit4.2. This step is recommended in the full workflow.
+The 1000G do not have the same contig style as the cellranger references. Update the 1000G contig style using bcftools in the stage 1 container. For the tutorial we will only do chromosome 10. Mount the directory with the 1000G reference and phase the genotypes. For the tutorial we do not set the --reproduce flag, which is required to set a seed for reproducible results with shapeit4.2. This step is recommended in the full workflow.
+**Launch SALSA container**
 ```
 SCRATCH1=/g/scratch
 project=/g/salsa
@@ -170,7 +173,18 @@ docker run \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="/g/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
-
+```
+**Rename the reference contigs**
+```
+# rename the contigs in the 1000G reference from 10 to chr10
+for i in {1..22} X;do echo "${i} chr${i}";done > /tmp/rename_chrm.txt
+inputvcf=ALL.chr10.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz
+bcftools annotate phasing/$inputvcf --threads 4 --rename-chrs /tmp/rename_chrm.txt -Oz -o $SCRATCH1/$inputvcf
+mv $SCRATCH1/$inputvcf phasing/
+bcftools index --threads 4 phasing/$inputvcf
+```
+**Phase an interval**
+```
 bash SALSA/step3_phase_vcf.sh \
 --library_id pbmc \
 --inputvcf vcfdir/rna_genotype/pbmc.rna.chr10.vcf.gz \
@@ -181,7 +195,6 @@ bash SALSA/step3_phase_vcf.sh \
 --threads 4 \
 --snvonly
 ```
-
 **(Optional) STEP 4: Annotate vcf with GATK Funcotator** If you would like to annotate your vcf with gnomAD MAF you will first need to download the GATK Funcotator resource following the directions located here: https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial . The gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124])
 
 Mount the reference directory to the docker container and annotate the vcf
