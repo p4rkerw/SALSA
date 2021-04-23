@@ -43,7 +43,7 @@ The following additional files are required if you are analyzing single cell ATA
 resources_broad_hg38_v0_wgs_calling_regions.hg38
 resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
 ```
-**STEP 0: Pull the docker containers** Pull the containers from dockerhub. 
+**STEP 0: Pull the docker containers** 
 ```
 docker pull p4rkerw/salsa:count_1.0
 docker pull broadinstitute/gatk:4.2.0.0
