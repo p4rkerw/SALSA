@@ -124,7 +124,7 @@ docker run \
 -e SCRATCH1="path/to/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
 ```
-**Phase an interval**
+**Merge two genotypes**
 ```
 bash SALSA/step2_merge_geno.sh \
 --library_id sample_1 \
