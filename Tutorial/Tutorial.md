@@ -150,8 +150,6 @@ Usage: step3_phase_vcf.sh [-nvdolpsitrh]
    -t  | --threads            INT   number of threads. Default=[1]
    -h  | --help                     show usage
 ```
-The 1000G vcf reference files do not have the same contig style as the cellranger reference. You will need to update the 1000G contig style using bcftools. For the tutorial, we will only do chromosome 10. 
-
 **Launch SALSA container**
 ```
 SCRATCH1=/g/scratch
@@ -167,7 +165,7 @@ docker run \
 -e SCRATCH1="/g/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
 ```
-**Rename the reference contigs**
+**Rename the reference contigs** The 1000G vcf reference files do not have the same contig style as the cellranger reference. You will need to update the 1000G contig style using bcftools. For the tutorial, we will only do chromosome 10. 
 ```
 # rename the contigs in the 1000G reference from 10 to chr10
 for i in {1..22} X;do echo "${i} chr${i}";done > /tmp/rename_chrm.txt
