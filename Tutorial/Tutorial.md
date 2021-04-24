@@ -159,6 +159,7 @@ Usage: step3_phase_vcf.sh [-nvdolpsitrh]
    -h  | --help                     show usage
 ```
 The 1000G do not have the same contig style as the cellranger references. Update the 1000G contig style using bcftools in the stage 1 container. For the tutorial we will only do chromosome 10. Mount the directory with the 1000G reference and phase the genotypes. For the tutorial we do not set the --reproduce flag, which is required to set a seed for reproducible results with shapeit4.2. This step is recommended in the full workflow.
+
 **Launch SALSA container**
 ```
 SCRATCH1=/g/scratch
@@ -300,7 +301,8 @@ STAR
 --genomeFastaFiles rna_ref/fasta/genome.fa \
 --sjdbGTFfile rna_ref/genes/genes.gtf
 ```
-Alternatively, these references will be built at runtime and placed in the $SCRATCH directory. To perform variant aware realignment on a single cell gene expression dataset with WASP run:
+Alternatively, these references will be built at runtime and placed in the $SCRATCH directory. 
+
 **Launch SALSA container**
 ```
 SCRATCH1=/g/scratch
