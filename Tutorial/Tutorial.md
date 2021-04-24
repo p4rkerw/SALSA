@@ -307,7 +307,7 @@ Alternatively, these references will be built at runtime and placed in the $SCRA
 ```
 Usage: step6_wasp.sh [-vbdoginlmpt]
    -v  | --inputvcf          STR   vcfdir/funcotation/sample_1.pass.joint.hcphase.funco.vcf.gz
-   -b  | --inputbam          STR   path/to/input.bam eg. [project/wasp_rna/Control_1.bcfilter.bam]
+   -b  | --inputbam          STR   path/to/input.bam eg. [project/wasp_rna/sample_1.bcfilter.bam]
    -d  | --outputdir         STR   name of output directory eg. [project/wasp_rna]
    -o  | --outputbam         STR   name of output wasp bam eg. [sample_1.phase.wasp.bam]
    -g  | --genotype          STR   genotype: [rna] [atac] [joint]
@@ -356,12 +356,12 @@ bash SALSA/step6_wasp.sh \
 **Usage**
 ```
 Usage: step7_gatk_alleleCount.sh [-viognmlCcspt]
-   -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [vcfdir/funcotation/Control_1.pass.joint.hcphase.funco.vcf.gz]
-   -i  | --inputbam           STR   path/to/wasp.bam eg. [project/wasp_rna/Control_1.phase.wasp.bam]
+   -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [vcfdir/funcotation/sample_1.pass.joint.hcphase.funco.vcf.gz]
+   -i  | --inputbam           STR   path/to/wasp.bam eg. [project/wasp_rna/sample_1.phase.wasp.bam]
    -o  | --outputdir          STR   path/to/output directory eg. [project/wasp_rna/counts]
    -b  | --barcodes           STR   path/to/barcodes.csv eg. [barcodes/rna_barcodes.csv]
    -g  | --genotype           STR   genotype: [rna] [atac] [joint]
-   -n  | --library_id         STR   library_id: eg. [Control_1]
+   -n  | --library_id         STR   library_id: eg. [sample_1]
    -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
    -l  | --interval           STR   optional: count a specified interval eg. [chr10]
    -C  | --pseudobulk_counts        allele-specific counts with all cells grouped together
