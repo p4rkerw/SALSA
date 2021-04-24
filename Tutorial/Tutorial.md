@@ -15,17 +15,10 @@ shapeit 4.2
 WASP 0.3.4
 ```
 
-**STEP 0: Download cellranger references** If you don't already have the reference files that were used to align your datasets then download them from the 10X Genomics website. For example, if you are analyzing human single cell gene expression and ATAC data you may have used the following references. This tutorial uses GRCh38 cellranger references and GATK bundle resources. If you're using hg19 then make sure to download the files that match your reference.
+**STEP 0: Download cellranger references** If you don't already have the reference files that were used to align your datasets download them from the 10X Genomics website. For example, if you are analyzing human single cell gene expression you likely used a reference downloaded from the 10X Genomics website. 10X Genomics routinely updates their references with each new cellranger build. Feel free to use a more recent reference or whatever you have used to align your data in the past. This tutorial uses GRCh38 cellranger reference and GATK bundle resources. If you're using hg19 make sure to download the files that match your reference.
 ```
-# RNA GRCh38 / hg38
+# cellranger reference for scRNA analysis GRCh38 / hg38
 GRCh38-2020-A.premrna
-
-# ATAC GRCh38 / hg38
-wget https://cf.10xgenomics.com/supp/cell-atac/refdata-cellranger-atac-GRCh38-1.2.0.tar.gz
-
-# ATAC GRCh37 / hg19
-wget https://cf.10xgenomics.com/supp/cell-atac/refdata-cellranger-atac-hg19-1.2.0.tar.gz
-
 ```
 
 **STEP 0: Download GATK resource bundle files** Download GATK resource bundle files from the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false)
