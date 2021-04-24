@@ -200,11 +200,11 @@ bash SALSA/step3_phase_vcf.sh \
 **Usage**
 ```
 Usage: step4_gatk_anno_vcf.sh [-nvdoamfth]
-   -n  | --library_id         STR   library_id: eg. [Control_1]
-   -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [vcfdir/phasing/Control_1.pass.joint.hcphase.vcf.gz]
+   -n  | --library_id         STR   library_id: eg. [sample_1]
+   -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [vcfdir/phasing/sample_1.pass.joint.hcphase.vcf.gz]
    -d  | --outputdir          STR   output directory name eg. [vcfdir/funcotation]
-   -o  | --outputvcf          STR   name of output vcf eg. [Control_1.pass.joint.hcphase.funco.vcf.gz]
-   -a  | --output_table       STR   name of output funcotation csv eg. [Control_1.pass.joint.hchpase.formatted.csv]
+   -o  | --outputvcf          STR   name of output vcf eg. [sample_1.pass.joint.hcphase.funco.vcf.gz]
+   -a  | --output_table       STR   name of output funcotation csv eg. [sample_1.pass.joint.hchpase.formatted.csv]
    -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
    -f  | --funcotation        STR   path/to/funcotation directory eg. [reference/funcotator_dataSources.v1.6.20190124g]
    -t  | --threads            INT   number of threads. Default=[1]
@@ -242,10 +242,10 @@ bash SALSA/step4_gatk_anno_vcf.sh \
 **Usage**
 ```
 Usage: step5_filterbam.sh [-nidolmbeth]
-   -n  | --library_id         STR   library_id: eg. [Control_1]
-   -i  | --inputbam           STR   path/to/input.bam eg. [rna_counts/Control_1/outs/possorted_genome_bam.bam]
+   -n  | --library_id         STR   library_id: eg. [sample_1]
+   -i  | --inputbam           STR   path/to/input.bam eg. [rna_counts/sample_1/outs/possorted_genome_bam.bam]
    -d  | --outputdir          STR   output directory eg. [project/wasp_rna]
-   -o  | --outputbam          STR   filtered output bam eg. [Control_1.bcfilter.bam]
+   -o  | --outputbam          STR   filtered output bam eg. [sample_1.bcfilter.bam]
    -l  | --interval           STR   optional: filter a single chromosome eg. [chr22]
    -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
    -b  | --barcodes           STR   path/to/barcodes.csv with headers and three columns. First column is named "barcodes"
@@ -301,8 +301,24 @@ STAR
 --genomeFastaFiles rna_ref/fasta/genome.fa \
 --sjdbGTFfile rna_ref/genes/genes.gtf
 ```
-Alternatively, these references will be built at runtime and placed in the $SCRATCH directory. 
+Alternatively, these references will be built at runtime and placed in the $SCRATCH directory.
 
+**Usage**
+```
+Usage: step6_wasp.sh [-vbdoginlmpt]
+   -v  | --inputvcf          STR   vcfdir/funcotation/sample_1.pass.joint.hcphase.funco.vcf.gz
+   -b  | --inputbam          STR   path/to/input.bam eg. [project/wasp_rna/Control_1.bcfilter.bam]
+   -d  | --outputdir         STR   name of output directory eg. [project/wasp_rna]
+   -o  | --outputbam         STR   name of output wasp bam eg. [sample_1.phase.wasp.bam]
+   -g  | --genotype          STR   genotype: [rna] [atac] [joint]
+   -i  | --stargenome        STR   path/to/star genomeDir made with genomeGenerate eg. [rna_ref/star]. If absent create new STAR index in $SCRATCH1/rna_ref
+   -n  | --library_id        STR   library_id: eg. [sample_1]
+   -m  | --modality          STR   modality: [rna] [atac]
+   -l  | --interval          STR   specified interval eg. [chr10]
+   -p  | --isphased                input vcf is phased. Default=[FALSE]
+   -t  | --threads           INT   number of threads. Default=[1]
+   -h  | --help                    show usage
+```
 **Launch SALSA container**
 ```
 SCRATCH1=/g/scratch
@@ -337,6 +353,24 @@ bash SALSA/step6_wasp.sh \
 ```
 **STEP 7: Obtain allele-specific read counts with GATK** This step will filter a phased and genotyped vcf for heterozygous SNV to perform allele-specific counting in a coordinate-sorted and indexed bam file after WASP realignment. There are multiple options for count table outputs. The --pseudobulk option will group all barcodes together to perform allele-specific counting. This is analogous to bulk RNA-seq. The --celltype_pseudobulk option will use the barcode annotations to split the bam into cell-type-specific bam files before performing allele-specific counting. The --single_cell_counts option will split the bam file into individual single cell bam files and perform allele-specific counting. If your input vcf is phased you can select the --isphased option to add a phased genotype to the count tables.
 
+**Usage**
+```
+Usage: step7_gatk_alleleCount.sh [-viognmlCcspt]
+   -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [vcfdir/funcotation/Control_1.pass.joint.hcphase.funco.vcf.gz]
+   -i  | --inputbam           STR   path/to/wasp.bam eg. [project/wasp_rna/Control_1.phase.wasp.bam]
+   -o  | --outputdir          STR   path/to/output directory eg. [project/wasp_rna/counts]
+   -b  | --barcodes           STR   path/to/barcodes.csv eg. [barcodes/rna_barcodes.csv]
+   -g  | --genotype           STR   genotype: [rna] [atac] [joint]
+   -n  | --library_id         STR   library_id: eg. [Control_1]
+   -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
+   -l  | --interval           STR   optional: count a specified interval eg. [chr10]
+   -C  | --pseudobulk_counts        allele-specific counts with all cells grouped together
+   -c  | --celltype_counts          allele-specific counts after grouping cells by barcode annotation
+   -s  | --single_cell_counts       single cell allele-specific counts for provided barcodes
+   -p  | --isphased                 optional: input vcf is phased. Default=[false]
+   -t  | --threads            INT   number of threads. Default=[1]
+   -h  | --help                     show usage
+```
 **Launch SALSA container**
 ```
 SCRATCH1=path/to/scratch
@@ -352,7 +386,9 @@ docker run \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="path/to/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
-
+```
+**Get phased allele-specific counts**
+```
 library_id=sample_1
 modality=rna
 interval=chr10
