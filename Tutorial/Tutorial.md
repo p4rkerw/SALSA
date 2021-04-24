@@ -23,9 +23,7 @@ wget -P $reference https://cf.10xgenomics.com/supp/cell-exp/refdata-gex-GRCh38-2
 tar -xvzf $reference/refdata-gex-GRCh38-2020-A.tar.gz
 ```
 
-**STEP 0: Download GATK resource bundle files** Download GATK resource bundle files from the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false)
-
-The following files are required for GATK HaplotypeCaller using GRCh38:
+**STEP 0: Download GATK resource bundle files** The following files are required for GATK HaplotypeCaller using GRCh38 and can be found in the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false):
 ```
 resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz
 resources_broad_hg38_v0_Homo_sapiens_assembly38.known_indels.vcf.gz
