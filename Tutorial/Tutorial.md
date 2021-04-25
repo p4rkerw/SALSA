@@ -364,18 +364,19 @@ Usage: step7_gatk_alleleCount.sh [-viognmlCcspt]
 ```
 **Launch SALSA container**
 ```
-SCRATCH1=path/to/scratch
+SCRATCH1=/g/scratch
+project=/g/salsa
+reference=/g/reference
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v path/to/GRCh38-2020-A.premrna:$HOME/rna_ref \
--v path/to/refdata-cellranger-atac-GRCh38-1.2.0:$HOME/atac_ref \
--v path/to/vcf_output:$HOME/vcfdir \
--v path/to/SALSA:$HOME/SALSA \
--v path/to/barcodes:$HOME/barcodes \
--v path/to/project:$HOME/project \
+-v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
+-v $project/vcf_output:$HOME/vcfdir \
+-v $project/SALSA:$HOME/SALSA \
+-v $project/barcodes:$HOME/barcodes \
+-v $project:$HOME/project \
 -v $SCRATCH1:$SCRATCH1 \
--e SCRATCH1="path/to/scratch" \
+-e SCRATCH1="/g/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
 ```
 **Get phased allele-specific counts**
