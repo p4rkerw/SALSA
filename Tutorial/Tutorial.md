@@ -333,7 +333,7 @@ bash SALSA/step6_wasp.sh \
 --inputbam project/wasp_rna/pbmc.bcfilter.chr22.bam \
 --outputdir project/wasp_rna/rna_genotype \
 --outputbam pbmc.hcphase.chr22wasp.bam \
---genotype joint \
+--genotype rna \
 --stargenome rna_ref/star \
 --library_id pbmc \
 --modality rna \
