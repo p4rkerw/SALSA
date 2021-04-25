@@ -86,8 +86,8 @@ bash SALSA/step1_gatk_genotype.sh \
 --bam rna_counts/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam \
 --library_id pbmc \
 --outputdir vcfdir/rna_genotype \
---outputvcf pbmc.rna.chr10.vcf.gz \
---interval chr10 \
+--outputvcf pbmc.rna.chr22.vcf.gz \
+--interval chr22 \
 --modality rna \
 --threads 4
 ```
@@ -120,18 +120,18 @@ docker run \
 ```
 bash SALSA/step2_merge_geno.sh \
 --library_id sample_1 \
---vcfone vcfdir/$atac_genotype/sample_1.atac.chr10.vcf.gz \
---vcftwo vcfdir/${modalitytwo}_genotype/sample_1.rna.chr10.vcf.gz \
+--vcfone vcfdir/$atac_genotype/sample_1.atac.chr22.vcf.gz \
+--vcftwo vcfdir/${modalitytwo}_genotype/sample_1.rna.chr22.vcf.gz \
 --outputdir vcfdir/joint_genotype \
---outputvcf sample_1.pass.joint.chr10.vcf.gz \
+--outputvcf sample_1.pass.joint.chr22.vcf.gz \
 --threads 4
 ```
-**(Recommended) STEP 3: Phase genotype** If you want to perform your analysis with phased genotypes you will need a phased reference. This is not strictly required, but it increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for SNV only or SNV and INDELS from ftp.1000genomes.ebi.ac.uk . You will need an FTP client and if you're using windows you could use [WinSCP](https://winscp.net/eng/index.php). If you are analyzing RNA data select the SNV reference. For ATAC data select the SNV and INDEL reference:
+**(Recommended) STEP 3: Phase genotype** If you want to perform your analysis with phased genotypes you will need a phased reference. This is not strictly required, but it increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for SNV only or SNV and INDELS from ftp.1000genomes.ebi.ac.uk . If you are only analyzing RNA data select the SNV reference. For ATAC data select the SNV and INDEL reference:
 
 a) SNV only: /vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV </br>
 b) SNV and INDEL: /vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL
 
-You will eventually need to download the vcf for every chromosome, but for the purposes of the tutorial just download the SNV reference for chr22 to reference/phasing:
+You will eventually need to download the vcf for every chromosome, but for the purposes of the tutorial just download the SNV reference for chr10 to reference/phasing:
 ```
 ALL.chr22.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz
 ```
@@ -178,15 +178,15 @@ bcftools index --threads 4 phasing/$inputvcf
 ```
 bash SALSA/step3_phase_vcf.sh \
 --library_id pbmc \
---inputvcf vcfdir/rna_genotype/pbmc.rna.chr10.vcf.gz \
+--inputvcf vcfdir/rna_genotype/pbmc.rna.chr22.vcf.gz \
 --outputdir vcfdir/phasing \
---outputvcf pbmc.pass.joint.chr10hcphase.vcf.gz \
---interval chr10 \
+--outputvcf pbmc.pass.joint.chr22hcphase.vcf.gz \
+--interval chr22 \
 --hcphase \
---threads 4 \
---snvonly
+--snvonly \
+--threads 4
 ```
-**(Optional) STEP 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with gnomAD MAF you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). The gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124])
+**(Optional) STEP 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with gnomAD MAF you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). GATK routinely updates its resources so you may need to change the name of the folder in the tutorial to match the one you downloaded. gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124])
 **Usage**
 ```
 Usage: step4_gatk_anno_vcf.sh [-nvdoamfth]
@@ -220,15 +220,16 @@ docker run \
 ```
 bash SALSA/step4_gatk_anno_vcf.sh \
 --library_id pbmc \
---inputvcf vcfdir/phasing/pbmc.pass.joint.chr10hcphase.vcf.gz \
+--inputvcf vcfdir/phasing/pbmc.pass.joint.chr22hcphase.vcf.gz \
 --outputdir vcfdir/funcotation \
---outputvcf pbmc.pass.joint.chr10hcphase.funco.vcf.gz \
---output_table pbmc.pass.joint.chr10hcphase.formatted.csv \
+--outputvcf pbmc.pass.joint.chr22hcphase.funco.vcf.gz \
+--output_table pbmc.pass.joint.chr22hcphase.formatted.csv \
 --modality rna \
---threads 4 \
---funcotation reference/funcotator_dataSources.v1.6.20190124g
+--funcotation reference/funcotator_dataSources.v1.6.20190124g \
+--threads 4
 ```
-**(Recommended) STEP 5:** Use barcode celltype annotations to filter the coordinate-sorted cellranger bam using the CB tag. This step is required if you want to analyze cell-specific or single cell allelic effects. The barcode annotation file has three columns where the first column is the barcode, the second column is the library_id, and the third column is the celltype annotation. If you have analyzed your dataset using Seurat you could generate a barcode annotation csv in R as follows (the Seurat package is not included in the SALSA containers). Mount the barcodes directory and filter the cellranger bam using the 10X Genomics subset-bam utility. For the purposes of the tutorial, we will only filter chromosome 10. The --validate flag runs GATK ValidateSamFile on the output to ensure the bam file meets specifications. To filter an ATAC coordinate-sorted bam change the modality and library_id variables as needed.
+**(Recommended) STEP 5:** Use barcode celltype annotations to filter the coordinate-sorted cellranger bam using the CB tag. This step is required if you want to analyze cell-specific or single cell allelic effects. The barcode annotation file has three columns where the first column is the barcode, the second column is the library_id, and the third column is the celltype annotation. For the purposes of the tutorial, we will only filter chr22.
+
 **Usage**
 ```
 Usage: step5_filterbam.sh [-nidolmbeth]
@@ -261,12 +262,12 @@ docker run \
 ```
 **Download clustering analysis for tutorial dataset and create a barcode csv**
 ```
-# download the file
+# download the cluster annotation file
 wget -P project https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/SC3_v3_NextGem_DI_PBMC_CSP_1K_analysis.tar.gz
-tar -C $project/cellranger_rna_counts -xvzf $project/SC3_v3_NextGem_DI_PBMC_CSP_1K_analysis.tar.gz
+tar -C project/cellranger_rna_counts -xvzf $project/SC3_v3_NextGem_DI_PBMC_CSP_1K_analysis.tar.gz
 
 # use the cluster number as celltype and assign pbmc as the library_id in final csv
-cluster=$project/cellranger_rna_counts/analysis/clustering/graphclust/clusters.csv
+cluster=project/cellranger_rna_counts/analysis/clustering/graphclust/clusters.csv
 (echo "barcode,orig.ident,celltype"; awk 'BEGIN{FS=OFS=","} {if (NR!=1) print $1,"pbmc",$2}' $cluster) |sed 's/-1//g'> barcodes/rna_barcodes.csv
 ```
 **Filter a cellranger bam with barcode csv**
@@ -276,11 +277,11 @@ bash SALSA/step5_filterbam.sh \
 --validate \
 --inputbam rna_counts/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam \
 --modality rna \
---interval chr10 \
+--interval chr22 \
 --barcodes barcodes/rna_barcodes.csv \
---threads 4 \
 --outputdir project/wasp_rna \
---outputbam pbmc.bcfilter.chr10.bam 
+--outputbam pbmc.bcfilter.chr22.bam \
+--threads 4
 ```
 **STEP 6: Perform variant-aware realignment with WASP** This step takes a genotyped vcf and performs variant-aware realignment on a coordinate-sorted and indexed bam file with WASP. WASP is a tool to perform unbiased allele-specific read mapping and you can read more about it here: https://github.com/bmvdgeijn/WASP . For the purposes of the tutorial, we will only analyze chromosome 10. For RNA analysis, this step requires a STAR index of the cellranger reference. A STAR index can be built ahead of time using the following command:
 ```
@@ -331,18 +332,17 @@ docker run \
 bash SALSA/step6_wasp.sh \
 --inputvcf vcfdir/funcotation/pbmc.pass.joint.chr22hcphase.funco.vcf.gz \
 --inputbam project/wasp_rna/pbmc.bcfilter.chr22.bam \
---outputdir project/wasp_rna \
+--outputdir project/wasp_rna/rna_genotype \
 --outputbam pbmc.hcphase.chr22wasp.bam \
---genotype rna \
+--genotype joint \
 --stargenome rna_ref/star \
 --library_id pbmc \
 --modality rna \
 --isphased \
 --interval chr22 \
 --threads 4
-
 ```
-**STEP 7: Obtain allele-specific read counts with GATK** This step will filter a phased and genotyped vcf for heterozygous SNV to perform allele-specific counting in a coordinate-sorted and indexed bam file after WASP realignment. There are multiple options for count table outputs. The --pseudobulk option will group all barcodes together to perform allele-specific counting. This is analogous to bulk RNA-seq. The --celltype_pseudobulk option will use the barcode annotations to split the bam into cell-type-specific bam files before performing allele-specific counting. The --single_cell_counts option will split the bam file into individual single cell bam files and perform allele-specific counting. If your input vcf is phased you can select the --isphased option to add a phased genotype to the count tables.
+**STEP 7: Obtain allele-specific read counts with GATK** This step will filter a phased and genotyped vcf for heterozygous SNV to perform allele-specific counting in a coordinate-sorted and indexed bam file after WASP realignment. There are multiple options for count table outputs. The --pseudobulk option will group all barcodes together to perform allele-specific counting. This is analogous to bulk RNA-seq. The --celltype_counts option will use the barcode annotations to split the bam into cell-type-specific bam files before performing allele-specific counting. The --single_cell_counts option will split the input into individual single cell bam files and perform allele-specific counting. If your input vcf is phased you can select the --isphased option to add a phased genotype to the count tables.
 
 **Usage**
 ```
@@ -354,7 +354,7 @@ Usage: step7_gatk_alleleCount.sh [-viognmlCcspt]
    -g  | --genotype           STR   genotype: [rna] [atac] [joint]
    -n  | --library_id         STR   library_id: eg. [sample_1]
    -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
-   -l  | --interval           STR   optional: count a specified interval eg. [chr10]
+   -l  | --interval           STR   optional: count a specified interval eg. [chr22]
    -C  | --pseudobulk_counts        allele-specific counts with all cells grouped together
    -c  | --celltype_counts          allele-specific counts after grouping cells by barcode annotation
    -s  | --single_cell_counts       single cell allele-specific counts for provided barcodes
@@ -386,7 +386,7 @@ bash SALSA/step7_gatk_alleleCount.sh \
 --inputbam project/wasp_rna/pbmc.hcphase.chr22wasp.bam \
 --outputdir project/wasp_rna/counts \
 --barcodes barcodes/rna_barcodes.csv \
---genotype joint_genotype \
+--genotype rna_genotype \
 --library_id pbmc \
 --modality rna \
 --pseudobulk_counts \
@@ -395,6 +395,7 @@ bash SALSA/step7_gatk_alleleCount.sh \
 --interval chr22 \
 --isphased \
 --threads 4
+
 ```
 
 
