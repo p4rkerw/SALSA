@@ -383,7 +383,7 @@ docker run \
 ```
 bash SALSA/step7_gatk_alleleCount.sh \
 --inputvcf vcfdir/funcotation/pbmc.pass.joint.chr22hcphase.funco.vcf.gz \
---inputbam project/wasp_rna/pbmc.phase.chr22wasp.bam \
+--inputbam project/wasp_rna/pbmc.hcphase.chr22wasp.bam \
 --outputdir project/wasp_rna/counts \
 --barcodes barcodes/rna_barcodes.csv \
 --genotype joint_genotype \
