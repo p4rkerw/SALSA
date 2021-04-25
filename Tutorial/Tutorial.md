@@ -123,7 +123,7 @@ bash SALSA/step2_merge_geno.sh \
 --vcfone vcfdir/$atac_genotype/sample_1.atac.chr22.vcf.gz \
 --vcftwo vcfdir/${modalitytwo}_genotype/sample_1.rna.chr22.vcf.gz \
 --outputdir vcfdir/joint_genotype \
---outputvcf sample_1.pass.joint.chr10.vcf.gz \
+--outputvcf sample_1.pass.joint.chr22.vcf.gz \
 --threads 4
 ```
 **(Recommended) STEP 3: Phase genotype** If you want to perform your analysis with phased genotypes you will need a phased reference. This is not strictly required, but it increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for SNV only or SNV and INDELS from ftp.1000genomes.ebi.ac.uk . If you are only analyzing RNA data select the SNV reference. For ATAC data select the SNV and INDEL reference:
