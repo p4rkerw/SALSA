@@ -332,7 +332,7 @@ docker run \
 bash SALSA/step6_wasp.sh \
 --inputvcf vcfdir/funcotation/pbmc.pass.joint.chr22hcphase.funco.vcf.gz \
 --inputbam project/wasp_rna/pbmc.bcfilter.chr22.bam \
---outputdir project/wasp_rna/rna_genotype \
+--outputdir project/wasp_rna \
 --outputbam pbmc.hcphase.chr22wasp.bam \
 --genotype joint \
 --stargenome rna_ref/star \
