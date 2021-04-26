@@ -33,7 +33,7 @@ resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
 ```
 docker pull p4rkerw/salsa:count_1.0
 ```
-**Step 1: Genotype a single cell gene expression dataset** For the tutorial, we will download a coordinate-sorted bam and index for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor:
+**Step 0: Download tutorial dataset**
 ```
 # URL to the dataset: https://support.10xgenomics.com/single-cell-gene-expression/datasets/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/
 # create your salsa tutorial directory and download the files
@@ -41,12 +41,12 @@ project=$PWD/salsa
 wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam
 wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam.bai
 ```
-**Clone 🌶️SALSA github repository**
+**Step 0: Clone 🌶️SALSA github repository**
 ```
 git -C $project clone https://github.com/p4rkerw/SALSA
 ```
-**Usage:**
-```
+
+**Step 1: Genotype a single cell gene expression dataset** For the tutorial, we will download a coordinate-sorted bam and index for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor:
 Usage: step1_gatk_genotype.sh [-indomlt]
    -i  | --bam                STR   path/to/input.bam eg. [rna_counts/sample_1/outs/possorted*.bam]
    -n  | --library_id         STR   library_id: eg. [sample_1]
@@ -87,8 +87,6 @@ bash SALSA/step1_gatk_genotype.sh \
 ```
 **(Not required for tutorial) Step 2: Merge genotypes from the same patient** If you genotyped a paired single cell gene expression and ATAC dataset from a split sample (or a single cell Multiome) you can merge these genotypes into a single vcf. If you're following the tutorial, you can skip this step.
 
-**Usage**
-```
 Usage: step2_merge_geno.sh [-nabdit]
    -n  | --library_id         STR   library_id: eg. [sample_1]
    -a  | --vcfone             STR   path/to/first.vcf.gz eg. [vcfdir/atac_genotype/sample_1.atac.vcf.gz]. Prioritize annotations from first vcf if there is overlap.
@@ -122,15 +120,6 @@ bash SALSA/step2_merge_geno.sh \
 --threads 4
 ```
 **(Recommended) Step 3: Phase genotype** If you want to perform your analysis with phased genotypes you will need a phased reference. This is not strictly required, but it increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for SNV only or SNV and INDELS from ftp.1000genomes.ebi.ac.uk . If you are only analyzing RNA data select the SNV reference. For ATAC data select the SNV and INDEL reference:
-
-a) SNV only: /vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV </br>
-b) SNV and INDEL: /vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL
-
-You will eventually need to download the vcf for every chromosome, but for the purposes of the tutorial just download the SNV reference for chr22 to $reference/phasing/biallelic_SNV:
-```
-ALL.chr22.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz
-```
-**Usage**
 ```
 Usage: step3_phase_vcf.sh [-nvdolpsitrh]
    -n  | --library_id         STR   library_id: eg. [sample_1]
@@ -145,6 +134,15 @@ Usage: step3_phase_vcf.sh [-nvdolpsitrh]
    -t  | --threads            INT   number of threads. Default=[1]
    -h  | --help                     show usage
 ```
+
+a) SNV only: /vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV </br>
+b) SNV and INDEL: /vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL
+
+You will eventually need to download the vcf for every chromosome, but for the purposes of the tutorial just download the SNV reference for chr22 to $reference/phasing/biallelic_SNV:
+```
+ALL.chr22.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz
+```
+
 **Launch 🌶️SALSA container**
 ```
 SCRATCH1=/g/scratch
@@ -182,7 +180,6 @@ bash SALSA/step3_phase_vcf.sh \
 --threads 4
 ```
 **(Optional) Step 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with gnomAD MAF you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). GATK routinely updates its resources so you may need to change the name of the folder in the tutorial to match the one you downloaded. gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124])
-**Usage**
 ```
 Usage: step4_gatk_anno_vcf.sh [-nvdoamfth]
    -n  | --library_id         STR   library_id: eg. [sample_1]
@@ -224,8 +221,6 @@ bash SALSA/step4_gatk_anno_vcf.sh \
 --threads 4
 ```
 **(Recommended) Step 5:** Use barcode celltype annotations to filter the coordinate-sorted cellranger bam using the CB tag. This step will speed up downstream analysis by eliminating barcodes that do not meet quality control. The barcode annotation file has three columns where the first column is the barcode, the second column is the library_id, and the third column is the celltype annotation. For the purposes of the tutorial, we will only filter chr22.
-
-**Usage**
 ```
 Usage: step5_filterbam.sh [-nidolmbeth]
    -n  | --library_id         STR   library_id: eg. [sample_1]
@@ -279,8 +274,6 @@ bash SALSA/step5_filterbam.sh \
 --threads 4
 ```
 **Step 6: Perform variant-aware realignment with WASP** This step takes a genotyped vcf and performs variant-aware realignment on a coordinate-sorted and indexed bam file with WASP. WASP is a tool to perform unbiased allele-specific read mapping and you can read more about it here: https://github.com/bmvdgeijn/WASP . For the purposes of the tutorial, we will only analyze chromosome 22. For RNA analysis, this step requires a STAR index of the cellranger reference. A STAR index can be built ahead of time using the command below. Building a new index takes awhile, but it only needs to be done once. If no --stargenome path is set when running step6_wasp.sh, a reference is built at runtime in the $SCRATCH1 directory.
-
-**Usage**
 ```
 Usage: step6_wasp.sh [-vbdoginlmpt]
    -v  | --inputvcf          STR   vcfdir/funcotation/sample_1.pass.joint.hcphase.funco.vcf.gz
@@ -342,8 +335,6 @@ bash SALSA/step6_wasp.sh \
 --threads 4
 ```
 **STEP 7: Obtain allele-specific read counts with GATK** This step will filter a phased and genotyped vcf for heterozygous SNV to perform allele-specific counting in a coordinate-sorted and indexed bam file after WASP realignment. There are multiple options for count table outputs. The --pseudobulk option will group all barcodes together to perform allele-specific counting. This is analogous to bulk RNA-seq. The --celltype_counts option will use the barcode annotations to split the bam into cell-type-specific bam files before performing allele-specific counting. The --single_cell_counts option will split the input into individual single cell bam files and perform allele-specific counting. If your input vcf is phased you can select the --isphased option to add a phased genotype to the count tables.
-
-**Usage**
 ```
 Usage: step7_gatk_alleleCount.sh [-viognmlCcspt]
    -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [vcfdir/funcotation/sample_1.pass.joint.hcphase.funco.vcf.gz]
