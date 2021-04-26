@@ -25,7 +25,7 @@ Find us on Docker Hub:
 <br/>
 
 **Allele Specific Analysis:**    
-These scripts can be run in publicly-available docker containers found here: [p4rkerw@dockerhub](https://hub.docker.com/search?q=p4rkerw&type=image)
+These scripts can be run in a publicly-available docker container found here: [p4rkerw@dockerhub](https://hub.docker.com/search?q=p4rkerw&type=image)
 
 (Follow the steps in order) 
 1. Genotype snRNA or snATAC libraries using GATK
