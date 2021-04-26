@@ -15,7 +15,7 @@ shapeit 4.2
 WASP 0.3.4
 ```
 
-**STEP 0: Download cellranger references** If you don't already have a GRCh38 cellranger reference download one from the 10X Genomics website. 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The refdata-gex-GRCh38-2020-A cellranger reference in this tutorial is compatible with the tutorial dataset on the 10X Genomics website. Feel free to use a different reference and/or dataset from their [collection](https://support.10xgenomics.com/single-cell-gene-expression/datasets), but make sure that it's aligned to GRCh38 so it matches the GATK bundle resources. 
+**Step 0: Download cellranger references** If you don't already have a GRCh38 cellranger reference download one from the 10X Genomics website. 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The refdata-gex-GRCh38-2020-A cellranger reference in this tutorial is compatible with the tutorial dataset on the 10X Genomics website. Feel free to use a different reference and/or dataset from their [collection](https://support.10xgenomics.com/single-cell-gene-expression/datasets), but make sure that it's aligned to GRCh38 so it matches the GATK bundle resources. 
 ```
 # cellranger reference for scRNA analysis GRCh38 / hg38
 reference=/g/reference
@@ -23,7 +23,7 @@ wget -P $reference https://cf.10xgenomics.com/supp/cell-exp/refdata-gex-GRCh38-2
 tar -xvzf $reference/refdata-gex-GRCh38-2020-A.tar.gz
 ```
 
-**STEP 0: Download GATK resource bundle files** The following files are required for GATK HaplotypeCaller using GRCh38 and can be found in the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false):
+**Step 0: Download GATK resource bundle files** The following files are required for GATK HaplotypeCaller using GRCh38 and can be found in the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false):
 ```
 resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz
 resources_broad_hg38_v0_Homo_sapiens_assembly38.known_indels.vcf.gz
@@ -35,11 +35,11 @@ The following additional files are required if you are analyzing single cell ATA
 ```
 resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
 ```
-**STEP 0: Pull 🌶️SALSA container** 
+**Step 0: Pull 🌶️SALSA container** 
 ```
 docker pull p4rkerw/salsa:count_1.0
 ```
-**STEP 1: Genotype a single cell gene expression dataset** For the tutorial, we will download a coordinate-sorted bam and index for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor:
+**Step 1: Genotype a single cell gene expression dataset** For the tutorial, we will download a coordinate-sorted bam and index for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor:
 ```
 # URL to the dataset: https://support.10xgenomics.com/single-cell-gene-expression/datasets/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/
 # create your salsa tutorial directory and download the files
@@ -91,7 +91,7 @@ bash SALSA/step1_gatk_genotype.sh \
 --modality rna \
 --threads 4
 ```
-**(Not required for tutorial) STEP 2: Merge genotypes from the same patient** If you genotyped a paired single cell gene expression and ATAC dataset from a split sample (or a single cell Multiome) you can merge these genotypes into a single vcf. If you're following the tutorial, you can skip this step.
+**(Not required for tutorial) Step 2: Merge genotypes from the same patient** If you genotyped a paired single cell gene expression and ATAC dataset from a split sample (or a single cell Multiome) you can merge these genotypes into a single vcf. If you're following the tutorial, you can skip this step.
 **Usage**
 ```
 Usage: step2_merge_geno.sh [-nabdit]
@@ -126,7 +126,7 @@ bash SALSA/step2_merge_geno.sh \
 --outputvcf sample_1.pass.joint.chr22.vcf.gz \
 --threads 4
 ```
-**(Recommended) STEP 3: Phase genotype** If you want to perform your analysis with phased genotypes you will need a phased reference. This is not strictly required, but it increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for SNV only or SNV and INDELS from ftp.1000genomes.ebi.ac.uk . If you are only analyzing RNA data select the SNV reference. For ATAC data select the SNV and INDEL reference:
+**(Recommended) Step 3: Phase genotype** If you want to perform your analysis with phased genotypes you will need a phased reference. This is not strictly required, but it increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for SNV only or SNV and INDELS from ftp.1000genomes.ebi.ac.uk . If you are only analyzing RNA data select the SNV reference. For ATAC data select the SNV and INDEL reference:
 
 a) SNV only: /vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV </br>
 b) SNV and INDEL: /vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL
@@ -186,7 +186,7 @@ bash SALSA/step3_phase_vcf.sh \
 --snvonly \
 --threads 4
 ```
-**(Optional) STEP 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with gnomAD MAF you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). GATK routinely updates its resources so you may need to change the name of the folder in the tutorial to match the one you downloaded. gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124])
+**(Optional) Step 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with gnomAD MAF you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). GATK routinely updates its resources so you may need to change the name of the folder in the tutorial to match the one you downloaded. gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124])
 **Usage**
 ```
 Usage: step4_gatk_anno_vcf.sh [-nvdoamfth]
@@ -228,7 +228,7 @@ bash SALSA/step4_gatk_anno_vcf.sh \
 --funcotation reference/funcotator_dataSources.v1.6.20190124g \
 --threads 4
 ```
-**(Recommended) STEP 5:** Use barcode celltype annotations to filter the coordinate-sorted cellranger bam using the CB tag. This step is required if you want to analyze cell-specific or single cell allelic effects. The barcode annotation file has three columns where the first column is the barcode, the second column is the library_id, and the third column is the celltype annotation. For the purposes of the tutorial, we will only filter chr22.
+**(Recommended) Step 5:** Use barcode celltype annotations to filter the coordinate-sorted cellranger bam using the CB tag. This step is required if you want to analyze cell-specific or single cell allelic effects. The barcode annotation file has three columns where the first column is the barcode, the second column is the library_id, and the third column is the celltype annotation. For the purposes of the tutorial, we will only filter chr22.
 
 **Usage**
 ```
@@ -283,7 +283,7 @@ bash SALSA/step5_filterbam.sh \
 --outputbam pbmc.bcfilter.chr22.bam \
 --threads 4
 ```
-**STEP 6: Perform variant-aware realignment with WASP** This step takes a genotyped vcf and performs variant-aware realignment on a coordinate-sorted and indexed bam file with WASP. WASP is a tool to perform unbiased allele-specific read mapping and you can read more about it here: https://github.com/bmvdgeijn/WASP . For the purposes of the tutorial, we will only analyze chromosome 22. For RNA analysis, this step requires a STAR index of the cellranger reference. A STAR index can be built ahead of time using the command below. Building a new index takes awhile, but it only needs to be done once. If no --stargenome path is set when running step6_wasp.sh, a reference is built at runtime in the $SCRATCH1 directory.
+**Step 6: Perform variant-aware realignment with WASP** This step takes a genotyped vcf and performs variant-aware realignment on a coordinate-sorted and indexed bam file with WASP. WASP is a tool to perform unbiased allele-specific read mapping and you can read more about it here: https://github.com/bmvdgeijn/WASP . For the purposes of the tutorial, we will only analyze chromosome 22. For RNA analysis, this step requires a STAR index of the cellranger reference. A STAR index can be built ahead of time using the command below. Building a new index takes awhile, but it only needs to be done once. If no --stargenome path is set when running step6_wasp.sh, a reference is built at runtime in the $SCRATCH1 directory.
 
 **Usage**
 ```
