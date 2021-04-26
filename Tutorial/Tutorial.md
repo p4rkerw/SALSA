@@ -292,7 +292,7 @@ STAR
 --genomeFastaFiles rna_ref/fasta/genome.fa \
 --sjdbGTFfile rna_ref/genes/genes.gtf
 ```
-Alternatively, these references will be built at runtime and placed in the $SCRATCH directory.
+If no --stargenome path is set a reference is built at runtime in the $SCRATCH1 directory.
 
 **Usage**
 ```
