@@ -213,7 +213,7 @@ docker run \
 -v $project/SALSA:$HOME/SALSA \
 -v $reference:$HOME/reference \
 -v $SCRATCH1:$SCRATCH1 \
--e SCRATCH1="path/to/scratch" \
+-e SCRATCH1="/g/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
 ```
 **Annotate a vcf**
