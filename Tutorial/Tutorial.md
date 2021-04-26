@@ -47,6 +47,7 @@ git -C $project clone https://github.com/p4rkerw/SALSA
 ```
 
 **Step 1: Genotype a single cell gene expression dataset** For the tutorial, we will download a coordinate-sorted bam and index for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor:
+```
 Usage: step1_gatk_genotype.sh [-indomlt]
    -i  | --bam                STR   path/to/input.bam eg. [rna_counts/sample_1/outs/possorted*.bam]
    -n  | --library_id         STR   library_id: eg. [sample_1]
