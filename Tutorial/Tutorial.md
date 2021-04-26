@@ -29,10 +29,10 @@ resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz
 resources_broad_hg38_v0_Homo_sapiens_assembly38.known_indels.vcf.gz
 resources_broad_hg38_v0_1000G_phase1.snps.high_confidence.hg38.vcf.gz
 resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
+resources_broad_hg38_v0_wgs_calling_regions.hg38
 ```
 The following additional files are required if you are analyzing single cell ATAC datasets (not needed for the tutorial):
 ```
-resources_broad_hg38_v0_wgs_calling_regions.hg38
 resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
 ```
 **STEP 0: Pull the SALSA container** 
