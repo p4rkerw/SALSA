@@ -121,6 +121,9 @@ bash SALSA/step2_merge_geno.sh \
 --threads 4
 ```
 **(Recommended) Step 3: Phase genotype** If you want to perform your analysis with phased genotypes you will need a phased reference. This is not strictly required, but it increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for SNV only or SNV and INDELS from ftp.1000genomes.ebi.ac.uk . If you are only analyzing RNA data select the SNV reference. For ATAC data select the SNV and INDEL reference:
+
+a) SNV only: /vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV </br>
+b) SNV and INDEL: /vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL
 ```
 Usage: step3_phase_vcf.sh [-nvdolpsitrh]
    -n  | --library_id         STR   library_id: eg. [sample_1]
@@ -135,9 +138,6 @@ Usage: step3_phase_vcf.sh [-nvdolpsitrh]
    -t  | --threads            INT   number of threads. Default=[1]
    -h  | --help                     show usage
 ```
-
-a) SNV only: /vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV </br>
-b) SNV and INDEL: /vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL
 
 You will eventually need to download the vcf for every chromosome, but for the purposes of the tutorial just download the SNV reference for chr22 to $reference/phasing/biallelic_SNV:
 ```
