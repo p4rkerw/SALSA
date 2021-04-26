@@ -47,7 +47,7 @@ project=$PWD/salsa
 wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam
 wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam.bai
 ```
-**Clone the :hot_pepper:SALSA github repository**
+**Clone :hot_pepper:SALSA github repository**
 ```
 git -C $project clone https://github.com/p4rkerw/SALSA
 ```
@@ -270,7 +270,7 @@ tar -C project/cellranger_rna_counts -xvzf $project/SC3_v3_NextGem_DI_PBMC_CSP_1
 cluster=project/cellranger_rna_counts/analysis/clustering/graphclust/clusters.csv
 (echo "barcode,orig.ident,celltype"; awk 'BEGIN{FS=OFS=","} {if (NR!=1) print $1,"pbmc",$2}' $cluster) |sed 's/-1//g'> barcodes/rna_barcodes.csv
 ```
-**Filter a cellranger bam with barcode csv**
+**Filter cellranger bam with barcode csv**
 ```
 bash SALSA/step5_filterbam.sh \
 --library_id pbmc \
