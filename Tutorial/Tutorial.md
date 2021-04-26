@@ -4,7 +4,7 @@ There are two stages in the workflow:
 1. Generate phased and annotated single cell allele-specific counts from a cellranger bam
 2. Analyze allele-specific counts 
 
-Stage 1: Steps 1-7 use p4rkerw/salsa:count_1.0, which is built on the broadinstitue/gatk:4.2.0.0 docker image with additional dependencies pre-installed:
+Steps 1-7 use p4rkerw/salsa:count_1.0, which is built on broadinstitue/gatk:4.2.0.0 with additional dependencies pre-installed:
 ```
 GATK 4.2.0.0
 bwa 0.7.17
