@@ -274,7 +274,7 @@ bash SALSA/step5_filterbam.sh \
 --outputbam pbmc.bcfilter.chr22.bam \
 --threads 4
 ```
-**Step 6: Perform variant-aware realignment with WASP** This step takes a genotyped vcf and performs variant-aware realignment on a coordinate-sorted and indexed bam file with WASP. WASP is a tool to perform unbiased allele-specific read mapping and you can read more about it here: https://github.com/bmvdgeijn/WASP . For the purposes of the tutorial, we will only analyze chromosome 22. For RNA analysis, this step requires a STAR index of the cellranger reference. A STAR index can be built ahead of time using the command below. Building a new index takes awhile, but it only needs to be done once. If no --stargenome path is set when running step6_wasp.sh, a reference is built at runtime in the $SCRATCH1 directory.
+**Step 6: Perform variant-aware realignment with WASP** This step takes a genotyped vcf and performs variant-aware realignment on a coordinate-sorted and indexed bam file with WASP. WASP is a tool to perform unbiased allele-specific read mapping and you can read more about it here: https://github.com/bmvdgeijn/WASP . For the purposes of the tutorial, we will only analyze chromosome 22. For RNA analysis, this step requires a STAR index of the cellranger reference. A STAR index can be built ahead of time using the command below. Building a new index takes awhile, but it only needs to be done once.
 ```
 Usage: step6_wasp.sh [-vbdoginlmpt]
    -v  | --inputvcf          STR   vcfdir/funcotation/sample_1.pass.joint.hcphase.funco.vcf.gz
@@ -282,7 +282,7 @@ Usage: step6_wasp.sh [-vbdoginlmpt]
    -d  | --outputdir         STR   name of output directory eg. [project/wasp_rna]
    -o  | --outputbam         STR   name of output wasp bam eg. [sample_1.phase.wasp.bam]
    -g  | --genotype          STR   genotype: [rna] [atac] [joint]
-   -i  | --stargenome        STR   path/to/star genomeDir made with genomeGenerate eg. [rna_ref/star]. If absent create new STAR index in $SCRATCH1/rna_ref
+   -i  | --stargenome        STR   path/to/star genomeDir made with genomeGenerate eg. [rna_ref/salsa_star]. If absent create new STAR index in rna_ref/salsa_star
    -n  | --library_id        STR   library_id: eg. [sample_1]
    -m  | --modality          STR   modality: [rna] [atac]
    -l  | --interval          STR   specified interval eg. [chr22]
