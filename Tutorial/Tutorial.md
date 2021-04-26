@@ -318,22 +318,16 @@ docker run \
 -e SCRATCH1="/g/scratch" \
 --rm -it p4rkerw/salsa:count_1.0
 ```
-**Build a STAR index**
+**Build a STAR index for 🌶️SALSA**
 ```
-# download the GTF for refdata-gex-GRCh38-2020-A
-gtf_url="http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_32/gencode.v32.primary_assembly.annotation.gtf.gz"
-wget -P rna_ref/genes $gtf_url
-gunzip rna_ref/genes/gencode.v32.primary_assembly.annotation.gtf.gz
-
 # build index
 STAR \
 --runMode genomeGenerate \
 --runThreadN 4 \
 --genomeDir rna_ref/salsa_star \
 --genomeFastaFiles rna_ref/fasta/genome.fa \
---sjdbGTFfile rna_ref/genes/gencode.v32.primary_assembly.annotation.gtf
+--sjdbGTFfile rna_ref/genes/genes.gtf
 ```
-
 **Run WASP on the barcode-filtered bam**
 ```
 bash SALSA/step6_wasp.sh \
