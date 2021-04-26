@@ -9,7 +9,7 @@ STAGE 1: Steps 1-7 use p4rkerw/salsa:count_1.0, which is built on the broadinsti
 GATK 4.2.0.0
 bwa 0.7.17
 STAR 2.7.8a
-bcftools 1.8 
+bcftools 1.9 
 pysam 0.15.3
 shapeit 4.2
 WASP 0.3.4
