@@ -283,16 +283,15 @@ bash SALSA/step5_filterbam.sh \
 --outputbam pbmc.bcfilter.chr22.bam \
 --threads 4
 ```
-**STEP 6: Perform variant-aware realignment with WASP** This step takes a genotyped vcf and performs variant-aware realignment on a coordinate-sorted and indexed bam file with WASP. WASP is a tool to perform unbiased allele-specific read mapping and you can read more about it here: https://github.com/bmvdgeijn/WASP . For the purposes of the tutorial, we will only analyze chromosome 22. For RNA analysis, this step requires a STAR index of the cellranger reference. The SALSA container has STAR 2.7.4a, which matches the index that comes with refdata-gex-GRCh38-2020-A. However, if you are using a different reference you will probably need to build a new STAR index. A STAR index can be built ahead of time using the command below. Note that the --genomeDir flag adds a new folder called salsa_star to your rna_ref directory. When running step6, you will need to change          --stargenome to rna_ref/salsa_star if you built a new index. 
+**STEP 6: Perform variant-aware realignment with WASP** This step takes a genotyped vcf and performs variant-aware realignment on a coordinate-sorted and indexed bam file with WASP. WASP is a tool to perform unbiased allele-specific read mapping and you can read more about it here: https://github.com/bmvdgeijn/WASP . For the purposes of the tutorial, we will only analyze chromosome 22. For RNA analysis, this step requires a STAR index of the cellranger reference. A STAR index can be built ahead of time using the command below. If no --stargenome path is set when running step6_wasp.sh, a reference is built at runtime in the $SCRATCH1 directory.
 ```
-STAR
+STAR \
 --runMode genomeGenerate \
 --runThreadN $threads \
 --genomeDir rna_ref/salsa_star \
 --genomeFastaFiles rna_ref/fasta/genome.fa \
 --sjdbGTFfile rna_ref/genes/genes.gtf
 ```
-If no --stargenome path is set a reference is built at runtime in the $SCRATCH1 directory.
 
 **Usage**
 ```
