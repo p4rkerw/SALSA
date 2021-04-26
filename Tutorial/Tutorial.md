@@ -8,7 +8,7 @@ STAGE 1: Steps 1-7 use p4rkerw/salsa:count_1.0, which is built on the broadinsti
 ```
 GATK 4.2.0.0
 bwa 0.7.17
-STAR 2.7.8a
+STAR 2.7.4a
 bcftools 1.9 
 pysam 0.15.3
 shapeit 4.2
@@ -283,12 +283,12 @@ bash SALSA/step5_filterbam.sh \
 --outputbam pbmc.bcfilter.chr22.bam \
 --threads 4
 ```
-**STEP 6: Perform variant-aware realignment with WASP** This step takes a genotyped vcf and performs variant-aware realignment on a coordinate-sorted and indexed bam file with WASP. WASP is a tool to perform unbiased allele-specific read mapping and you can read more about it here: https://github.com/bmvdgeijn/WASP . For the purposes of the tutorial, we will only analyze chromosome 10. For RNA analysis, this step requires a STAR index of the cellranger reference. A STAR index can be built ahead of time using the following command:
+**STEP 6: Perform variant-aware realignment with WASP** This step takes a genotyped vcf and performs variant-aware realignment on a coordinate-sorted and indexed bam file with WASP. WASP is a tool to perform unbiased allele-specific read mapping and you can read more about it here: https://github.com/bmvdgeijn/WASP . For the purposes of the tutorial, we will only analyze chromosome 10. For RNA analysis, this step requires a STAR index of the cellranger reference. The SALSA container has STAR 2.7.4a, which matches the index that comes with refdata-gex-GRCh38-2020-A. However, if you are using a different index you will probably need to rebuild the STAR index. A STAR index can be built ahead of time using the following command. Note that the --genomeDir flag adds a new folder called salsa_star to your rna_ref directory. When running step6, you will need to change          --stargenome to rna_ref/star_salsa if you built a new index. 
 ```
 STAR
 --runMode genomeGenerate \
 --runThreadN $threads \
---genomeDir rna_ref/star \
+--genomeDir rna_ref/salsa_star \
 --genomeFastaFiles rna_ref/fasta/genome.fa \
 --sjdbGTFfile rna_ref/genes/genes.gtf
 ```
