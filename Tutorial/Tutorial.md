@@ -323,6 +323,7 @@ docker run \
 # download the GTF for refdata-gex-GRCh38-2020-A
 gtf_url="http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_32/gencode.v32.primary_assembly.annotation.gtf.gz"
 wget -P rna_ref/genes $gtf_url
+gunzip rna_ref/genes/gencode.v32.primary_assembly.annotation.gtf.gz
 
 # build index
 STAR \
@@ -330,7 +331,7 @@ STAR \
 --runThreadN 4 \
 --genomeDir rna_ref/salsa_star \
 --genomeFastaFiles rna_ref/fasta/genome.fa \
---sjdbGTFfile rna_ref/genes/gencode.v32.primary_assembly.annotation.gtf.gz
+--sjdbGTFfile rna_ref/genes/gencode.v32.primary_assembly.annotation.gtf
 ```
 
 **Run WASP on the barcode-filtered bam**
