@@ -86,6 +86,7 @@ bash SALSA/step1_gatk_genotype.sh \
 --threads 4
 ```
 **(Not required for tutorial) Step 2: Merge genotypes from the same patient** If you genotyped a paired single cell gene expression and ATAC dataset from a split sample (or a single cell Multiome) you can merge these genotypes into a single vcf. If you're following the tutorial, you can skip this step.
+
 **Usage**
 ```
 Usage: step2_merge_geno.sh [-nabdit]
