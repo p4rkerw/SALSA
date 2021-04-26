@@ -324,7 +324,7 @@ docker run \
 # build index
 STAR \
 --runMode genomeGenerate \
---runThreadN 4 \
+--runThreadN 1 \
 --genomeDir rna_ref/salsa_star \
 --genomeFastaFiles rna_ref/fasta/genome.fa \
 --sjdbGTFfile rna_ref/genes/genes.gtf \
