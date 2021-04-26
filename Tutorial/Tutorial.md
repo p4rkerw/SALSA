@@ -35,7 +35,7 @@ The following additional files are required if you are analyzing single cell ATA
 ```
 resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
 ```
-**STEP 0: Pull the :hot_pepper:SALSA container** 
+**STEP 0: Pull :hot_pepper:SALSA container** 
 ```
 docker pull p4rkerw/salsa:count_1.0
 ```
