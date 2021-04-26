@@ -33,7 +33,7 @@ resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
 ```
 docker pull p4rkerw/salsa:count_1.0
 ```
-**Step 0: Download tutorial dataset**
+**Step 0: Download tutorial dataset** For the tutorial, we will download a coordinate-sorted bam and index for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor:
 ```
 # URL to the dataset: https://support.10xgenomics.com/single-cell-gene-expression/datasets/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/
 # create your salsa tutorial directory and download the files
@@ -46,7 +46,7 @@ wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-e
 git -C $project clone https://github.com/p4rkerw/SALSA
 ```
 
-**Step 1: Genotype a single cell gene expression dataset** For the tutorial, we will download a coordinate-sorted bam and index for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor:
+**Step 1: Genotype a single cell gene expression dataset** 
 ```
 Usage: step1_gatk_genotype.sh [-indomlt]
    -i  | --bam                STR   path/to/input.bam eg. [rna_counts/sample_1/outs/possorted*.bam]
