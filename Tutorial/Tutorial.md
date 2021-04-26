@@ -15,7 +15,7 @@ shapeit 4.2
 WASP 0.3.4
 ```
 
-**STEP 0: Download cellranger references** If you don't already have a GRCh38 cellranger reference download it from the 10X Genomics website. 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The refdata-gex-GRCh38-2020-A cellranger reference in this tutorial was selected because it was used to align the pbmc dataset on the 10X Genomics website. Feel free to use a different reference and/or dataset from their [collection](https://support.10xgenomics.com/single-cell-gene-expression/datasets), but make sure that it's aligned to the GRCh38 build to match the GATK bundle resources. 
+**STEP 0: Download cellranger references** If you don't already have a GRCh38 cellranger reference download one from the 10X Genomics website. 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The refdata-gex-GRCh38-2020-A cellranger reference in this tutorial is compatible with the tutorial dataset on the 10X Genomics website. Feel free to use a different reference and/or dataset from their [collection](https://support.10xgenomics.com/single-cell-gene-expression/datasets), but make sure that it's aligned to GRCh38 so it matches the GATK bundle resources. 
 ```
 # cellranger reference for scRNA analysis GRCh38 / hg38
 reference=/g/reference
