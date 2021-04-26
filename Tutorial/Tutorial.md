@@ -4,18 +4,18 @@ There are two stages in the workflow:
 1. Generate phased and annotated single cell allele-specific counts from a cellranger bam
 2. Analyze allele-specific counts 
 
-STAGE 1: Steps 1-7 use p4rkerw/salsa:count_1.0, which is built on the broadinstitue/gatk:4.2.0.0 docker image with additional dependencies pre-installed:
+Stage 1: Steps 1-7 use p4rkerw/salsa:count_1.0, which is built on the broadinstitue/gatk:4.2.0.0 docker image with additional dependencies pre-installed:
 ```
 GATK 4.2.0.0
 bwa 0.7.17
-STAR 2.7.2a
+STAR 2.5.1b
 bcftools 1.9 
 pysam 0.15.3
 shapeit 4.2
 WASP 0.3.4
 ```
 
-**Step 0: Download cellranger references** If you don't already have a GRCh38 cellranger reference download one from the 10X Genomics website. 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The refdata-gex-GRCh38-2020-A cellranger reference in this tutorial is compatible with the tutorial dataset on the 10X Genomics website. Feel free to use a different reference and/or dataset from their [collection](https://support.10xgenomics.com/single-cell-gene-expression/datasets), but make sure that it's aligned to GRCh38 so it matches the GATK bundle resources. 
+**Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the 10X Genomics website. 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The refdata-gex-GRCh38-2020-A cellranger reference in this tutorial is compatible with the tutorial dataset on the 10X Genomics website. Feel free to use a different reference and/or dataset from their [collection](https://support.10xgenomics.com/single-cell-gene-expression/datasets), but make sure that it's aligned to GRCh38 so it matches the GATK bundle resources. 
 ```
 # cellranger reference for scRNA analysis GRCh38 / hg38
 reference=/g/reference
@@ -23,7 +23,7 @@ wget -P $reference https://cf.10xgenomics.com/supp/cell-exp/refdata-gex-GRCh38-2
 tar -xvzf $reference/refdata-gex-GRCh38-2020-A.tar.gz
 ```
 
-**Step 0: Download GATK resource bundle files** The following files are required for GATK HaplotypeCaller using GRCh38 and can be found in the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false):
+**Step 0: Download GATK resource bundle** The following files are required for GATK HaplotypeCaller using GRCh38 and can be found in the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false):
 ```
 resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz
 resources_broad_hg38_v0_Homo_sapiens_assembly38.known_indels.vcf.gz
@@ -47,7 +47,7 @@ project=$PWD/salsa
 wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam
 wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam.bai
 ```
-**Clone :hot_pepper:SALSA github repository**
+**Clone 🌶️SALSA github repository**
 ```
 git -C $project clone https://github.com/p4rkerw/SALSA
 ```
