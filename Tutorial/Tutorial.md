@@ -15,12 +15,7 @@ shapeit 4.2
 WASP 0.3.4
 ```
 
-**Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the 10X Genomics website. 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The refdata-gex-GRCh38-2020-A cellranger reference in this tutorial is compatible with the tutorial dataset on the 10X Genomics website. Feel free to use a different reference and/or dataset from their [collection](https://support.10xgenomics.com/single-cell-gene-expression/datasets), but make sure that it's aligned to GRCh38 so it matches the GATK bundle resources. 
-```
-# cellranger reference for scRNA analysis GRCh38 / hg38
-reference=/g/reference
-wget -P $reference https://cf.10xgenomics.com/supp/cell-exp/refdata-gex-GRCh38-2020-A.tar.gz
-tar -xvzf $reference/refdata-gex-GRCh38-2020-A.tar.gz
+**Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the 10X Genomics website. 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The GRCh38-2020-A.premrna cellranger reference in this tutorial is compatible with the tutorial dataset on the 10X Genomics website. Feel free to use a different reference and/or dataset from their [collection](https://support.10xgenomics.com/single-cell-gene-expression/datasets), but make sure that it's aligned to GRCh38 so it matches the GATK bundle resources. 
 ```
 
 **Step 0: Download GATK resource bundle** The following files are required for GATK HaplotypeCaller using GRCh38 and can be found in the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false):
@@ -72,7 +67,7 @@ docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
 -v $project/cellranger_rna_counts:$HOME/rna_counts \
--v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
+-v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
 -v $reference/gatk:$HOME/gatk_bundle \
@@ -208,7 +203,7 @@ reference=/g/reference
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
+-v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
 -v $reference:$HOME/reference \
@@ -309,7 +304,7 @@ reference=/g/reference
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
+-v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
 -v $reference:$HOME/reference \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
@@ -324,7 +319,7 @@ docker run \
 # build index
 STAR \
 --runMode genomeGenerate \
---runThreadN 1 \
+--runThreadN 4 \
 --genomeDir rna_ref/salsa_star \
 --genomeFastaFiles rna_ref/fasta/genome.fa \
 --sjdbGTFfile rna_ref/genes/genes.gtf \
@@ -374,7 +369,7 @@ reference=/g/reference
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
+-v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
 -v $project/barcodes:$HOME/barcodes \
