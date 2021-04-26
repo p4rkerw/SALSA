@@ -336,7 +336,7 @@ bash SALSA/step6_wasp.sh \
 --outputdir project/wasp_rna \
 --outputbam pbmc.hcphase.chr22wasp.bam \
 --genotype joint \
---stargenome rna_ref/star \
+--stargenome rna_ref/salsa_star \
 --library_id pbmc \
 --modality rna \
 --isphased \
