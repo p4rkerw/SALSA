@@ -8,7 +8,7 @@ Stage 1: Steps 1-7 use p4rkerw/salsa:count_1.0, which is built on the broadinsti
 ```
 GATK 4.2.0.0
 bwa 0.7.17
-STAR 2.5.1b
+STAR 2.7.8a
 bcftools 1.9 
 pysam 0.15.3
 shapeit 4.2
@@ -322,7 +322,7 @@ STAR \
 --genomeDir rna_ref/salsa_star \
 --genomeFastaFiles rna_ref/fasta/genome.fa \
 --sjdbGTFfile rna_ref/genes/genes.gtf \
---genomeSAsparse 3 
+--genomeSAsparseD 3 
 ```
 
 **Run WASP on the barcode-filtered bam**
