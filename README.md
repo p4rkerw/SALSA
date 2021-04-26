@@ -37,5 +37,5 @@ These scripts can be run in publicly-available docker containers found here: [p4
 7. Obtain pseudobulk, cell-specific, or single cell allele-specific counts with GATK ASEReadCounter  
 8. Analyze allele-specific counts
 
-To get started follow along with our [tutorial](https://github.com/p4rkerw/SALSA/tree/main/Tutorial/Tutorial.md)
+To get started follow along with our [tutorial](https://github.com/p4rkerw/SALSA/tree/main/Tutorial/README.md)
 
