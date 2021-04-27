@@ -96,14 +96,14 @@ Usage: step2_merge_geno.sh [-nabdit]
 ```
 **Launch 🌶️SALSA container**
 ```
-SCRATCH1=path/to/scratch
+SCRATCH1=/g/scratch
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
 -v $SCRATCH1:$SCRATCH1 \
--e SCRATCH1="path/to/scratch" \
+-e SCRATCH1="/g/scratch" \
 --rm -it p4rkerw/salsa:latest
 ```
 **Merge two genotypes**
