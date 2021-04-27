@@ -1,6 +1,6 @@
 🌶️SALSA is a tool for generating and analyzing phased single cell allele-specific read counts from patient samples. The SALSA workflow runs in a publicly-available docker container with all the necessary dependencies for code execution. This workflow assumes you have aligned your raw data with cellranger or cellranger-atac to generate coordinate-sorted bam files and analyzed it to obtain cell barcode annotations. For additional information, please consult the 10X Genomics website: https://www.10xgenomics.com/ . For this tutorial, we will download a dataset from the 10X Genomics website that has already been aligned and annotated. To complete the tutorial, you will also need to download the cellranger reference, GATK bundle resources, and 1000G phased references (see below for more information). All of the tutorial outputs are included in the this repository in case you want to compare results or skip a step. 
 
-Steps 1-7 use p4rkerw/salsa:count_1.0, which is built on broadinstitue/gatk:4.2.0.0 with additional dependencies pre-installed:
+Steps 1-7 use p4rkerw/salsa:latest, which is built on broadinstitue/gatk:4.2.0.0 with additional dependencies pre-installed:
 ```
 GATK 4.2.0.0
 bwa 0.7.17
