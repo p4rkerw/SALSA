@@ -27,7 +27,7 @@ resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
 ```
 **Step 0: Pull 🌶️SALSA container** 
 ```
-docker pull p4rkerw/salsa:count_1.0
+docker pull p4rkerw/salsa:latest
 ```
 **Step 0: Download tutorial dataset** For the tutorial, we will download a coordinate-sorted bam and index for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor:
 ```
@@ -69,7 +69,7 @@ docker run \
 -v $reference/gatk:$HOME/gatk_bundle \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="/g/scratch" \
---rm -it p4rkerw/salsa:count_1.0
+--rm -it p4rkerw/salsa:latest
 ```
 **Genotype an RNA sample**
 ```
@@ -104,7 +104,7 @@ docker run \
 -v $project/SALSA:$HOME/SALSA \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="path/to/scratch" \
---rm -it p4rkerw/salsa:count_1.0
+--rm -it p4rkerw/salsa:latest
 ```
 **Merge two genotypes**
 ```
@@ -153,7 +153,7 @@ docker run \
 -v $reference/phasing/biallelic_SNV:$HOME/phasing \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="/g/scratch" \
---rm -it p4rkerw/salsa:count_1.0
+--rm -it p4rkerw/salsa:latest
 ```
 **Rename the reference contigs** The 1000G vcf reference files do not have the same contig style as the cellranger reference. You will need to update the 1000G contig style using bcftools. For the tutorial, we will only do chromosome 10. 
 ```
@@ -203,7 +203,7 @@ docker run \
 -v $reference:$HOME/reference \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="/g/scratch" \
---rm -it p4rkerw/salsa:count_1.0
+--rm -it p4rkerw/salsa:latest
 ```
 **Annotate a vcf**
 ```
@@ -245,7 +245,7 @@ docker run \
 -v $project:$HOME/project \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="/g/scratch" \
---rm -it p4rkerw/salsa:count_1.0
+--rm -it p4rkerw/salsa:latest
 ```
 **Download clustering analysis for tutorial dataset and create a barcode csv**
 ```
@@ -301,7 +301,7 @@ docker run \
 -v $project:$HOME/project \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="/g/scratch" \
---rm -it p4rkerw/salsa:count_1.0
+--rm -it p4rkerw/salsa:latest
 ```
 
 **Build a STAR index for 🌶️SALSA**
@@ -364,7 +364,7 @@ docker run \
 -v $project:$HOME/project \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="/g/scratch" \
---rm -it p4rkerw/salsa:count_1.0
+--rm -it p4rkerw/salsa:latest
 ```
 **Get phased allele-specific counts**
 ```
