@@ -343,7 +343,7 @@ STAR \
 --genomeFastaFiles rna_ref/fasta/genome.fa \
 --sjdbGTFfile rna_ref/genes/genes.gtf \
 --genomeSAsparseD 3 \
---runThreadN 4
+--runThreadN 1
 ```
 
 **Run WASP on the barcode-filtered bam**
