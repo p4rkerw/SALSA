@@ -186,7 +186,7 @@ bash SALSA/step3_phase_vcf.sh \
 --snvonly \
 --threads 10
 ```
-**Inspect the phased vcf** Note how all the variants are phased
+**Inspect the phased vcf** Note how all the variants are now phased.
 ```
 bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT\n]' vcfdir/phasing/pbmc.pass.joint.chr22hcphase.vcf.gz | head -n5
 # chr22,16604409,A,G,1|1
