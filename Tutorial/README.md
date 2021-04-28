@@ -72,6 +72,7 @@ docker run \
 ```
 **Genotype an RNA sample**
 ```
+# runtime ~5min
 bash SALSA/step1_gatk_genotype.sh \
 --bam rna_counts/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam \
 --library_id pbmc \
@@ -79,7 +80,16 @@ bash SALSA/step1_gatk_genotype.sh \
 --outputvcf pbmc.rna.chr22.vcf.gz \
 --interval chr22 \
 --modality rna \
---threads 4
+--threads 10
+```
+**Inspect the vcf** Note that the first 3 variants have a physically-phased genotype denoted by the pipe character whereas the last 2 variants are not phased. 
+```
+bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT,%FILTER\n]' vcfdir/rna_genotype/pbmc.rna.chr22.vcf.gz | head -n3
+chr22,16604409,A,G,1|1,PASS
+chr22,16604416,C,G,1|1,PASS
+chr22,16656494,A,G,1/1,PASS
+chr22,17085614,C,T,0/1,PASS
+chr22,17085738,C,CT,0/1,QD
 ```
 **(Not required for tutorial) Step 2: Merge genotypes from the same patient** If you genotyped a paired single cell gene expression and ATAC dataset from a split sample (or a single cell Multiome) you can merge these genotypes into a single vcf. If you're following the tutorial, you can skip this step.
 ```
