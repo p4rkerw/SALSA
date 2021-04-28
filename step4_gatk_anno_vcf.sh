@@ -152,7 +152,7 @@ Gencode_27_transcriptExon,Gencode_27_hugoSymbol' \
 {for (i=1; i<=nc; i++) if (a[i] in hdr) printf "%s%s", $hdr[a[i]], (i<nc?OFS:ORS)}' $workdir/formatted.variant.csv > $workdir/funco_no_varid.csv
 
 # add a variant_id column
-awk 'BEGIN{FS=OFS=","} {print (NR>1?$1"_"$2"_"$3"_"$4:"variant_id"), $0}' $workdir/funco_no_varid > $funcotated_table
+awk 'BEGIN{FS=OFS=","} {print (NR>1?$1"_"$2"_"$3"_"$4:"variant_id"), $0}' $workdir/funco_no_varid.csv > $funcotated_table
 
 
 #echo "Removing temporary files"
