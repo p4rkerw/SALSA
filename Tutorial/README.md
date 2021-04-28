@@ -288,6 +288,7 @@ cluster=project/cellranger_rna_counts/analysis/clustering/graphclust/clusters.cs
 ```
 **Filter cellranger bam with barcode csv**
 ```
+# runtime ~1min
 bash SALSA/step5_filterbam.sh \
 --library_id pbmc \
 --validate \
@@ -297,7 +298,7 @@ bash SALSA/step5_filterbam.sh \
 --barcodes barcodes/rna_barcodes.csv \
 --outputdir project/wasp_rna \
 --outputbam pbmc.bcfilter.chr22.bam \
---threads 4
+--threads 10
 ```
 **Step 6: Perform variant-aware realignment with WASP** This step takes a genotyped vcf and performs variant-aware realignment on a coordinate-sorted and indexed bam file with WASP. WASP is a tool to perform unbiased allele-specific read mapping and you can read more about it here: https://github.com/bmvdgeijn/WASP . For the purposes of the tutorial, we will only analyze chromosome 22. For RNA analysis, this step requires a STAR index of the cellranger reference. A STAR index can be built ahead of time using the command below. Building a new index takes awhile, but it only needs to be done once.
 ```
@@ -333,7 +334,7 @@ docker run \
 --rm -it p4rkerw/salsa:latest
 ```
 
-**Build a STAR index for 🌶️SALSA**
+**Build a STAR index for 🌶️SALSA** You only need to do this once. You can use the same reference for future analyses.
 ```
 # build index
 STAR \
