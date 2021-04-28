@@ -334,7 +334,7 @@ docker run \
 --rm -it p4rkerw/salsa:latest
 ```
 
-**(Not required for tutorial) Build a STAR index for 🌶️SALSA** If you are using a cellranger reference that was not built with STAR-2.5.1b you may want to build a new STAR reference. The command below will build a new index in rna_ref/salsa_star so it doesn't overwrite the existing reference in rna_ref/star. You will then need to update the step6_wasp.sh command with --stargenome rna_ref/salsa_star . Alternatively, download the version of STAR that matches your existing cellranger reference and link the executable to /usr/bin/STAR . The second approach will be much faster.
+**(Not required for tutorial) Build a STAR index for 🌶️SALSA** To date, all of the cellranger references have been built with STAR-2.5.1b . However, if you are using a different reference you may want to build a new STAR index. The command below will build a new index in rna_ref/salsa_star so it doesn't overwrite the existing reference in rna_ref/star. You will then need to update the step6_wasp.sh command with --stargenome rna_ref/salsa_star . Alternatively, download the version of STAR that matches your existing cellranger reference and link the executable to /usr/bin/STAR . The second approach will be much faster.
 ```
 # runtime ~35min
 # STAR \
