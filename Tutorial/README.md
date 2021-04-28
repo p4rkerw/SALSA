@@ -334,16 +334,16 @@ docker run \
 --rm -it p4rkerw/salsa:latest
 ```
 
-**Build a STAR index for 🌶️SALSA** You only need to do this once because you can use the same reference for future analyses. The number of threads should be increased depending on system resources. If there are limited resources, the index can be built outside of the container with the same version STAR-2.7.8a. 
+**Build a STAR index for 🌶️SALSA** You only need to do this once because you can use the same reference for future analyses. The number of threads can be increased or decreased depending on system resources. If there are limited resources, the index can be built outside of the container with the same version STAR-2.7.8a. 
 ```
-# build index
+# runtime ~35min
 STAR \
 --runMode genomeGenerate \
 --genomeDir rna_ref/salsa_star \
 --genomeFastaFiles rna_ref/fasta/genome.fa \
 --sjdbGTFfile rna_ref/genes/genes.gtf \
 --genomeSAsparseD 3 \
---runThreadN 1
+--runThreadN 10
 ```
 
 **Run WASP on the barcode-filtered bam**
