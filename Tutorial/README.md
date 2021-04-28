@@ -85,7 +85,6 @@ bash SALSA/step1_gatk_genotype.sh \
 **Inspect the vcf** Note that the first 3 variants are physically-phased, which is indicated by the pipe character in their genotype. In contrast, the last 2 variants are not phased. 
 ```
 bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT,%FILTER\n]' vcfdir/rna_genotype/pbmc.rna.chr22.vcf.gz | head -n3
-# not run
 # chr22,16604409,A,G,1|1,PASS
 # chr22,16604416,C,G,1|1,PASS
 # chr22,16656494,A,G,1/1,PASS
@@ -187,6 +186,16 @@ bash SALSA/step3_phase_vcf.sh \
 --snvonly \
 --threads 10
 ```
+**Inspect the phased vcf** Note how all the variants are phased
+```
+bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT\n]' vcfdir/phasing/pbmc.pass.joint.chr22hcphase.vcf.gz | head -n5
+# chr22,16604409,A,G,1|1
+# chr22,16604416,C,G,1|1
+# chr22,17085614,C,T,1|0
+# chr22,17086116,G,C,0|1
+# chr22,17086917,C,T,1|0
+
+```
 **(Optional) Step 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with gnomAD MAF you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). GATK routinely updates its resources so you may need to change the name of the folder in the tutorial to match the one you downloaded. gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124])
 ```
 Usage: step4_gatk_anno_vcf.sh [-nvdoamfth]
@@ -232,7 +241,6 @@ bash SALSA/step4_gatk_anno_vcf.sh \
 **Inspect the annotation table** GATK Funcotator provides a lot of annotation fields in the vcf, but the output table only includes a subset of them.
 ```
 head -n3 vcfdir/funcotation/pbmc.pass.joint.chr22hcphase.formatted.csv
-# not run
 # variant_id,CHROM,POS,REF,ALT,GT,FILTER,Gencode_27_variantClassification,Gencode_27_codonChange,gnomAD_exome_AF,gnomAD_genome_AF,Gencode_27_hugoSymbol
 # chr22_16604409_A_G,chr22,16604409,A,G,1|1,.,RNA,,,3.50740e-03,TPTEP1
 # chr22_16604416_C_G,chr22,16604416,C,G,1|1,.,RNA,,,2.99460e-03,TPTEP1
