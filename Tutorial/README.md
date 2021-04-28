@@ -4,7 +4,7 @@ Steps 1-7 use p4rkerw/salsa:latest, which is built on broadinstitue/gatk:4.2.0.0
 ```
 GATK 4.2.0.0
 bwa 0.7.17
-STAR 2.7.8a
+STAR 2.5.1b
 bcftools 1.9 
 pysam 0.15.3
 shapeit 4.2
@@ -334,7 +334,7 @@ docker run \
 --rm -it p4rkerw/salsa:latest
 ```
 
-**Build a STAR index for 🌶️SALSA** You only need to do this once because you can use the same reference for future analyses. The number of threads can be increased or decreased depending on system resources. If there are limited resources, the index can be built outside of the container with the same version STAR-2.7.8a. 
+**(Optional) Build a STAR index for 🌶️SALSA** If you are using a cellranger reference that was not build with STAR-2.5.1b you will need to build a new STAR reference.
 ```
 # runtime ~35min
 STAR \
@@ -354,7 +354,7 @@ bash SALSA/step6_wasp.sh \
 --outputdir project/wasp_rna \
 --outputbam pbmc.hcphase.chr22wasp.bam \
 --genotype joint \
---stargenome rna_ref/salsa_star \
+--stargenome rna_ref/star \
 --library_id pbmc \
 --modality rna \
 --isphased \
