@@ -10,7 +10,7 @@ pysam 0.15.3
 shapeit 4.2
 WASP 0.3.4
 ```
-**Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the 10X Genomics website. 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The GRCh38-2020-A.premrna cellranger reference in this tutorial is compatible with the tutorial dataset (which is aligned to GRCh38-2020-A), but there are many options. Feel free to download a different [reference](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest) and/or [dataset](https://support.10xgenomics.com/single-cell-gene-expression/datasets) from the 10X Genomics collection; just make sure it's aligned to GRCh38 so it matches the GATK bundle resources. Alignment information can be found in the summary html files.  
+**Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the 10X Genomics website. 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The refdata-gex-GRCh38-2020-A cellranger reference in this tutorial is compatible with the tutorial dataset (which is aligned to GRCh38-2020-A), but there are many options. Feel free to download a different [reference](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest) and/or [dataset](https://support.10xgenomics.com/single-cell-gene-expression/datasets) from the 10X Genomics collection; just make sure it's aligned to GRCh38 so it matches the GATK bundle resources. Alignment information can be found in the summary html files.  
 
 **Step 0: Download GATK resource bundle** The following files are required for GATK HaplotypeCaller using GRCh38 and can be found in the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false):
 ```
@@ -62,7 +62,7 @@ docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
 -v $project/cellranger_rna_counts:$HOME/rna_counts \
--v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
+-v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
 -v $reference/gatk:$HOME/gatk_bundle \
@@ -217,7 +217,7 @@ reference=/g/reference
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
+-v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
 -v $reference:$HOME/reference \
@@ -324,7 +324,7 @@ reference=/g/reference
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
+-v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
 -v $reference:$HOME/reference \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
@@ -348,6 +348,7 @@ STAR \
 
 **Run WASP on the barcode-filtered bam**
 ```
+# runtime ~2min
 bash SALSA/step6_wasp.sh \
 --inputvcf vcfdir/funcotation/pbmc.pass.joint.chr22hcphase.funco.vcf.gz \
 --inputbam project/wasp_rna/pbmc.bcfilter.chr22.bam \
@@ -387,7 +388,7 @@ reference=/g/reference
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
+-v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
 -v $project/barcodes:$HOME/barcodes \
