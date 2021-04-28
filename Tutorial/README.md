@@ -238,7 +238,7 @@ bash SALSA/step4_gatk_anno_vcf.sh \
 --funcotation reference/funcotator_dataSources.v1.6.20190124g \
 --threads 10
 ```
-**Inspect the annotation table** GATK Funcotator provides a lot of annotation fields in the vcf, but the output table only includes a subset of them.
+**Inspect the annotation table** GATK Funcotator provides a lot of annotation fields in the vcf INFO field and only a subset are included in this table. Note how these two variants are present in the gnomAD genomes database and have allele frequency annotations. 
 ```
 head -n3 vcfdir/funcotation/pbmc.pass.joint.chr22hcphase.formatted.csv
 # variant_id,CHROM,POS,REF,ALT,GT,FILTER,Gencode_27_variantClassification,Gencode_27_codonChange,gnomAD_exome_AF,gnomAD_genome_AF,Gencode_27_hugoSymbol
