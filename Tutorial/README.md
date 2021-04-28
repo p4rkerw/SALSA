@@ -4,7 +4,7 @@
 ```
 docker pull p4rkerw/salsa:latest
 ```
-Steps 1-7 use this container, which is built on broadinstitue/gatk:4.2.0.0 with additional dependencies pre-installed:
+All of the steps in this tutorial use this container, which is built on broadinstitue/gatk:4.2.0.0 with additional dependencies pre-installed:
 ```
 GATK 4.2.0.0
 bwa 0.7.17
