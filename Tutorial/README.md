@@ -85,11 +85,12 @@ bash SALSA/step1_gatk_genotype.sh \
 **Inspect the vcf** Note that the first 3 variants are physically-phased, which is indicated by the pipe character in their genotype. In contrast, the last 2 variants are not phased. 
 ```
 bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT,%FILTER\n]' vcfdir/rna_genotype/pbmc.rna.chr22.vcf.gz | head -n3
-chr22,16604409,A,G,1|1,PASS
-chr22,16604416,C,G,1|1,PASS
-chr22,16656494,A,G,1/1,PASS
-chr22,17085614,C,T,0/1,PASS
-chr22,17085738,C,CT,0/1,QD
+# not run
+# chr22,16604409,A,G,1|1,PASS
+# chr22,16604416,C,G,1|1,PASS
+# chr22,16656494,A,G,1/1,PASS
+# chr22,17085614,C,T,0/1,PASS
+# chr22,17085738,C,CT,0/1,QD
 ```
 **(Not required for tutorial) Step 2: Merge genotypes from the same patient** If you genotyped a paired single cell gene expression and ATAC dataset from a split sample (or a single cell Multiome) you can merge these genotypes into a single vcf. If you're following the tutorial, you can skip this step.
 ```
@@ -231,9 +232,10 @@ bash SALSA/step4_gatk_anno_vcf.sh \
 **Inspect the annotation table** GATK Funcotator provides a lot of annotation fields in the vcf, but the output table only includes a subset of them.
 ```
 head -n3 vcfdir/funcotation/pbmc.pass.joint.chr22hcphase.formatted.csv
-variant_id,CHROM,POS,REF,ALT,GT,FILTER,Gencode_27_variantClassification,Gencode_27_codonChange,gnomAD_exome_AF,gnomAD_genome_AF,Gencode_27_hugoSymbol
-chr22_16604409_A_G,chr22,16604409,A,G,1|1,.,RNA,,,3.50740e-03,TPTEP1
-chr22_16604416_C_G,chr22,16604416,C,G,1|1,.,RNA,,,2.99460e-03,TPTEP1
+# not run
+# variant_id,CHROM,POS,REF,ALT,GT,FILTER,Gencode_27_variantClassification,Gencode_27_codonChange,gnomAD_exome_AF,gnomAD_genome_AF,Gencode_27_hugoSymbol
+# chr22_16604409_A_G,chr22,16604409,A,G,1|1,.,RNA,,,3.50740e-03,TPTEP1
+# chr22_16604416_C_G,chr22,16604416,C,G,1|1,.,RNA,,,2.99460e-03,TPTEP1
 ```
 
 **(Recommended) Step 5:** Use barcode celltype annotations to filter the coordinate-sorted cellranger bam using the CB tag. This step will speed up downstream analysis by eliminating barcodes that do not meet quality control. The barcode annotation file has three columns where the first column is the barcode, the second column is the library_id, and the third column is the celltype annotation. For the purposes of the tutorial, we will only filter chr22.
