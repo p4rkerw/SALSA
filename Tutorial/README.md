@@ -105,25 +105,25 @@ Usage: step2_merge_geno.sh [-nabdit]
 ```
 **Launch 🌶️SALSA container**
 ```
-SCRATCH1=/g/scratch
-docker run \
---workdir $HOME \
--v $HOME:$HOME \
--v $project/vcf_output:$HOME/vcfdir \
--v $project/SALSA:$HOME/SALSA \
--v $SCRATCH1:$SCRATCH1 \
--e SCRATCH1="/g/scratch" \
---rm -it p4rkerw/salsa:latest
+# SCRATCH1=/g/scratch
+# docker run \
+# --workdir $HOME \
+# -v $HOME:$HOME \
+# -v $project/vcf_output:$HOME/vcfdir \
+# -v $project/SALSA:$HOME/SALSA \
+# -v $SCRATCH1:$SCRATCH1 \
+# -e SCRATCH1="/g/scratch" \
+# --rm -it p4rkerw/salsa:latest
 ```
 **Merge two genotypes**
 ```
-bash SALSA/step2_merge_geno.sh \
---library_id sample_1 \
---vcfone vcfdir/$atac_genotype/sample_1.atac.chr22.vcf.gz \
---vcftwo vcfdir/${modalitytwo}_genotype/sample_1.rna.chr22.vcf.gz \
---outputdir vcfdir/joint_genotype \
---outputvcf sample_1.pass.joint.chr22.vcf.gz \
---threads 4
+# bash SALSA/step2_merge_geno.sh \
+# --library_id sample_1 \
+# --vcfone vcfdir/$atac_genotype/sample_1.atac.chr22.vcf.gz \
+# --vcftwo vcfdir/${modalitytwo}_genotype/sample_1.rna.chr22.vcf.gz \
+# --outputdir vcfdir/joint_genotype \
+# --outputvcf sample_1.pass.joint.chr22.vcf.gz \
+# --threads 4
 ```
 **(Recommended) Step 3: Phase genotype** If you want to perform your analysis with phased genotypes you will need a phased reference. This is not strictly required, but it increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for SNV only or SNV and INDELS from ftp.1000genomes.ebi.ac.uk . If you are only analyzing RNA data select the SNV reference. For ATAC data select the SNV and INDEL reference:
 
@@ -337,13 +337,13 @@ docker run \
 **(Not required for tutorial) Build a STAR index for 🌶️SALSA** If you are using a cellranger reference that was not built with STAR-2.5.1b you may want to build a new STAR reference. Alternatively, download the version of STAR that matches your existing cellranger reference and link the executable to /usr/bin/STAR . 
 ```
 # runtime ~35min
-STAR \
---runMode genomeGenerate \
---genomeDir rna_ref/salsa_star \
---genomeFastaFiles rna_ref/fasta/genome.fa \
---sjdbGTFfile rna_ref/genes/genes.gtf \
---genomeSAsparseD 3 \
---runThreadN 10
+# STAR \
+# --runMode genomeGenerate \
+# --genomeDir rna_ref/salsa_star \
+# --genomeFastaFiles rna_ref/fasta/genome.fa \
+# --sjdbGTFfile rna_ref/genes/genes.gtf \
+# --genomeSAsparseD 3 \
+# --runThreadN 10
 ```
 
 **Run WASP on the barcode-filtered bam**
