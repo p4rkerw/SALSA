@@ -14,6 +14,11 @@ pysam 0.15.3
 shapeit 4.2
 WASP 0.3.4
 ```
+**Step 0: Clone 🌶️SALSA github repository**
+```
+git -C $project clone https://github.com/p4rkerw/SALSA
+```
+
 **Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the 10X Genomics website. 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The refdata-gex-GRCh38-2020-A cellranger reference in this tutorial is compatible with the tutorial dataset (which is aligned to GRCh38-2020-A), but there are many options. Feel free to download a different [reference](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest) and/or [dataset](https://support.10xgenomics.com/single-cell-gene-expression/datasets) from the 10X Genomics collection; just make sure it's aligned to GRCh38 so it matches the GATK bundle resources. Alignment information can be found in the summary html files.  
 
 **Step 0: Download GATK resource bundle** The following files are required for GATK HaplotypeCaller using GRCh38 and can be found in the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false):
@@ -36,10 +41,6 @@ resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
 project=$PWD/salsa
 wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam
 wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam.bai
-```
-**Step 0: Clone 🌶️SALSA github repository**
-```
-git -C $project clone https://github.com/p4rkerw/SALSA
 ```
 
 **Step 1: Genotype a single cell gene expression dataset** 
