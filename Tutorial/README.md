@@ -339,11 +339,11 @@ docker run \
 # build index
 STAR \
 --runMode genomeGenerate \
---runThreadN 4 \
 --genomeDir rna_ref/salsa_star \
 --genomeFastaFiles rna_ref/fasta/genome.fa \
 --sjdbGTFfile rna_ref/genes/genes.gtf \
---genomeSAsparseD 3 
+--genomeSAsparseD 3 \
+--runThreadN 4
 ```
 
 **Run WASP on the barcode-filtered bam**
