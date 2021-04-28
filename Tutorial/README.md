@@ -1,10 +1,6 @@
-🌶️SALSA is a tool for generating and analyzing phased single cell allele-specific read counts. The SALSA workflow runs in publicly-available docker containers with all the necessary dependencies for code execution. This workflow assumes you have aligned your raw data with cellranger or cellranger-atac to generate coordinate-sorted bam files and analyzed it to obtain cell barcode annotations. For additional information, please consult the 10X Genomics website: https://www.10xgenomics.com/ . For this tutorial, we will use a dataset downloaded from the 10X Genomics website that has already been aligned and annotated. To complete the tutorial, you will also need to download the cellranger reference, GATK bundle resources, and 1000G phased references (see below for more information). All of the tutorial outputs are included in the 🌶️SALSA repository in case you want to compare results or skip a step. 
+🌶️SALSA is a tool for generating and analyzing phased single cell allele-specific read counts from patient samples. The SALSA workflow runs in a publicly-available docker container with all the necessary dependencies for code execution. This workflow assumes you have aligned your raw data with cellranger or cellranger-atac to generate coordinate-sorted bam files and analyzed it to obtain cell barcode annotations. For additional information, please consult the 10X Genomics website: https://www.10xgenomics.com/ . For this tutorial, we will download a dataset from the 10X Genomics website that has already been aligned and annotated. To complete the tutorial, you will also need to download the cellranger reference, GATK bundle resources, and 1000G phased references (see below for more information). All of the tutorial outputs are included in the this repository in case you want to compare results or skip a step. 
 
-There are two stages in the workflow:
-1. Generate phased and annotated single cell allele-specific counts from a cellranger bam
-2. Analyze allele-specific counts 
-
-Steps 1-7 use p4rkerw/salsa:count_1.0, which is built on broadinstitue/gatk:4.2.0.0 with additional dependencies pre-installed:
+Steps 1-7 use p4rkerw/salsa:latest, which is built on broadinstitue/gatk:4.2.0.0 with additional dependencies pre-installed:
 ```
 GATK 4.2.0.0
 bwa 0.7.17
@@ -14,8 +10,7 @@ pysam 0.15.3
 shapeit 4.2
 WASP 0.3.4
 ```
-
-**Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the 10X Genomics website. 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The GRCh38-2020-A.premrna cellranger reference in this tutorial is compatible with the tutorial dataset on the 10X Genomics website (which is aligned to GRCh38-2020-A). Feel free to download a different [reference](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest) and/or [dataset](https://support.10xgenomics.com/single-cell-gene-expression/datasets) from their collection; just make sure it's aligned to GRCh38 so it matches the GATK bundle resources. 
+**Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the 10X Genomics website. 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The GRCh38-2020-A.premrna cellranger reference in this tutorial is compatible with the tutorial dataset (which is aligned to GRCh38-2020-A), but there are many options. Feel free to download a different [reference](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest) and/or [dataset](https://support.10xgenomics.com/single-cell-gene-expression/datasets) from the 10X Genomics collection; just make sure it's aligned to GRCh38 so it matches the GATK bundle resources. Alignment information can be found in the summary html files.  
 
 **Step 0: Download GATK resource bundle** The following files are required for GATK HaplotypeCaller using GRCh38 and can be found in the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false):
 ```
@@ -31,7 +26,7 @@ resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
 ```
 **Step 0: Pull 🌶️SALSA container** 
 ```
-docker pull p4rkerw/salsa:count_1.0
+docker pull p4rkerw/salsa:latest
 ```
 **Step 0: Download tutorial dataset** For the tutorial, we will download a coordinate-sorted bam and index for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor:
 ```
@@ -58,7 +53,7 @@ Usage: step1_gatk_genotype.sh [-indomlt]
    -t  | --threads            INT   number of threads. Default=[1]
    -h  | --help                     show usage
 ```
-**Launch 🌶️SALSA container** : Mount the required volumes in an interactive session. The $SCRATCH1 variable designates a temporary file directory. The following command mounts directories with counts generated by cellranger mounted to rna_counts. Users may prefer to mount all the directories required for future steps (see below) when they run the container, but for the sake of simplicity only the required volumes are specified at each step.
+**Launch 🌶️SALSA container** : Mount the required volumes in an interactive session. The $SCRATCH1 variable designates a temporary file directory. The directory with coordinate-sorted bam file generated by cellranger counts is mounted to rna_counts. Users may prefer to mount all the directories required for future steps rather than launching a new container for each step (see below), but for the sake of simplicity only the volumes required for each step are specified.
 ```
 SCRATCH1=/g/scratch
 project=/g/salsa
@@ -73,7 +68,7 @@ docker run \
 -v $reference/gatk:$HOME/gatk_bundle \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="/g/scratch" \
---rm -it p4rkerw/salsa:count_1.0
+--rm -it p4rkerw/salsa:latest
 ```
 **Genotype an RNA sample**
 ```
@@ -100,15 +95,15 @@ Usage: step2_merge_geno.sh [-nabdit]
 ```
 **Launch 🌶️SALSA container**
 ```
-SCRATCH1=path/to/scratch
+SCRATCH1=/g/scratch
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
 -v $SCRATCH1:$SCRATCH1 \
--e SCRATCH1="path/to/scratch" \
---rm -it p4rkerw/salsa:count_1.0
+-e SCRATCH1="/g/scratch" \
+--rm -it p4rkerw/salsa:latest
 ```
 **Merge two genotypes**
 ```
@@ -157,7 +152,7 @@ docker run \
 -v $reference/phasing/biallelic_SNV:$HOME/phasing \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="/g/scratch" \
---rm -it p4rkerw/salsa:count_1.0
+--rm -it p4rkerw/salsa:latest
 ```
 **Rename the reference contigs** The 1000G vcf reference files do not have the same contig style as the cellranger reference. You will need to update the 1000G contig style using bcftools. For the tutorial, we will only do chromosome 10. 
 ```
@@ -207,7 +202,7 @@ docker run \
 -v $reference:$HOME/reference \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="/g/scratch" \
---rm -it p4rkerw/salsa:count_1.0
+--rm -it p4rkerw/salsa:latest
 ```
 **Annotate a vcf**
 ```
@@ -249,7 +244,7 @@ docker run \
 -v $project:$HOME/project \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="/g/scratch" \
---rm -it p4rkerw/salsa:count_1.0
+--rm -it p4rkerw/salsa:latest
 ```
 **Download clustering analysis for tutorial dataset and create a barcode csv**
 ```
@@ -305,7 +300,7 @@ docker run \
 -v $project:$HOME/project \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="/g/scratch" \
---rm -it p4rkerw/salsa:count_1.0
+--rm -it p4rkerw/salsa:latest
 ```
 
 **Build a STAR index for 🌶️SALSA**
@@ -368,7 +363,7 @@ docker run \
 -v $project:$HOME/project \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="/g/scratch" \
---rm -it p4rkerw/salsa:count_1.0
+--rm -it p4rkerw/salsa:latest
 ```
 **Get phased allele-specific counts**
 ```

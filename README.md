@@ -1,7 +1,7 @@
 # SALSA
 **Welcome to 🌶️ SALSA! - Single Cell Allele-Specific Analysis**
 
-Here you will find a workflow and models for analyzing single cell allele-specific expression and chromatin accessibility obtained from 10X Genomics Single Cell Gene Expression, Single Cell ATAC, or Single Cell Multiome datasets. An earlier version of this software was written for the following manuscript:
+Here you will find a workflow to analyze single cell allele-specific expression and chromatin accessibility obtained from 10X Genomics Single Cell Gene Expression and Single Cell ATAC datasets. To get started follow along with the [tutorial](https://github.com/p4rkerw/SALSA/tree/main/Tutorial/README.md). An earlier version of this software was written for the following manuscript:
 
 Muto, Y., Wilson, P.C., Ledru, N. et al. Single cell transcriptional and chromatin accessibility profiling redefine cellular heterogeneity in the adult human kidney. Nat Commun 12, 2190 (2021). https://doi.org/10.1038/s41467-021-22368-w
 
@@ -25,7 +25,7 @@ Find us on Docker Hub:
 <br/>
 
 **Allele Specific Analysis:**    
-These scripts can be run in publicly-available docker containers found here: [p4rkerw@dockerhub](https://hub.docker.com/search?q=p4rkerw&type=image)
+These scripts can be run in a publicly-available docker container found here: [p4rkerw@dockerhub](https://hub.docker.com/search?q=p4rkerw&type=image)
 
 (Follow the steps in order) 
 1. Genotype snRNA or snATAC libraries using GATK
@@ -35,7 +35,4 @@ These scripts can be run in publicly-available docker containers found here: [p4
 5. Filter the 10X genomics positions sorted bam file by cell barcode using the subsetbam utility  
 6. Apply the WASP pipeline to barcode-filtered bam files to perform variant-aware realignment  
 7. Obtain pseudobulk, cell-specific, or single cell allele-specific counts with GATK ASEReadCounter  
-8. Analyze allele-specific counts
-
-To get started follow along with our [tutorial](https://github.com/p4rkerw/SALSA/tree/main/Tutorial/Tutorial.md)
 
