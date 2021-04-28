@@ -399,6 +399,7 @@ docker run \
 ```
 **Get phased allele-specific counts**
 ```
+# runtime ~
 bash SALSA/step7_gatk_alleleCount.sh \
 --inputvcf vcfdir/funcotation/pbmc.pass.joint.chr22hcphase.funco.vcf.gz \
 --inputbam project/wasp_rna/pbmc.hcphase.chr22wasp.bam \
@@ -412,7 +413,7 @@ bash SALSA/step7_gatk_alleleCount.sh \
 --celltype_counts \
 --interval chr22 \
 --isphased \
---threads 4
+--threads 10
 
 ```
 
