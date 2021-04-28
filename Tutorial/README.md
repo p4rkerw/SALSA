@@ -1,5 +1,10 @@
 🌶️SALSA is a tool for generating and analyzing phased single cell allele-specific read counts from patient samples. The SALSA workflow runs in a publicly-available docker container with all the necessary dependencies for code execution. This workflow assumes you have aligned your raw data with cellranger or cellranger-atac to generate coordinate-sorted bam files and analyzed it to obtain cell barcode annotations. For additional information, please consult the 10X Genomics website: https://www.10xgenomics.com/ . For this tutorial, we will download a dataset from the 10X Genomics website that has already been aligned and annotated. To complete the tutorial, you will also need to download the cellranger reference, GATK bundle resources, and 1000G phased references (see below for more information). All of the tutorial outputs are included in the this repository in case you want to compare results or skip a step. 
 
+**Step 0: Clone 🌶️SALSA github repository**
+```
+git -C $project clone https://github.com/p4rkerw/SALSA
+```
+
 **Step 0: Pull 🌶️SALSA container** 
 ```
 docker pull p4rkerw/salsa:latest
@@ -13,10 +18,6 @@ bcftools 1.9
 pysam 0.15.3
 shapeit 4.2
 WASP 0.3.4
-```
-**Step 0: Clone 🌶️SALSA github repository**
-```
-git -C $project clone https://github.com/p4rkerw/SALSA
 ```
 
 **Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the 10X Genomics website. 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The refdata-gex-GRCh38-2020-A cellranger reference in this tutorial is compatible with the tutorial dataset (which is aligned to GRCh38-2020-A), but there are many options. Feel free to download a different [reference](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest) and/or [dataset](https://support.10xgenomics.com/single-cell-gene-expression/datasets) from the 10X Genomics collection; just make sure it's aligned to GRCh38 so it matches the GATK bundle resources. Alignment information can be found in the summary html files.  
