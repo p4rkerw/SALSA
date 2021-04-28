@@ -82,9 +82,9 @@ bash SALSA/step1_gatk_genotype.sh \
 --modality rna \
 --threads 10
 ```
-**Inspect the vcf** Note that the first 3 variants are physically-phased, which is indicated by the pipe character in their genotype. In contrast, the last 2 variants are not phased. 
+**Inspect the genotyped vcf** Note that the first 3 variants are physically-phased, which is indicated by the pipe character in their genotype. In contrast, the last 2 variants are not phased. 
 ```
-bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT,%FILTER\n]' vcfdir/rna_genotype/pbmc.rna.chr22.vcf.gz | head -n3
+bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT,%FILTER\n]' vcfdir/rna_genotype/pbmc.rna.chr22.vcf.gz | head -n5
 # chr22,16604409,A,G,1|1,PASS
 # chr22,16604416,C,G,1|1,PASS
 # chr22,16656494,A,G,1/1,PASS
