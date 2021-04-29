@@ -30,7 +30,7 @@ The following additional files are required if you are analyzing single cell ATA
 resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
 ```
 
-**Step 0: Download tutorial dataset** We will download a coordinate-sorted bam and index for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor:
+**Step 0: Download tutorial dataset** We will download a coordinate-sorted bam and index for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor. This dataset uses the cellranger v3 single cell gene expression chemistry. 
 ```
 # URL to the dataset: https://support.10xgenomics.com/single-cell-gene-expression/datasets/3.0.0/pbmc_1k_v3
 # create your salsa tutorial directory and download the files
