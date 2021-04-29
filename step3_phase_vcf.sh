@@ -28,7 +28,7 @@ if [[ ${#} -eq 0 ]]; then
    usage
 fi
 
-PARSED_ARGUMENTS=$(getopt -a -n step2_merge_genh.sh -o n:v:d:o:l:sirt:h --long library_id:,inputvcf:,outputdir:,outputvcf:,interval:,hcphase,snvonly,\
+PARSED_ARGUMENTS=$(getopt -a -n step2_merge_genh.sh -o n:v:d:o:l:psirt:h --long library_id:,inputvcf:,outputdir:,outputvcf:,interval:,hcphase,snvonly,\
 snvindel,reproduce,threads:,help -- "$@")
 
 echo "PARSED_ARGUMENTS are $PARSED_ARGUMENTS"
@@ -41,7 +41,7 @@ do
     -d | --outputdir)         outputdir=$2         ; shift 2 ;;
     -o | --outputvcf)         outputvcf=$2         ; shift 2 ;;
     -l | --interval)          interval=$2          ; shift 2 ;;
-    -h | --hcphase)           hcphase=true         ; shift 1 ;;
+    -p | --hcphase)           hcphase=true         ; shift 1 ;;
     -s | --snvonly)           snvonly=true         ; shift 1 ;;
     -i | --snvindel)          snvindel=true        ; shift 1 ;;
     -r | --reproduce)         reproduce=true       ; shift 1 ;;
