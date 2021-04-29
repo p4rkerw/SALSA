@@ -1,21 +1,5 @@
 🌶️SALSA is a tool for generating and analyzing phased single cell allele-specific read counts from 10X Genomics cellranger datasets. For additional information, please consult the 10X Genomics: https://www.10xgenomics.com/ . The workflow runs in a publicly-available docker container with all the necessary dependencies for code execution. For this tutorial, we will download a dataset from the 10X Genomics website that has already been aligned and annotated. To complete all of the steps in the tutorial, you will need to download a cellranger reference, GATK bundle resources, and 1000G phased reference (see below for more information). However, all of the tutorial outputs are included in the this repository in case you want to compare results or skip a step. If you are analyzing your own data you will need to run cellranger and annotate your barcodes before starting the workflow.
 
-**Step 0: Pull 🌶️SALSA container** 
-```
-docker pull p4rkerw/salsa:latest
-```
-The 🌶️SALSA Docker container is built on [broadinstitute/gatk:4.2.0.0](https://hub.docker.com/r/broadinstitute/gatk) with additional dependencies pre-installed (see below). Docker is a set of platform as a service (PaaS) products that use OS-level virtualization to deliver software in packages called containers, which can be used to enhance reproducibility. You can find the the 🌶️SALSA Dockerfile [here](https://github.com/p4rkerw/SALSA/blob/main/docker/Dockerfile).
-```
-# container dependencies
-GATK 4.2.0.0
-bwa 0.7.17
-STAR 2.5.1b
-bcftools 1.9 
-pysam 0.15.3
-shapeit 4.2
-WASP 0.3.4
-```
-
 **Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the [10X Genomics website](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest). 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The GRCh38-2020-A.premrna cellranger reference in this tutorial is compatible with the tutorial dataset (which is aligned to GRCh38-2020-A) and is set up to analyze intronic reads encountered in single nucleus RNA sequencing (snRNA-seq). If you'd like to use this reference you can prepare it with cellranger using this [script](https://github.com/p4rkerw/SALSA/blob/main/reference/mkref.sh). Feel free to download a different reference and/or [dataset](https://support.10xgenomics.com/single-cell-gene-expression/datasets) from the 10X Genomics collection; just make sure it's aligned to GRCh38 so it matches the GATK bundle resources and ucsc contig style. Alignment information can be found in the summary html files. 
 
 **Step 0: Download tutorial dataset and align to your chosen reference with cellranger** We will download a coordinate-sorted bam for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor. This dataset uses the single cell gene expression v3 chemistry. 
@@ -54,6 +38,22 @@ resources_broad_hg38_v0_wgs_calling_regions.hg38
 The following additional files are required if you are analyzing single cell ATAC datasets (not needed for the tutorial):
 ```
 resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
+```
+
+**Step 0: Pull 🌶️SALSA container** 
+```
+docker pull p4rkerw/salsa:latest
+```
+The 🌶️SALSA Docker container is built on [broadinstitute/gatk:4.2.0.0](https://hub.docker.com/r/broadinstitute/gatk) with additional dependencies pre-installed (see below). Docker is a set of platform as a service (PaaS) products that use OS-level virtualization to deliver software in packages called containers, which can be used to enhance reproducibility. You can find the the 🌶️SALSA Dockerfile [here](https://github.com/p4rkerw/SALSA/blob/main/docker/Dockerfile).
+```
+# container dependencies
+GATK 4.2.0.0
+bwa 0.7.17
+STAR 2.5.1b
+bcftools 1.9 
+pysam 0.15.3
+shapeit 4.2
+WASP 0.3.4
 ```
 
 **Step 0: Clone 🌶️SALSA github repository** The repository is cloned to the $project directory, which is the same directory that the tutorial dataset was downloaded to. The tutorial assumes that the path to your project directory is /g/salsa so make sure to change the path if you chose a different directory.
