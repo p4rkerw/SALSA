@@ -85,7 +85,7 @@ bash SALSA/step1_gatk_genotype.sh \
 --modality rna \
 --threads 10
 ```
-**Inspect the genotyped vcf** Note that the first 3 variants are physically-phased, which is indicated by the pipe character in their genotype. If you want to read more about phyical phasing take a look [here](https://gatk.broadinstitute.org/hc/en-us/articles/360050354712-What-is-physical-phasing-#:~:text=What%20exactly%20is%20meant%20by%20the%20%22physical%20phasing%22,of%20two%20homologous%20chromosomes%20the%20alleles%20fall%20on.). In contrast, the last 2 variants are not phased. This vcf contains filtered variants that did not pass QC metrics (eg. variant number 5 has 'QD' in the filter field). If you want to adjust the filtering thresholds before proceeding to the next step take a look at the GATK VariantFiltration tool. 
+**Inspect the genotyped vcf** Note that the first 3 variants are physically-phased, which is indicated by the pipe character in their genotype. In contrast, the last 2 variants are not phased. If you want to read more about phyical phasing take a look [here](https://gatk.broadinstitute.org/hc/en-us/articles/360050354712-What-is-physical-phasing-#:~:text=What%20exactly%20is%20meant%20by%20the%20%22physical%20phasing%22,of%20two%20homologous%20chromosomes%20the%20alleles%20fall%20on.). This vcf contains filtered variants that did not pass QC metrics (eg. variant number 5 has 'QD' in the filter field). If you want to adjust the filtering thresholds before proceeding to the next step take a look at the GATK VariantFiltration tool. 
 ```
 bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT,%FILTER\n]' vcfdir/rna_genotype/pbmc.rna.chr22.vcf.gz | head -n5
 # chr22,16604409,A,G,1|1,PASS
