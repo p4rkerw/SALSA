@@ -1,16 +1,21 @@
 🌶️SALSA is a tool for generating and analyzing phased single cell allele-specific read counts from patient samples. The SALSA workflow runs in a publicly-available docker container with all the necessary dependencies for code execution. This workflow assumes you have aligned your raw data with cellranger or cellranger-atac to generate coordinate-sorted bam files and analyzed it to obtain cell barcode annotations. For additional information, please consult the 10X Genomics website: https://www.10xgenomics.com/ . For this tutorial, we will download a dataset from the 10X Genomics website that has already been aligned and annotated. To complete the tutorial, you will also need to download the cellranger reference, GATK bundle resources, and 1000G phased references (see below for more information). All of the tutorial outputs are included in the this repository in case you want to compare results or skip a step. 
 
-Steps 1-7 use p4rkerw/salsa:latest, which is built on broadinstitue/gatk:4.2.0.0 with additional dependencies pre-installed:
+**Step 0: Pull 🌶️SALSA container** 
+```
+docker pull p4rkerw/salsa:latest
+```
+All of the steps in this tutorial use this container, which is built on [broadinstitute/gatk:4.2.0.0](https://hub.docker.com/r/broadinstitute/gatk) with additional dependencies pre-installed. You can find the the Dockerfile [here]
 ```
 GATK 4.2.0.0
 bwa 0.7.17
-STAR 2.7.8a
+STAR 2.5.1b
 bcftools 1.9 
 pysam 0.15.3
 shapeit 4.2
 WASP 0.3.4
 ```
-**Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the 10X Genomics website. 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The GRCh38-2020-A.premrna cellranger reference in this tutorial is compatible with the tutorial dataset (which is aligned to GRCh38-2020-A), but there are many options. Feel free to download a different [reference](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest) and/or [dataset](https://support.10xgenomics.com/single-cell-gene-expression/datasets) from the 10X Genomics collection; just make sure it's aligned to GRCh38 so it matches the GATK bundle resources. Alignment information can be found in the summary html files.  
+
+**Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the [10X Genomics website](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest). 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The refdata-gex-GRCh38-2020-A cellranger reference in this tutorial is compatible with the tutorial dataset (which is aligned to GRCh38-2020-A), but there are many options. Feel free to download a different reference and/or [dataset](https://support.10xgenomics.com/single-cell-gene-expression/datasets) from the 10X Genomics collection; just make sure it's aligned to GRCh38 so it matches the GATK bundle resources. Alignment information can be found in the summary html files.  
 
 **Step 0: Download GATK resource bundle** The following files are required for GATK HaplotypeCaller using GRCh38 and can be found in the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false):
 ```
@@ -24,11 +29,8 @@ The following additional files are required if you are analyzing single cell ATA
 ```
 resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
 ```
-**Step 0: Pull 🌶️SALSA container** 
-```
-docker pull p4rkerw/salsa:latest
-```
-**Step 0: Download tutorial dataset** For the tutorial, we will download a coordinate-sorted bam and index for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor:
+
+**Step 0: Download tutorial dataset** We will download a coordinate-sorted bam and index for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor:
 ```
 # URL to the dataset: https://support.10xgenomics.com/single-cell-gene-expression/datasets/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/
 # create your salsa tutorial directory and download the files
@@ -36,12 +38,13 @@ project=$PWD/salsa
 wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam
 wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam.bai
 ```
-**Step 0: Clone 🌶️SALSA github repository**
+
+**Step 0: Clone 🌶️SALSA github repository** The repository is cloned to the $project directory, which is the same directory that the tutorial dataset was downloaded to. The tutorial assumes that the path to your project directory is /g/salsa so make sure to change the path if you chose a different directory.
 ```
 git -C $project clone https://github.com/p4rkerw/SALSA
 ```
 
-**Step 1: Genotype a single cell gene expression dataset** 
+**Step 1: Genotype a single cell gene expression dataset** The tutorial workflow is based on the GATK germline short variant discovery pipeline for RNAseq. Additional info can be found on the [GATK website](https://gatk.broadinstitute.org/hc/en-us/articles/360035531192-RNAseq-short-variant-discovery-SNPs-Indels-) . To explore additional GATK options type 'gatk --list' into the terminal. If you want to skip ahead move the [genotyped vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.rna.chr22.vcf.gz) and its index to the volume mounted to vcfdir/rna_genotype and proceed to the next step.
 ```
 Usage: step1_gatk_genotype.sh [-indomlt]
    -i  | --bam                STR   path/to/input.bam eg. [rna_counts/sample_1/outs/possorted*.bam]
@@ -62,7 +65,7 @@ docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
 -v $project/cellranger_rna_counts:$HOME/rna_counts \
--v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
+-v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
 -v $reference/gatk:$HOME/gatk_bundle \
@@ -70,7 +73,7 @@ docker run \
 -e SCRATCH1="/g/scratch" \
 --rm -it p4rkerw/salsa:latest
 ```
-**Genotype an RNA sample**
+**Genotype an RNA sample** 
 ```
 # runtime ~5min
 bash SALSA/step1_gatk_genotype.sh \
@@ -82,16 +85,16 @@ bash SALSA/step1_gatk_genotype.sh \
 --modality rna \
 --threads 10
 ```
-**Inspect the vcf** Note that the first 3 variants have a physically-phased genotype denoted by the pipe character whereas the last 2 variants are not phased. 
+**Inspect the genotyped vcf** Note that the first 3 variants are physically-phased, which is indicated by the pipe character in their genotype. In contrast, the last 2 variants are not phased. This vcf contains filtered variants that did not pass QC metrics (eg. variant number 5 has 'QD' in the filter field). If you want to adjust the filtering thresholds before proceeding to the next step take a look at the GATK VariantFiltration tool. 
 ```
-bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT,%FILTER\n]' vcfdir/rna_genotype/pbmc.rna.chr22.vcf.gz | head -n3
-chr22,16604409,A,G,1|1,PASS
-chr22,16604416,C,G,1|1,PASS
-chr22,16656494,A,G,1/1,PASS
-chr22,17085614,C,T,0/1,PASS
-chr22,17085738,C,CT,0/1,QD
+bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT,%FILTER\n]' vcfdir/rna_genotype/pbmc.rna.chr22.vcf.gz | head -n5
+# chr22,16604409,A,G,1|1,PASS
+# chr22,16604416,C,G,1|1,PASS
+# chr22,16656494,A,G,1/1,PASS
+# chr22,17085614,C,T,0/1,PASS
+# chr22,17085738,C,CT,0/1,QD
 ```
-**(Not required for tutorial) Step 2: Merge genotypes from the same patient** If you genotyped a paired single cell gene expression and ATAC dataset from a split sample (or a single cell Multiome) you can merge these genotypes into a single vcf. If you're following the tutorial, you can skip this step.
+**(Not required for tutorial) Step 2: Merge genotypes from the same patient** If you genotyped a paired single cell gene expression and ATAC dataset from a split sample (or a single cell Multiome) you can merge genotypes into a single vcf. If you're following the tutorial, you can skip this step.
 ```
 Usage: step2_merge_geno.sh [-nabdit]
    -n  | --library_id         STR   library_id: eg. [sample_1]
@@ -105,30 +108,30 @@ Usage: step2_merge_geno.sh [-nabdit]
 ```
 **Launch 🌶️SALSA container**
 ```
-SCRATCH1=/g/scratch
-docker run \
---workdir $HOME \
--v $HOME:$HOME \
--v $project/vcf_output:$HOME/vcfdir \
--v $project/SALSA:$HOME/SALSA \
--v $SCRATCH1:$SCRATCH1 \
--e SCRATCH1="/g/scratch" \
---rm -it p4rkerw/salsa:latest
+# SCRATCH1=/g/scratch
+# docker run \
+# --workdir $HOME \
+# -v $HOME:$HOME \
+# -v $project/vcf_output:$HOME/vcfdir \
+# -v $project/SALSA:$HOME/SALSA \
+# -v $SCRATCH1:$SCRATCH1 \
+# -e SCRATCH1="/g/scratch" \
+# --rm -it p4rkerw/salsa:latest
 ```
 **Merge two genotypes**
 ```
-bash SALSA/step2_merge_geno.sh \
---library_id sample_1 \
---vcfone vcfdir/$atac_genotype/sample_1.atac.chr22.vcf.gz \
---vcftwo vcfdir/${modalitytwo}_genotype/sample_1.rna.chr22.vcf.gz \
---outputdir vcfdir/joint_genotype \
---outputvcf sample_1.pass.joint.chr22.vcf.gz \
---threads 4
+# bash SALSA/step2_merge_geno.sh \
+# --library_id sample_1 \
+# --vcfone vcfdir/$atac_genotype/sample_1.atac.chr22.vcf.gz \
+# --vcftwo vcfdir/${modalitytwo}_genotype/sample_1.rna.chr22.vcf.gz \
+# --outputdir vcfdir/joint_genotype \
+# --outputvcf sample_1.pass.joint.chr22.vcf.gz \
+# --threads 4
 ```
-**(Recommended) Step 3: Phase genotype** If you want to perform your analysis with phased genotypes you will need a phased reference. This is not strictly required, but it increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for SNV only or SNV and INDELS from ftp.1000genomes.ebi.ac.uk . If you are only analyzing RNA data select the SNV reference. For ATAC data select the SNV and INDEL reference:
+**(Recommended) Step 3: Phase genotype** If you want to perform your analysis with phased genotypes you will need a phased reference. We will use [shapeit4](https://github.com/odelaneau/shapeit4) to phase our variants. To explore additional phasing options type 'shapeit4.2' into your command line. Variant phasing increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for SNV only or SNV_and_INDEL from ftp.1000genomes.ebi.ac.uk . If you are analyzing the tutorial RNA dataset select the SNV reference. If you want to skip ahead move the [phased vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.pass.joint.chr22hcphase.vcf.gz) and its index to the volume mounted to vcfdir/phasing and proceed to the next step.
 
 a) SNV only: /vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV </br>
-b) SNV and INDEL: /vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL
+b) SNV_and_INDEL: /vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL
 ```
 Usage: step3_phase_vcf.sh [-nvdolpsitrh]
    -n  | --library_id         STR   library_id: eg. [sample_1]
@@ -144,7 +147,7 @@ Usage: step3_phase_vcf.sh [-nvdolpsitrh]
    -h  | --help                     show usage
 ```
 
-You will eventually need to download the vcf for every chromosome, but for the purposes of the tutorial just download the SNV reference for chr22 to $reference/phasing/biallelic_SNV:
+You will eventually need to download the vcf for every chromosome, but for the purposes of the tutorial just download the SNV reference for chr22 to $reference/phasing/biallelic_SNV . The reference may take awhile to download so feel free to move ahead to the next step using the [phased vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.pass.joint.chr22hcphase.vcf.gz) in the repository. You can come back to step 3 when the download finishes.
 ```
 ALL.chr22.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz
 ```
@@ -164,9 +167,10 @@ docker run \
 -e SCRATCH1="/g/scratch" \
 --rm -it p4rkerw/salsa:latest
 ```
-**Rename the reference contigs** The 1000G vcf reference files do not have the same contig style as the cellranger reference. You will need to update the 1000G contig style using bcftools. For the tutorial, we will only do chromosome 10. 
+**Rename the reference contigs** The 1000G vcf reference files do not have the same contig style as the cellranger reference. You will need to update the 1000G contig style using bcftools. For the tutorial, we will only do chromosome 22. 
 ```
-# rename the contigs in the 1000G reference from 10 to chr10
+# runtime ~10min
+# rename the contigs in the 1000G reference from 22 to chr22
 for i in {1..22} X;do echo "${i} chr${i}";done > /tmp/rename_chrm.txt
 inputvcf=ALL.chr22.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz
 bcftools annotate phasing/$inputvcf --threads 4 --rename-chrs /tmp/rename_chrm.txt -Oz -o $SCRATCH1/$inputvcf
@@ -175,6 +179,7 @@ bcftools index --threads 4 phasing/$inputvcf
 ```
 **Phase an interval**
 ```
+# runtime ~9min
 bash SALSA/step3_phase_vcf.sh \
 --library_id pbmc \
 --inputvcf vcfdir/rna_genotype/pbmc.rna.chr22.vcf.gz \
@@ -183,9 +188,19 @@ bash SALSA/step3_phase_vcf.sh \
 --interval chr22 \
 --hcphase \
 --snvonly \
---threads 4
+--threads 10
 ```
-**(Optional) Step 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with gnomAD MAF you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). GATK routinely updates its resources so you may need to change the name of the folder in the tutorial to match the one you downloaded. gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124])
+**Inspect the phased vcf** Note how the GT field indicates that all the variants are now phased.
+```
+bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT\n]' vcfdir/phasing/pbmc.pass.joint.chr22hcphase.vcf.gz | head -n5
+# chr22,16604409,A,G,1|1
+# chr22,16604416,C,G,1|1
+# chr22,17085614,C,T,1|0
+# chr22,17086116,G,C,0|1
+# chr22,17086917,C,T,1|0
+
+```
+**(Optional) Step 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with Gencode and gnomAD you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). GATK routinely updates its resources so you may need to change the name of the folder in the tutorial to match the one you downloaded. gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124]). If you want to skip ahead while these files are downloading move the [funcotated vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.pass.joint.chr22hcphase.funco.vcf.gz) and its index to the volume mounted to vcfdir/funcotation and proceed to the next step.
 ```
 Usage: step4_gatk_anno_vcf.sh [-nvdoamfth]
    -n  | --library_id         STR   library_id: eg. [sample_1]
@@ -206,7 +221,7 @@ reference=/g/reference
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
+-v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
 -v $reference:$HOME/reference \
@@ -216,6 +231,7 @@ docker run \
 ```
 **Annotate a vcf**
 ```
+# runtime ~3min
 bash SALSA/step4_gatk_anno_vcf.sh \
 --library_id pbmc \
 --inputvcf vcfdir/phasing/pbmc.pass.joint.chr22hcphase.vcf.gz \
@@ -224,9 +240,17 @@ bash SALSA/step4_gatk_anno_vcf.sh \
 --output_table pbmc.pass.joint.chr22hcphase.formatted.csv \
 --modality rna \
 --funcotation reference/funcotator_dataSources.v1.6.20190124g \
---threads 4
+--threads 10
 ```
-**(Recommended) Step 5:** Use barcode celltype annotations to filter the coordinate-sorted cellranger bam using the CB tag. This step will speed up downstream analysis by eliminating barcodes that do not meet quality control. The barcode annotation file has three columns where the first column is the barcode, the second column is the library_id, and the third column is the celltype annotation. For the purposes of the tutorial, we will only filter chr22.
+**Inspect the annotation table** GATK Funcotator provides a lot of annotation fields in the vcf INFO field and only a subset are included in this table. Note how these two variants are present in the gnomAD genomes database and have allele frequency annotations in the gnomAD_genome_AF column.
+```
+head -n3 vcfdir/funcotation/pbmc.pass.joint.chr22hcphase.formatted.csv
+# variant_id,CHROM,POS,REF,ALT,GT,FILTER,Gencode_27_variantClassification,Gencode_27_codonChange,gnomAD_exome_AF,gnomAD_genome_AF,Gencode_27_hugoSymbol
+# chr22_16604409_A_G,chr22,16604409,A,G,1|1,.,RNA,,,3.50740e-03,TPTEP1
+# chr22_16604416_C_G,chr22,16604416,C,G,1|1,.,RNA,,,2.99460e-03,TPTEP1
+```
+
+**(Recommended) Step 5:** Use barcode celltype annotations to filter the coordinate-sorted cellranger bam using the CB tag. This step will speed up downstream analysis by eliminating barcodes that do not meet quality control. The barcode annotation file should have three columns where the first column is the barcode, the second column is the library_id, and the third column is the celltype annotation. For the purposes of the tutorial, we will only filter chr22.
 ```
 Usage: step5_filterbam.sh [-nidolmbeth]
    -n  | --library_id         STR   library_id: eg. [sample_1]
@@ -258,7 +282,7 @@ docker run \
 ```
 **Download clustering analysis for tutorial dataset and create a barcode csv**
 ```
-# download the cluster annotation file
+# download the barcode cluster annotation file from 10X Genomics
 wget -P project https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/SC3_v3_NextGem_DI_PBMC_CSP_1K_analysis.tar.gz
 tar -C project/cellranger_rna_counts -xvzf $project/SC3_v3_NextGem_DI_PBMC_CSP_1K_analysis.tar.gz
 
@@ -268,6 +292,7 @@ cluster=project/cellranger_rna_counts/analysis/clustering/graphclust/clusters.cs
 ```
 **Filter cellranger bam with barcode csv**
 ```
+# runtime ~1min
 bash SALSA/step5_filterbam.sh \
 --library_id pbmc \
 --validate \
@@ -277,7 +302,7 @@ bash SALSA/step5_filterbam.sh \
 --barcodes barcodes/rna_barcodes.csv \
 --outputdir project/wasp_rna \
 --outputbam pbmc.bcfilter.chr22.bam \
---threads 4
+--threads 10
 ```
 **Step 6: Perform variant-aware realignment with WASP** This step takes a genotyped vcf and performs variant-aware realignment on a coordinate-sorted and indexed bam file with WASP. WASP is a tool to perform unbiased allele-specific read mapping and you can read more about it here: https://github.com/bmvdgeijn/WASP . For the purposes of the tutorial, we will only analyze chromosome 22. For RNA analysis, this step requires a STAR index of the cellranger reference. A STAR index can be built ahead of time using the command below. Building a new index takes awhile, but it only needs to be done once.
 ```
@@ -303,7 +328,7 @@ reference=/g/reference
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
+-v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
 -v $reference:$HOME/reference \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
@@ -313,27 +338,28 @@ docker run \
 --rm -it p4rkerw/salsa:latest
 ```
 
-**Build a STAR index for 🌶️SALSA**
+**(Not required for tutorial) Build a STAR index for 🌶️SALSA** To date, all of the cellranger references have been built with STAR-2.5.1b . However, if you are using a different reference you may want to build a new STAR index. The command below will build a new index in rna_ref/salsa_star so it doesn't overwrite the existing reference in rna_ref/star. You will then need to update the step6_wasp.sh command with --stargenome rna_ref/salsa_star . Alternatively, download the version of STAR that matches your existing cellranger reference and link the executable to /usr/bin/STAR . The second approach will be much faster.
 ```
-# build index
-STAR \
---runMode genomeGenerate \
---runThreadN 4 \
---genomeDir rna_ref/salsa_star \
---genomeFastaFiles rna_ref/fasta/genome.fa \
---sjdbGTFfile rna_ref/genes/genes.gtf \
---genomeSAsparseD 3 
+# runtime ~35min
+# STAR \
+# --runMode genomeGenerate \
+# --genomeDir rna_ref/salsa_star \
+# --genomeFastaFiles rna_ref/fasta/genome.fa \
+# --sjdbGTFfile rna_ref/genes/genes.gtf \
+# --genomeSAsparseD 3 \
+# --runThreadN 10
 ```
 
 **Run WASP on the barcode-filtered bam**
 ```
+# runtime ~2min
 bash SALSA/step6_wasp.sh \
 --inputvcf vcfdir/funcotation/pbmc.pass.joint.chr22hcphase.funco.vcf.gz \
 --inputbam project/wasp_rna/pbmc.bcfilter.chr22.bam \
 --outputdir project/wasp_rna \
 --outputbam pbmc.hcphase.chr22wasp.bam \
 --genotype joint \
---stargenome rna_ref/salsa_star \
+--stargenome rna_ref/star \
 --library_id pbmc \
 --modality rna \
 --isphased \
@@ -366,7 +392,7 @@ reference=/g/reference
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
+-v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
 -v $project/barcodes:$HOME/barcodes \
@@ -377,6 +403,7 @@ docker run \
 ```
 **Get phased allele-specific counts**
 ```
+# runtime ~11min
 bash SALSA/step7_gatk_alleleCount.sh \
 --inputvcf vcfdir/funcotation/pbmc.pass.joint.chr22hcphase.funco.vcf.gz \
 --inputbam project/wasp_rna/pbmc.hcphase.chr22wasp.bam \
@@ -390,7 +417,7 @@ bash SALSA/step7_gatk_alleleCount.sh \
 --celltype_counts \
 --interval chr22 \
 --isphased \
---threads 4
+--threads 10
 
 ```
 
