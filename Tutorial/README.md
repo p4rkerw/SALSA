@@ -73,7 +73,7 @@ docker run \
 -e SCRATCH1="/g/scratch" \
 --rm -it p4rkerw/salsa:latest
 ```
-**Genotype an RNA sample** The tutorial workflow is based on the GATK germline short variant discovery pipeline for RNAseq. Additional info can be found on the [GATK website](https://gatk.broadinstitute.org/hc/en-us/articles/360035531192-RNAseq-short-variant-discovery-SNPs-Indels-) . To explore additional GATK options type 'gatk --list' into the terminal. If you want to skip ahead move the [genotyped vcf] into the volume mounted to vcfdir/rna_genotype and proceed to the next step.
+**Genotype an RNA sample** The tutorial workflow is based on the GATK germline short variant discovery pipeline for RNAseq. Additional info can be found on the [GATK website](https://gatk.broadinstitute.org/hc/en-us/articles/360035531192-RNAseq-short-variant-discovery-SNPs-Indels-) . To explore additional GATK options type 'gatk --list' into the terminal. If you want to skip ahead move the [genotyped vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.rna.chr22.vcf.gz) and its index to the volume mounted to vcfdir/rna_genotype and proceed to the next step.
 ```
 # runtime ~5min
 bash SALSA/step1_gatk_genotype.sh \
@@ -128,7 +128,7 @@ Usage: step2_merge_geno.sh [-nabdit]
 # --outputvcf sample_1.pass.joint.chr22.vcf.gz \
 # --threads 4
 ```
-**(Recommended) Step 3: Phase genotype** If you want to perform your analysis with phased genotypes you will need a phased reference. We will use [shapeit4](https://github.com/odelaneau/shapeit4) to phase our variants. To explore additional phasing options type 'shapeit4.2' into your command line. Variant phasing increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for SNV only or SNV_and_INDEL from ftp.1000genomes.ebi.ac.uk . If you are analyzing the tutorial RNA dataset select the SNV reference. If you want to skip ahead move the [phased vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.pass.joint.chr22hcphase.vcf.gz) in the repository to the volume mounted to vcfdir/phasing.
+**(Recommended) Step 3: Phase genotype** If you want to perform your analysis with phased genotypes you will need a phased reference. We will use [shapeit4](https://github.com/odelaneau/shapeit4) to phase our variants. To explore additional phasing options type 'shapeit4.2' into your command line. Variant phasing increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for SNV only or SNV_and_INDEL from ftp.1000genomes.ebi.ac.uk . If you are analyzing the tutorial RNA dataset select the SNV reference. If you want to skip ahead move the [phased vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.pass.joint.chr22hcphase.vcf.gz) and its index to the volume mounted to vcfdir/phasing and proceed to the next step.
 
 a) SNV only: /vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV </br>
 b) SNV_and_INDEL: /vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL
@@ -200,7 +200,7 @@ bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT\n]' vcfdir/phasing/pbmc.pass.joint
 # chr22,17086917,C,T,1|0
 
 ```
-**(Optional) Step 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with Gencode and gnomAD you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). GATK routinely updates its resources so you may need to change the name of the folder in the tutorial to match the one you downloaded. gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124])
+**(Optional) Step 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with Gencode and gnomAD you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). GATK routinely updates its resources so you may need to change the name of the folder in the tutorial to match the one you downloaded. gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124]). If you want to skip ahead move the [funcotated vcf] and its index to the volume mounted to vcfdir/funcotation and proceed to the next step.
 ```
 Usage: step4_gatk_anno_vcf.sh [-nvdoamfth]
    -n  | --library_id         STR   library_id: eg. [sample_1]
