@@ -20,22 +20,22 @@ WASP 0.3.4
 
 **Step 0: Download tutorial dataset and align to your chosen reference with cellranger** We will download a coordinate-sorted bam for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor. This dataset uses the single cell gene expression v3 chemistry. 
 ```
-# URL to the dataset: https://support.10xgenomics.com/single-cell-gene-expression/datasets/3.0.0/pbmc_1k_v3
+# URL to the dataset: https://support.10xgenomics.com/single-cell-gene-expression/datasets/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT
 # create your salsa tutorial directory and download the fastq
 project=$PWD/salsa
-wget -P $project/fastq https://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_1k_v3/pbmc_1k_v3_fastqs.tar
+wget -P $project/tar https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_fastqs.tar
 
 # check md5
-md5sum $project/fastq/pbmc_1k_v3_fastqs.tar #265ebe8f77ad90db350984d9c7a59e52
+md5sum $project/tar/1k_PBMCs_TotalSeq_B_3p_LT_fastqs.tar #ac98de1046df421ff3d8dc6b1a3d6112
 
 # unpack
-tar -C $project -xvf $project/fastq/pbmc_1k_v3_fastqs.tar
+tar -C $project -xvf $project/1k_PBMCs_TotalSeq_B_3p_LT_fastqs.tar
 
 # align and count with cellranger 6.0.1
 reference=/g/reference
 cellranger count \
 --id pbmc \
---fastqs $project/pbmc_1k_v3_fastqs \
+--fastqs $project/1k_PBMCs_TotalSeq_B_3p_LT_fastqs/1k_PBMCs_TotalSeq_B_3p_LT_gex_fastqs \
 --transcriptome $reference/GRCh38-2020-A.premrna \
 --nosecondary \
 --nopreflight \
