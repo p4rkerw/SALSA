@@ -15,7 +15,7 @@ shapeit 4.2
 WASP 0.3.4
 ```
 
-**Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the [10X Genomics website](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest). 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The refdata-gex-GRCh38-2020-A cellranger reference in this tutorial is compatible with the tutorial dataset (which is aligned to GRCh38-2020-A), but there are many options. Feel free to download a different reference and/or [dataset](https://support.10xgenomics.com/single-cell-gene-expression/datasets) from the 10X Genomics collection; just make sure it's aligned to GRCh38 so it matches the GATK bundle resources. Alignment information can be found in the summary html files. If you are analyzing your own data use the same cellranger reference you used for cellranger count. 
+**Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the [10X Genomics website](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest). 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The GRCh38-2020-A.premrna cellranger reference in this tutorial is compatible with the tutorial dataset (which is aligned to GRCh38-2020-A), but there are many options. Feel free to download a different reference and/or [dataset](https://support.10xgenomics.com/single-cell-gene-expression/datasets) from the 10X Genomics collection; just make sure it's aligned to GRCh38 so it matches the GATK bundle resources. Alignment information can be found in the summary html files. If you are analyzing your own data use the same cellranger reference you used for cellranger count. 
 
 **Step 0: Download GATK resource bundle** The following files are required for genotyping with GATK using GRCh38 and can be found in the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false) . Download these files to your reference directory. For additional information on GATK germline and RNA-seq short variant discovery check out their [website](https://gatk.broadinstitute.org/hc/en-us/sections/360007226651-Best-Practices-Workflows)
 ```
@@ -65,7 +65,7 @@ docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
 -v $project/cellranger_rna_counts:$HOME/rna_counts \
--v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
+-v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
 -v $reference/gatk:$HOME/gatk_bundle \
@@ -221,7 +221,7 @@ reference=/g/reference
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
+-v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
 -v $reference:$HOME/reference \
@@ -328,7 +328,7 @@ reference=/g/reference
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
+-v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
 -v $reference:$HOME/reference \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
@@ -392,7 +392,7 @@ reference=/g/reference
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
+-v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
 -v $project/barcodes:$HOME/barcodes \
