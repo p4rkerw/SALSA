@@ -15,7 +15,7 @@ shapeit 4.2
 WASP 0.3.4
 ```
 
-**Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the [10X Genomics website](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest). 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The refdata-gex-GRCh38-2020-A cellranger reference in this tutorial is compatible with the tutorial dataset (which is aligned to GRCh38-2020-A), but there are many options. Feel free to download a different reference and/or [dataset](https://support.10xgenomics.com/single-cell-gene-expression/datasets) from the 10X Genomics collection; just make sure it's aligned to GRCh38 so it matches the GATK bundle resources. Alignment information can be found in the summary html files.  
+**Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the [10X Genomics website](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest). 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The GRCh38-2020-A.premrna cellranger reference in this tutorial is compatible with the tutorial dataset (which is aligned to GRCh38-2020-A) and is set up to analyze intronic reads encountered in single nucleus RNA sequencing data (snRNA-seq). If you'd like to use this reference you can prepare it with cellranger using this [script]. Feel free to download a different reference and/or [dataset](https://support.10xgenomics.com/single-cell-gene-expression/datasets) from the 10X Genomics collection; just make sure it's aligned to GRCh38 so it matches the GATK bundle resources. Alignment information can be found in the summary html files. If you are analyzing your own data use the same cellranger reference you used for cellranger count. 
 
 **Step 0: Download GATK resource bundle** The following files are required for genotyping with GATK using GRCh38 and can be found in the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false) . Download these files to your reference directory. For additional information on GATK germline and RNA-seq short variant discovery check out their [website](https://gatk.broadinstitute.org/hc/en-us/sections/360007226651-Best-Practices-Workflows)
 ```
@@ -30,13 +30,17 @@ The following additional files are required if you are analyzing single cell ATA
 resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
 ```
 
-**Step 0: Download tutorial dataset** We will download a coordinate-sorted bam and index for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor:
+**Step 0: Download tutorial dataset** We will download a coordinate-sorted bam and index for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor. This dataset uses the single cell gene expression v3 chemistry. 
 ```
-# URL to the dataset: https://support.10xgenomics.com/single-cell-gene-expression/datasets/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/
+# URL to the dataset: https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_SI_PBMC_CSP_1K/SC3_v3_NextGem_SI_PBMC_CSP_1K_web_summary.html
 # create your salsa tutorial directory and download the files
 project=$PWD/salsa
-wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam
-wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam.bai
+wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_SI_PBMC_CSP_1K/SC3_v3_NextGem_SI_PBMC_CSP_1K_possorted_genome_bam.bam
+wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_SI_PBMC_CSP_1K/SC3_v3_NextGem_SI_PBMC_CSP_1K_possorted_genome_bam.bam.bai
+
+# check the md5sum
+md5sum $project/cellranger_rna_counts/SC3_v3_NextGem_SI_PBMC_CSP_1K_possorted_genome_bam.bam #6eb63c18b1f858ea9d0d60b0a56efda7
+md5sum $project/cellranger_rna_counts/SC3_v3_NextGem_SI_PBMC_CSP_1K_possorted_genome_bam.bam.bai #3475a8cf40c01b1400a6cefaf659afd1
 ```
 
 **Step 0: Clone 🌶️SALSA github repository** The repository is cloned to the $project directory, which is the same directory that the tutorial dataset was downloaded to. The tutorial assumes that the path to your project directory is /g/salsa so make sure to change the path if you chose a different directory.
@@ -65,7 +69,7 @@ docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
 -v $project/cellranger_rna_counts:$HOME/rna_counts \
--v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
+-v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
 -v $reference/gatk:$HOME/gatk_bundle \
@@ -77,7 +81,7 @@ docker run \
 ```
 # runtime ~5min
 bash SALSA/step1_gatk_genotype.sh \
---bam rna_counts/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam \
+--bam rna_counts/SC3_v3_NextGem_SI_PBMC_CSP_1K_possorted_genome_bam.bam \
 --library_id pbmc \
 --outputdir vcfdir/rna_genotype \
 --outputvcf pbmc.rna.chr22.vcf.gz \
@@ -85,7 +89,7 @@ bash SALSA/step1_gatk_genotype.sh \
 --modality rna \
 --threads 10
 ```
-**Inspect the genotyped vcf** Note that the first 3 variants are physically-phased, which is indicated by the pipe character in their genotype. If you want to read more about phyical phasing take a look [here](https://gatk.broadinstitute.org/hc/en-us/articles/360050354712-What-is-physical-phasing-#:~:text=What%20exactly%20is%20meant%20by%20the%20%22physical%20phasing%22,of%20two%20homologous%20chromosomes%20the%20alleles%20fall%20on.). In contrast, the last 2 variants are not phased. This vcf contains filtered variants that did not pass QC metrics (eg. variant number 5 has 'QD' in the filter field). If you want to adjust the filtering thresholds before proceeding to the next step take a look at the GATK VariantFiltration tool. 
+**Inspect the genotyped vcf** Note that the first 3 variants are physically-phased, which is indicated by the pipe character in their genotype. In contrast, the last 2 variants are not phased. If you want to read more about phyical phasing take a look [here](https://gatk.broadinstitute.org/hc/en-us/articles/360050354712-What-is-physical-phasing-#:~:text=What%20exactly%20is%20meant%20by%20the%20%22physical%20phasing%22,of%20two%20homologous%20chromosomes%20the%20alleles%20fall%20on.). This vcf contains filtered variants that did not pass QC metrics (eg. variant number 5 has 'QD' in the filter field). If you want to adjust the filtering thresholds before proceeding to the next step take a look at the GATK VariantFiltration tool. 
 ```
 bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT,%FILTER\n]' vcfdir/rna_genotype/pbmc.rna.chr22.vcf.gz | head -n5
 # chr22,16604409,A,G,1|1,PASS
@@ -130,8 +134,8 @@ Usage: step2_merge_geno.sh [-nabdit]
 ```
 **(Recommended) Step 3: Phase genotype** If you want to perform your analysis with phased genotypes you will need a phased reference. We will use [shapeit4](https://github.com/odelaneau/shapeit4) to phase our variants. To explore additional phasing options type 'shapeit4.2' into your command line. Variant phasing increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for SNV only or SNV_and_INDEL from ftp.1000genomes.ebi.ac.uk . If you are analyzing the tutorial RNA dataset select the SNV reference. If you want to skip ahead move the [phased vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.pass.joint.chr22hcphase.vcf.gz) and its index to the volume mounted to vcfdir/phasing and proceed to the next step.
 
-a) SNV only: /vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV </br>
-b) SNV_and_INDEL: /vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL
+a) SNV only: [/vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV/) </br>
+b) SNV_and_INDEL: [/vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL/)
 ```
 Usage: step3_phase_vcf.sh [-nvdolpsitrh]
    -n  | --library_id         STR   library_id: eg. [sample_1]
@@ -200,7 +204,7 @@ bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT\n]' vcfdir/phasing/pbmc.pass.joint
 # chr22,17086917,C,T,1|0
 
 ```
-**(Optional) Step 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with Gencode and gnomAD you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). GATK routinely updates its resources so you may need to change the name of the folder in the tutorial to match the one you downloaded. gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124]). If you want to skip ahead while these files are downloading move the [funcotated vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.pass.joint.chr22hcphase.funco.vcf.gz) and its index to the volume mounted to vcfdir/funcotation and proceed to the next step.
+**(Optional) Step 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with GENCODE and gnomAD you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). GATK routinely updates its resources so you may need to change the name of the folder in the tutorial to match the one you downloaded. gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124]). If you want to skip ahead while these files are downloading move the [funcotated vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.pass.joint.chr22hcphase.funco.vcf.gz) and its index to the volume mounted to vcfdir/funcotation and proceed to the next step.
 ```
 Usage: step4_gatk_anno_vcf.sh [-nvdoamfth]
    -n  | --library_id         STR   library_id: eg. [sample_1]
@@ -221,7 +225,7 @@ reference=/g/reference
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
+-v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
 -v $reference:$HOME/reference \
@@ -328,7 +332,7 @@ reference=/g/reference
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
+-v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
 -v $reference:$HOME/reference \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
@@ -392,7 +396,7 @@ reference=/g/reference
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
+-v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
 -v $project/barcodes:$HOME/barcodes \
