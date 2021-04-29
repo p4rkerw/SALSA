@@ -21,13 +21,13 @@ RUN apt update && apt install -y \
                  automake \
                  bzip2 \
                  gcc \
-		             g++ \
+		 g++ \
                  make \
                  wget \
                  zlib1g-dev \
-		             libboost-all-dev \
-		             git \
-		             pv
+		 libboost-all-dev \
+		 git \
+		 pv
 
 # install htslib via samtools
 RUN \                
@@ -56,7 +56,8 @@ RUN \
 
 # install r bioconda pysam bwa STAR hdf5 for WASP dependencies
 # pysam hdf5 required for WASP snp2h5 install and compile
-RUN conda config --add channels r && \
+RUN \
+    conda config --add channels r && \
     conda config --add channels bioconda && \
     conda install bwa=0.7.17 && \
     conda install bcftools=1.9 && \
