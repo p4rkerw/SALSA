@@ -4,7 +4,7 @@
 ```
 docker pull p4rkerw/salsa:latest
 ```
-All of the steps in this tutorial use this container, which is built on [broadinstitute/gatk:4.2.0.0](https://hub.docker.com/r/broadinstitute/gatk) with additional dependencies pre-installed. You can find the the Dockerfile [here]
+All of the steps in this tutorial use this Docker container, which is built on [broadinstitute/gatk:4.2.0.0](https://hub.docker.com/r/broadinstitute/gatk) with additional dependencies pre-installed (see below). Docker is a set of platform as a service (PaaS) products that use OS-level virtualization to deliver software in packages called containers, which can be used to enhance reproducibility. You can find the the 🌶️SALSA Dockerfile [here](https://github.com/p4rkerw/SALSA/blob/main/docker/Dockerfile).
 ```
 GATK 4.2.0.0
 bwa 0.7.17
