@@ -16,6 +16,7 @@ md5sum $project/tar/1k_PBMCs_TotalSeq_B_3p_LT_fastqs.tar #ac98de1046df421ff3d8dc
 tar -C $project -xvf $project/1k_PBMCs_TotalSeq_B_3p_LT_fastqs.tar
 
 # align and count with cellranger 6.0.1
+# runtime ~45min
 reference=/g/reference
 cellranger count \
 --id pbmc \
@@ -81,7 +82,7 @@ reference=/g/reference
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v $project/cellranger_rna_counts:$HOME/rna_counts \
+-v $project/pbmc:$HOME/rna_counts \
 -v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
@@ -94,7 +95,7 @@ docker run \
 ```
 # runtime ~5min
 bash SALSA/step1_gatk_genotype.sh \
---bam rna_counts/SC3_v3_NextGem_SI_PBMC_CSP_1K_possorted_genome_bam.bam \
+--bam rna_counts/outs/possorted_genome_bam.bam \
 --library_id pbmc \
 --outputdir vcfdir/rna_genotype \
 --outputvcf pbmc.rna.chr22.vcf.gz \
