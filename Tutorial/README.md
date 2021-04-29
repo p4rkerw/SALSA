@@ -73,7 +73,7 @@ docker run \
 -e SCRATCH1="/g/scratch" \
 --rm -it p4rkerw/salsa:latest
 ```
-**Genotype an RNA sample**
+**Genotype an RNA sample** The tutorial workflow is based on the GATK germline short variant discovery pipeline for RNAseq. Additional info is [here](https://gatk.broadinstitute.org/hc/en-us/articles/360035531192-RNAseq-short-variant-discovery-SNPs-Indels-)
 ```
 # runtime ~5min
 bash SALSA/step1_gatk_genotype.sh \
@@ -85,7 +85,7 @@ bash SALSA/step1_gatk_genotype.sh \
 --modality rna \
 --threads 10
 ```
-**Inspect the genotyped vcf** Note that the first 3 variants are physically-phased, which is indicated by the pipe character in their genotype. In contrast, the last 2 variants are not phased. 
+**Inspect the genotyped vcf** Note that the first 3 variants are physically-phased, which is indicated by the pipe character in their genotype. In contrast, the last 2 variants are not phased. This vcf contains filtered variants that did not pass QC metrics (eg. variant number 5 has 'QD' in the filter field). If you want to adjust the filtering thresholds before proceeding to the next step take a look at the GATK VariantFiltration tool. 
 ```
 bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT,%FILTER\n]' vcfdir/rna_genotype/pbmc.rna.chr22.vcf.gz | head -n5
 # chr22,16604409,A,G,1|1,PASS
@@ -94,7 +94,7 @@ bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT,%FILTER\n]' vcfdir/rna_genotype/pb
 # chr22,17085614,C,T,0/1,PASS
 # chr22,17085738,C,CT,0/1,QD
 ```
-**(Not required for tutorial) Step 2: Merge genotypes from the same patient** If you genotyped a paired single cell gene expression and ATAC dataset from a split sample (or a single cell Multiome) you can merge these genotypes into a single vcf. If you're following the tutorial, you can skip this step.
+**(Not required for tutorial) Step 2: Merge genotypes from the same patient** If you genotyped a paired single cell gene expression and ATAC dataset from a split sample (or a single cell Multiome) you can merge genotypes into a single vcf. If you're following the tutorial, you can skip this step.
 ```
 Usage: step2_merge_geno.sh [-nabdit]
    -n  | --library_id         STR   library_id: eg. [sample_1]
@@ -128,7 +128,7 @@ Usage: step2_merge_geno.sh [-nabdit]
 # --outputvcf sample_1.pass.joint.chr22.vcf.gz \
 # --threads 4
 ```
-**(Recommended) Step 3: Phase genotype** If you want to perform your analysis with phased genotypes you will need a phased reference. This is not strictly required, but it increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for SNV only or SNV and INDELS from ftp.1000genomes.ebi.ac.uk . If you are only analyzing RNA data select the SNV reference. For ATAC data select the SNV and INDEL reference:
+**(Recommended) Step 3: Phase genotype** If you want to perform your analysis with phased genotypes you will need a phased reference. Variant phasing increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for SNV only or SNV_and_INDEL from ftp.1000genomes.ebi.ac.uk . If you are  analyzing the tutorial RNA dataset select the SNV reference. For ATAC data select the SNV_and_INDEL reference:
 
 a) SNV only: /vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV </br>
 b) SNV and INDEL: /vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL
