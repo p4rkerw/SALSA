@@ -77,7 +77,7 @@ docker run \
 ```
 # runtime ~5min
 bash SALSA/step1_gatk_genotype.sh \
---bam rna_counts/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam \
+--bam rna_counts/pbmc_1k_v3_genome_bam.bam \
 --library_id pbmc \
 --outputdir vcfdir/rna_genotype \
 --outputvcf pbmc.rna.chr22.vcf.gz \
