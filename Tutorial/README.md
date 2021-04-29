@@ -44,7 +44,7 @@ wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-e
 git -C $project clone https://github.com/p4rkerw/SALSA
 ```
 
-**Step 1: Genotype a single cell gene expression dataset** 
+**Step 1: Genotype a single cell gene expression dataset** The tutorial workflow is based on the GATK germline short variant discovery pipeline for RNAseq. Additional info can be found on the [GATK website](https://gatk.broadinstitute.org/hc/en-us/articles/360035531192-RNAseq-short-variant-discovery-SNPs-Indels-) . To explore additional GATK options type 'gatk --list' into the terminal. If you want to skip ahead move the [genotyped vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.rna.chr22.vcf.gz) and its index to the volume mounted to vcfdir/rna_genotype and proceed to the next step.
 ```
 Usage: step1_gatk_genotype.sh [-indomlt]
    -i  | --bam                STR   path/to/input.bam eg. [rna_counts/sample_1/outs/possorted*.bam]
@@ -73,7 +73,7 @@ docker run \
 -e SCRATCH1="/g/scratch" \
 --rm -it p4rkerw/salsa:latest
 ```
-**Genotype an RNA sample** The tutorial workflow is based on the GATK germline short variant discovery pipeline for RNAseq. Additional info can be found on the [GATK website](https://gatk.broadinstitute.org/hc/en-us/articles/360035531192-RNAseq-short-variant-discovery-SNPs-Indels-) . To explore additional GATK options type 'gatk --list' into the terminal. If you want to skip ahead move the [genotyped vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.rna.chr22.vcf.gz) and its index to the volume mounted to vcfdir/rna_genotype and proceed to the next step.
+**Genotype an RNA sample** 
 ```
 # runtime ~5min
 bash SALSA/step1_gatk_genotype.sh \
