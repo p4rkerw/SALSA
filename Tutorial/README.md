@@ -4,16 +4,16 @@
 
 **Step 0: Download tutorial dataset and align to your chosen reference with cellranger** We will download a coordinate-sorted bam for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor. This dataset uses the single cell gene expression v3 chemistry. 
 ```
-# URL to the dataset: https://support.10xgenomics.com/single-cell-gene-expression/datasets/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT
+# URL to the dataset: https://support.10xgenomics.com/single-cell-gene-expression/datasets/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K
 # create your salsa tutorial directory and download the fastq
 project=$PWD/salsa
-wget -P $project/tar https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_fastqs.tar
+wget -P $project/tar https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/SC3_v3_NextGem_DI_PBMC_CSP_1K_fastqs.tar
 
 # check md5
-md5sum $project/tar/1k_PBMCs_TotalSeq_B_3p_LT_fastqs.tar #ac98de1046df421ff3d8dc6b1a3d6112
+md5sum $project/tar/SC3_v3_NextGem_DI_PBMC_CSP_1K_fastqs.tar #aa872b4e52afac06d3e2acf51a040b46
 
 # unpack
-tar -C $project -xvf $project/1k_PBMCs_TotalSeq_B_3p_LT_fastqs.tar
+tar -C $project -xvf $project/tar/SC3_v3_NextGem_DI_PBMC_CSP_1K_fastqs.tar
 
 # align and count with cellranger 6.0.1
 # runtime ~45min
