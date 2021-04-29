@@ -128,10 +128,10 @@ Usage: step2_merge_geno.sh [-nabdit]
 # --outputvcf sample_1.pass.joint.chr22.vcf.gz \
 # --threads 4
 ```
-**(Recommended) Step 3: Phase genotype** If you want to perform your analysis with phased genotypes you will need a phased reference. We will use [shapeit4](https://github.com/odelaneau/shapeit4) to phase our variants. To explore additional phasing options type 'shapeit4.2' into your command line. Variant phasing increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for SNV only or SNV_and_INDEL from ftp.1000genomes.ebi.ac.uk . If you are  analyzing the tutorial RNA dataset select the SNV reference. For ATAC data select the SNV_and_INDEL reference:
+**(Recommended) Step 3: Phase genotype** If you want to perform your analysis with phased genotypes you will need a phased reference. We will use [shapeit4](https://github.com/odelaneau/shapeit4) to phase our variants. To explore additional phasing options type 'shapeit4.2' into your command line. Variant phasing increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for SNV only or SNV_and_INDEL from ftp.1000genomes.ebi.ac.uk . If you are  analyzing the tutorial RNA dataset select the SNV reference.
 
 a) SNV only: /vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV </br>
-b) SNV and INDEL: /vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL
+b) SNV_and_INDEL: /vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL
 ```
 Usage: step3_phase_vcf.sh [-nvdolpsitrh]
    -n  | --library_id         STR   library_id: eg. [sample_1]
@@ -169,6 +169,7 @@ docker run \
 ```
 **Rename the reference contigs** The 1000G vcf reference files do not have the same contig style as the cellranger reference. You will need to update the 1000G contig style using bcftools. For the tutorial, we will only do chromosome 22. 
 ```
+# runtime ~10min
 # rename the contigs in the 1000G reference from 22 to chr22
 for i in {1..22} X;do echo "${i} chr${i}";done > /tmp/rename_chrm.txt
 inputvcf=ALL.chr22.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz
@@ -189,7 +190,7 @@ bash SALSA/step3_phase_vcf.sh \
 --snvonly \
 --threads 10
 ```
-**Inspect the phased vcf** Note how all the variants are now phased.
+**Inspect the phased vcf** Note how the GT field indicates that all the variants are now phased.
 ```
 bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT\n]' vcfdir/phasing/pbmc.pass.joint.chr22hcphase.vcf.gz | head -n5
 # chr22,16604409,A,G,1|1
@@ -199,7 +200,7 @@ bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT\n]' vcfdir/phasing/pbmc.pass.joint
 # chr22,17086917,C,T,1|0
 
 ```
-**(Optional) Step 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with gnomAD MAF you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). GATK routinely updates its resources so you may need to change the name of the folder in the tutorial to match the one you downloaded. gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124])
+**(Optional) Step 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with Gencode and gnomAD you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). GATK routinely updates its resources so you may need to change the name of the folder in the tutorial to match the one you downloaded. gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124])
 ```
 Usage: step4_gatk_anno_vcf.sh [-nvdoamfth]
    -n  | --library_id         STR   library_id: eg. [sample_1]
@@ -241,7 +242,7 @@ bash SALSA/step4_gatk_anno_vcf.sh \
 --funcotation reference/funcotator_dataSources.v1.6.20190124g \
 --threads 10
 ```
-**Inspect the annotation table** GATK Funcotator provides a lot of annotation fields in the vcf INFO field and only a subset are included in this table. Note how these two variants are present in the gnomAD genomes database and have allele frequency annotations. 
+**Inspect the annotation table** GATK Funcotator provides a lot of annotation fields in the vcf INFO field and only a subset are included in this table. Note how these two variants are present in the gnomAD genomes database and have allele frequency annotations in the gnomAD_genome_AF column.
 ```
 head -n3 vcfdir/funcotation/pbmc.pass.joint.chr22hcphase.formatted.csv
 # variant_id,CHROM,POS,REF,ALT,GT,FILTER,Gencode_27_variantClassification,Gencode_27_codonChange,gnomAD_exome_AF,gnomAD_genome_AF,Gencode_27_hugoSymbol
@@ -249,7 +250,7 @@ head -n3 vcfdir/funcotation/pbmc.pass.joint.chr22hcphase.formatted.csv
 # chr22_16604416_C_G,chr22,16604416,C,G,1|1,.,RNA,,,2.99460e-03,TPTEP1
 ```
 
-**(Recommended) Step 5:** Use barcode celltype annotations to filter the coordinate-sorted cellranger bam using the CB tag. This step will speed up downstream analysis by eliminating barcodes that do not meet quality control. The barcode annotation file has three columns where the first column is the barcode, the second column is the library_id, and the third column is the celltype annotation. For the purposes of the tutorial, we will only filter chr22.
+**(Recommended) Step 5:** Use barcode celltype annotations to filter the coordinate-sorted cellranger bam using the CB tag. This step will speed up downstream analysis by eliminating barcodes that do not meet quality control. The barcode annotation file should have three columns where the first column is the barcode, the second column is the library_id, and the third column is the celltype annotation. For the purposes of the tutorial, we will only filter chr22.
 ```
 Usage: step5_filterbam.sh [-nidolmbeth]
    -n  | --library_id         STR   library_id: eg. [sample_1]
@@ -281,7 +282,7 @@ docker run \
 ```
 **Download clustering analysis for tutorial dataset and create a barcode csv**
 ```
-# download the cluster annotation file
+# download the barcode cluster annotation file from 10X Genomics
 wget -P project https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/SC3_v3_NextGem_DI_PBMC_CSP_1K_analysis.tar.gz
 tar -C project/cellranger_rna_counts -xvzf $project/SC3_v3_NextGem_DI_PBMC_CSP_1K_analysis.tar.gz
 
