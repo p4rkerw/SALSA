@@ -73,7 +73,7 @@ docker run \
 -e SCRATCH1="/g/scratch" \
 --rm -it p4rkerw/salsa:latest
 ```
-**Genotype an RNA sample** The tutorial workflow is based on the GATK germline short variant discovery pipeline for RNAseq. Additional info is [here](https://gatk.broadinstitute.org/hc/en-us/articles/360035531192-RNAseq-short-variant-discovery-SNPs-Indels-)
+**Genotype an RNA sample** The tutorial workflow is based on the GATK germline short variant discovery pipeline for RNAseq. Additional info can be found on the [GATK website](https://gatk.broadinstitute.org/hc/en-us/articles/360035531192-RNAseq-short-variant-discovery-SNPs-Indels-) . To explore additional GATK options type 'gatk --list' into the terminal.
 ```
 # runtime ~5min
 bash SALSA/step1_gatk_genotype.sh \
@@ -128,7 +128,7 @@ Usage: step2_merge_geno.sh [-nabdit]
 # --outputvcf sample_1.pass.joint.chr22.vcf.gz \
 # --threads 4
 ```
-**(Recommended) Step 3: Phase genotype** If you want to perform your analysis with phased genotypes you will need a phased reference. Variant phasing increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for SNV only or SNV_and_INDEL from ftp.1000genomes.ebi.ac.uk . If you are  analyzing the tutorial RNA dataset select the SNV reference. For ATAC data select the SNV_and_INDEL reference:
+**(Recommended) Step 3: Phase genotype** If you want to perform your analysis with phased genotypes you will need a phased reference. We will use [shapeit4](https://github.com/odelaneau/shapeit4) to phase our variants. To explore additional phasing options type 'shapeit4.2' into your command line. Variant phasing increases the performance of the WASP variant-realignment and ASEP analysis steps. Download the 1000G phased reference files for SNV only or SNV_and_INDEL from ftp.1000genomes.ebi.ac.uk . If you are  analyzing the tutorial RNA dataset select the SNV reference. For ATAC data select the SNV_and_INDEL reference:
 
 a) SNV only: /vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV </br>
 b) SNV and INDEL: /vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL
