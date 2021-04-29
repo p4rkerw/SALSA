@@ -32,11 +32,11 @@ resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
 
 **Step 0: Download tutorial dataset** We will download a coordinate-sorted bam and index for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor:
 ```
-# URL to the dataset: https://support.10xgenomics.com/single-cell-gene-expression/datasets/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/
+# URL to the dataset: https://support.10xgenomics.com/single-cell-gene-expression/datasets/3.0.0/pbmc_1k_v3
 # create your salsa tutorial directory and download the files
 project=$PWD/salsa
-wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam
-wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam.bai
+wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_1k_v3/pbmc_1k_v3_possorted_genome_bam.bam
+wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_1k_v3/pbmc_1k_v3_possorted_genome_bam.bam.bai
 ```
 
 **Step 0: Clone 🌶️SALSA github repository** The repository is cloned to the $project directory, which is the same directory that the tutorial dataset was downloaded to. The tutorial assumes that the path to your project directory is /g/salsa so make sure to change the path if you chose a different directory.
