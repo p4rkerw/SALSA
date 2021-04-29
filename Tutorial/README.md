@@ -18,6 +18,31 @@ WASP 0.3.4
 
 **Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the [10X Genomics website](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest). 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The GRCh38-2020-A.premrna cellranger reference in this tutorial is compatible with the tutorial dataset (which is aligned to GRCh38-2020-A) and is set up to analyze intronic reads encountered in single nucleus RNA sequencing (snRNA-seq). If you'd like to use this reference you can prepare it with cellranger using this [script](https://github.com/p4rkerw/SALSA/blob/main/reference/mkref.sh). Feel free to download a different reference and/or [dataset](https://support.10xgenomics.com/single-cell-gene-expression/datasets) from the 10X Genomics collection; just make sure it's aligned to GRCh38 so it matches the GATK bundle resources and ucsc contig style. Alignment information can be found in the summary html files. 
 
+**Step 0: Download tutorial dataset and align to your chosen reference with cellranger** We will download a coordinate-sorted bam for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor. This dataset uses the single cell gene expression v3 chemistry. 
+```
+# URL to the dataset: https://support.10xgenomics.com/single-cell-gene-expression/datasets/3.0.0/pbmc_1k_v3
+# create your salsa tutorial directory and download the fastq
+project=$PWD/salsa
+wget -P $project/fastq https://cf.10xgenomics.com/samples/cell-exp/3.0.0/pbmc_1k_v3/pbmc_1k_v3_fastqs.tar
+
+# check md5
+md5sum $project/fastq/pbmc_1k_v3_fastqs.tar #265ebe8f77ad90db350984d9c7a59e52
+
+# unpack
+tar -C $project -xvf $project/fastq/pbmc_1k_v3_fastqs.tar
+
+# align and count with cellranger 6.0.1
+reference=/g/reference
+cellranger count \
+--id pbmc \
+--fastqs $project/pbmc_1k_v3_fastqs \
+--transcriptome $reference/GRCh38-2020-A.premrna \
+--nosecondary \
+--nopreflight \
+--expect-cells 1000 \
+--localcores 10
+```
+
 **Step 0: Download GATK resource bundle** The following files are required for genotyping with GATK using GRCh38 and can be found in the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false) . Download these files to your reference directory. For additional information on GATK germline and RNA-seq short variant discovery check out their [website](https://gatk.broadinstitute.org/hc/en-us/sections/360007226651-Best-Practices-Workflows)
 ```
 resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz
@@ -29,17 +54,6 @@ resources_broad_hg38_v0_wgs_calling_regions.hg38
 The following additional files are required if you are analyzing single cell ATAC datasets (not needed for the tutorial):
 ```
 resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
-```
-
-**Step 0: Download tutorial dataset** We will download a coordinate-sorted bam for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor. This dataset uses the single cell gene expression v3 chemistry. 
-```
-# URL to the dataset: https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_SI_PBMC_CSP_1K/SC3_v3_NextGem_SI_PBMC_CSP_1K_web_summary.html
-# create your salsa tutorial directory and download the files
-project=$PWD/salsa
-wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_SI_PBMC_CSP_1K/SC3_v3_NextGem_SI_PBMC_CSP_1K_possorted_genome_bam.bam
-
-# check the md5sum
-md5sum $project/cellranger_rna_counts/SC3_v3_NextGem_SI_PBMC_CSP_1K_possorted_genome_bam.bam #6eb63c18b1f858ea9d0d60b0a56efda7
 ```
 
 **Step 0: Clone 🌶️SALSA github repository** The repository is cloned to the $project directory, which is the same directory that the tutorial dataset was downloaded to. The tutorial assumes that the path to your project directory is /g/salsa so make sure to change the path if you chose a different directory.
