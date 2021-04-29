@@ -19,8 +19,8 @@ tar -C $project -xvf $project/tar/SC3_v3_NextGem_DI_PBMC_CSP_1K_fastqs.tar
 # runtime ~45min
 reference=/g/reference
 cellranger count \
---id pbmc \
---fastqs $project/1k_PBMCs_TotalSeq_B_3p_LT_fastqs/1k_PBMCs_TotalSeq_B_3p_LT_gex_fastqs \
+--id pbmc_1k \
+--fastqs $project/SC3_v3_NextGem_DI_CSP-Labeled_PBMCs_1K_fastqs/SC3_v3_NextGem_DI_CSP-Labeled_PBMCs_1K_gex_fastqs \
 --transcriptome $reference/GRCh38-2020-A.premrna \
 --nosecondary \
 --nopreflight \
