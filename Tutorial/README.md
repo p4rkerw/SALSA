@@ -31,17 +31,15 @@ The following additional files are required if you are analyzing single cell ATA
 resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
 ```
 
-**Step 0: Download tutorial dataset** We will download a coordinate-sorted bam and index for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor. This dataset uses the single cell gene expression v3 chemistry. 
+**Step 0: Download tutorial dataset** We will download a coordinate-sorted bam for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor. This dataset uses the single cell gene expression v3 chemistry. 
 ```
 # URL to the dataset: https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_SI_PBMC_CSP_1K/SC3_v3_NextGem_SI_PBMC_CSP_1K_web_summary.html
 # create your salsa tutorial directory and download the files
 project=$PWD/salsa
 wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_SI_PBMC_CSP_1K/SC3_v3_NextGem_SI_PBMC_CSP_1K_possorted_genome_bam.bam
-wget -P $project/cellranger_rna_counts https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_SI_PBMC_CSP_1K/SC3_v3_NextGem_SI_PBMC_CSP_1K_possorted_genome_bam.bam.bai
 
 # check the md5sum
 md5sum $project/cellranger_rna_counts/SC3_v3_NextGem_SI_PBMC_CSP_1K_possorted_genome_bam.bam #6eb63c18b1f858ea9d0d60b0a56efda7
-md5sum $project/cellranger_rna_counts/SC3_v3_NextGem_SI_PBMC_CSP_1K_possorted_genome_bam.bam.bai #3475a8cf40c01b1400a6cefaf659afd1
 ```
 
 **Step 0: Clone 🌶️SALSA github repository** The repository is cloned to the $project directory, which is the same directory that the tutorial dataset was downloaded to. The tutorial assumes that the path to your project directory is /g/salsa so make sure to change the path if you chose a different directory.
