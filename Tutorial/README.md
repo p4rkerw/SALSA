@@ -173,7 +173,7 @@ bcftools annotate phasing/$inputvcf --threads 4 --rename-chrs /tmp/rename_chrm.t
 mv $SCRATCH1/$inputvcf phasing/
 bcftools index --threads 4 phasing/$inputvcf
 ```
-**Phase an interval** For the tutorial, we will not set the --reproduce flag so we can use multithreading. As a result, there may be small differences between the phased vcf in the repository and your results. 
+**Phase an interval** For the tutorial, we will use multithreading to phase the variants. This means we will not set the --reproduce flag and, as a result, there may be small differences between the phased vcf in the repository and your results. 
 ```
 bash SALSA/step3_phase_vcf.sh \
 --library_id pbmc_1k \
