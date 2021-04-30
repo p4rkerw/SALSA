@@ -95,7 +95,7 @@ docker run \
 ```
 **Genotype an RNA sample** 
 ```
-# if you followed the cellranger alignment step
+# if you followed the cellranger alignment step...
 # runtime ~3min
 bash SALSA/step1_gatk_genotype.sh \
 --bam rna_counts/outs/possorted_genome_bam.bam \
@@ -106,10 +106,17 @@ bash SALSA/step1_gatk_genotype.sh \
 --modality rna \
 --threads 10
 
-# if you skipped the cellranger alignment step
+# if you skipped the cellranger alignment step...
 wget -P rna_counts/outs https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_possorted_genome_bam.bam
-wget -P rna_counts/outs https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_possorted_genome_bam.bai 
-
+wget -P rna_counts/outs https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_possorted_genome_bam.bam.bai
+bash SALSA/step1_gatk_genotype.sh \
+--bam rna_counts/outs/1k_PBMCs_TotalSeq_B_3p_LT_possorted_genome_bam.bam \
+--library_id pbmc_1k \
+--outputdir vcfdir/rna_genotype \
+--outputvcf pbmc.rna.chr22.vcf.gz \
+--interval chr22 \
+--modality rna \
+--threads 10
 ```
 **Inspect the genotyped vcf** Note how the GT field has a "/" character, which indicates that the variants are not phased. 
 ```
