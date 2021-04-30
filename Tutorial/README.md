@@ -123,28 +123,6 @@ Usage: step2_merge_geno.sh [-nabdit]
    -t  | --threads            INT   number of threads. Default=[1]
    -h  | --help                     show usage
 ```
-**Launch 🌶️SALSA container**
-```
-# SCRATCH1=/g/scratch
-# docker run \
-# --workdir $HOME \
-# -v $HOME:$HOME \
-# -v $project/vcf_output:$HOME/vcfdir \
-# -v $project/SALSA:$HOME/SALSA \
-# -v $SCRATCH1:$SCRATCH1 \
-# -e SCRATCH1="/mnt/g/scratch" \
-# --rm -it p4rkerw/salsa:latest
-```
-**Merge two genotypes**
-```
-# bash SALSA/step2_merge_geno.sh \
-# --library_id sample_1 \
-# --vcfone vcfdir/$atac_genotype/sample_1.atac.chr22.vcf.gz \
-# --vcftwo vcfdir/${modalitytwo}_genotype/sample_1.rna.chr22.vcf.gz \
-# --outputdir vcfdir/joint_genotype \
-# --outputvcf sample_1.pass.joint.chr22.vcf.gz \
-# --threads 4
-```
 **(Recommended) Step 3: Phase genotype** If you want to perform your analysis with phased genotypes you will need a phased reference. We will use [shapeit4](https://github.com/odelaneau/shapeit4) to phase our variants. To explore additional phasing options type 'shapeit4.2' into your terminal. Variant phasing increases the performance of the WASP variant-realignment and downstream analysis steps. Download the 1000G phased reference files for SNV only or SNV_and_INDEL from ftp.1000genomes.ebi.ac.uk . If you are analyzing the tutorial RNA dataset select the SNV reference. If you want to skip ahead move the [phased vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.pass.joint.chr22hcphase.vcf.gz) and its index to the volume mounted to vcfdir/phasing and proceed to the next step.
 
 a) SNV only: [/vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV/) </br>
