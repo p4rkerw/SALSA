@@ -181,7 +181,7 @@ bash SALSA/step3_phase_vcf.sh \
 --library_id pbmc_1k \
 --inputvcf vcfdir/rna_genotype/pbmc.rna.chr22.vcf.gz \
 --outputdir vcfdir/phasing \
---outputvcf pbmc.pass.joint.chr22hcphase.vcf.gz \
+--outputvcf pbmc.pass.rna.chr22hcphase.vcf.gz \
 --interval chr22 \
 --hcphase \
 --snvonly \
@@ -189,7 +189,7 @@ bash SALSA/step3_phase_vcf.sh \
 ```
 **Inspect the phased vcf** The GT field has a "|" character, indicating that the variants are now phased.
 ```
-bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT\n]' vcfdir/phasing/pbmc.pass.joint.chr22hcphase.vcf.gz | head -n5
+bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT\n]' vcfdir/phasing/pbmc.pass.rna.chr22hcphase.vcf.gz | head -n5
 # chr22,17085042,T,C,1|1
 # chr22,17085084,G,C,1|1
 # chr22,17111083,G,T,0|1
@@ -230,7 +230,7 @@ docker run \
 # runtime ~3min
 bash SALSA/step4_gatk_anno_vcf.sh \
 --library_id pbmc_1k \
---inputvcf vcfdir/phasing/pbmc.pass.joint.chr22hcphase.vcf.gz \
+--inputvcf vcfdir/phasing/pbmc.pass.rna.chr22hcphase.vcf.gz \
 --outputdir vcfdir/funcotation \
 --outputvcf pbmc.pass.joint.chr22hcphase.funco.vcf.gz \
 --output_table pbmc.pass.joint.chr22hcphase.formatted.csv \
@@ -355,7 +355,7 @@ docker run \
 ```
 # runtime ~2min
 bash SALSA/step6_wasp.sh \
---inputvcf vcfdir/funcotation/pbmc.pass.joint.chr22hcphase.funco.vcf.gz \
+--inputvcf vcfdir/funcotation/pbmc.pass.rna.chr22hcphase.funco.vcf.gz \
 --inputbam project/wasp_rna/pbmc.bcfilter.chr22.bam \
 --outputdir project/wasp_rna \
 --outputbam pbmc.hcphase.chr22wasp.bam \
@@ -406,7 +406,7 @@ docker run \
 ```
 # runtime ~11min
 bash SALSA/step7_gatk_alleleCount.sh \
---inputvcf vcfdir/funcotation/pbmc.pass.joint.chr22hcphase.funco.vcf.gz \
+--inputvcf vcfdir/funcotation/pbmc.pass.rna.chr22hcphase.funco.vcf.gz \
 --inputbam project/wasp_rna/pbmc.hcphase.chr22wasp.bam \
 --outputdir project/wasp_rna/counts \
 --barcodes barcodes/rna_barcodes.csv \
