@@ -83,7 +83,7 @@ docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
 -v $project/pbmc:$HOME/rna_counts \
--v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
+-v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
 -v $reference/gatk:$HOME/gatk_bundle \
@@ -239,7 +239,7 @@ reference=/g/reference
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
+-v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
 -v $reference:$HOME/reference \
@@ -346,7 +346,7 @@ reference=/g/reference
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
+-v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
 -v $reference:$HOME/reference \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
@@ -410,7 +410,7 @@ reference=/g/reference
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v $reference/GRCh38-2020-A.premrna:$HOME/rna_ref \
+-v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
 -v $project/barcodes:$HOME/barcodes \
