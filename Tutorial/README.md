@@ -93,7 +93,7 @@ docker run \
 -e SCRATCH1="/mnt/g/scratch" \
 --rm -it p4rkerw/salsa:latest
 ```
-**Genotype an RNA sample** 
+**Genotype an RNA sample** Pick an option depending on whether you did the cellranger alignment or skipped ahead.
 ```
 # if you followed the cellranger alignment step...
 # runtime ~3min
