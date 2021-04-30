@@ -107,6 +107,8 @@ bash SALSA/step1_gatk_genotype.sh \
 --threads 10
 
 # if you skipped the cellranger alignment step
+wget -P rna_counts/outs https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_possorted_genome_bam.bam
+wget -P rna_counts/outs https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_possorted_genome_bam.bai 
 
 ```
 **Inspect the genotyped vcf** Note how the GT field has a "/" character, which indicates that the variants are not phased. 
