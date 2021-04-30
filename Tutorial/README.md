@@ -93,7 +93,7 @@ docker run \
 -e SCRATCH1="/mnt/g/scratch" \
 --rm -it p4rkerw/salsa:latest
 ```
-**Genotype an RNA sample** 
+**Genotype an RNA sample** If you skipped the cellranger alignment step you can replace rna_counts/outs/possorted_genome_bam.bam with /path/to/1k_PBMCs_TotalSeq_B_3p_LT_possorted_genome_bam.bam 
 ```
 # runtime ~3min
 bash SALSA/step1_gatk_genotype.sh \
