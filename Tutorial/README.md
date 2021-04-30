@@ -16,7 +16,6 @@ md5sum $project/tar/1k_PBMCs_TotalSeq_B_3p_LT_fastqs.tar #ac98de1046df421ff3d8dc
 tar -C $project -xvf $project/tar/1k_PBMCs_TotalSeq_B_3p_LT_fastqs.tar
 
 # align and count with cellranger (version 6.0.1)
-# runtime ~45min
 reference=/g/reference
 cellranger count \
 --id pbmc_1k \
@@ -50,7 +49,7 @@ The 🌶️SALSA Docker container is built on [broadinstitute/gatk:4.2.0.0](http
 # container dependencies
 GATK 4.2.0.0
 bwa 0.7.17
-STAR 2.5.1b
+STAR 2.7.4a
 bcftools 1.9 
 pysam 0.15.3
 shapeit 4.2
@@ -93,24 +92,24 @@ docker run \
 ```
 **Genotype an RNA sample** 
 ```
-# runtime ~5min
 bash SALSA/step1_gatk_genotype.sh \
 --bam rna_counts/outs/possorted_genome_bam.bam \
---library_id pbmc \
+--library_id pbmc_1k \
 --outputdir vcfdir/rna_genotype \
 --outputvcf pbmc.rna.chr22.vcf.gz \
 --interval chr22 \
 --modality rna \
 --threads 10
 ```
-**Inspect the genotyped vcf** Note that the first 3 variants are physically-phased, which is indicated by the pipe character in their genotype. In contrast, the last 2 variants are not phased. If you want to read more about phyical phasing take a look [here](https://gatk.broadinstitute.org/hc/en-us/articles/360050354712-What-is-physical-phasing-#:~:text=What%20exactly%20is%20meant%20by%20the%20%22physical%20phasing%22,of%20two%20homologous%20chromosomes%20the%20alleles%20fall%20on.). This vcf contains filtered variants that did not pass QC metrics (eg. variant number 5 has 'QD' in the filter field). If you want to adjust the filtering thresholds before proceeding to the next step take a look at the GATK VariantFiltration tool. 
+**Inspect the genotyped vcf** Note how the GT field has a "/" character, which indicates that the variants are not phased. 
 ```
 bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT,%FILTER\n]' vcfdir/rna_genotype/pbmc.rna.chr22.vcf.gz | head -n5
-# chr22,16604409,A,G,1|1,PASS
-# chr22,16604416,C,G,1|1,PASS
-# chr22,16656494,A,G,1/1,PASS
-# chr22,17085614,C,T,0/1,PASS
-# chr22,17085738,C,CT,0/1,QD
+# chr22,17085042,T,C,1/1,PASS
+# chr22,17085084,G,C,1/1,PASS
+# chr22,17086116,G,C,0/1,PASS
+# chr22,17086809,A,C,0/1,PASS
+# chr22,17087008,A,G,1/1,PASS
+
 ```
 **(Not required for tutorial) Step 2: Merge genotypes from the same patient** If you genotyped a paired single cell gene expression and ATAC dataset from a split sample (or a single cell Multiome) you can merge genotypes into a single vcf. If you're following the tutorial, you can skip this step.
 ```
@@ -195,11 +194,10 @@ bcftools annotate phasing/$inputvcf --threads 4 --rename-chrs /tmp/rename_chrm.t
 mv $SCRATCH1/$inputvcf phasing/
 bcftools index --threads 4 phasing/$inputvcf
 ```
-**Phase an interval**
+**Phase an interval** For the tutorial, we will not set the --reproduce flag so we can use multithreading. As a result, there may be small differences between the phased vcf in the repository and your results. 
 ```
-# runtime ~9min
 bash SALSA/step3_phase_vcf.sh \
---library_id pbmc \
+--library_id pbmc_1k \
 --inputvcf vcfdir/rna_genotype/pbmc.rna.chr22.vcf.gz \
 --outputdir vcfdir/phasing \
 --outputvcf pbmc.pass.joint.chr22hcphase.vcf.gz \
@@ -208,14 +206,15 @@ bash SALSA/step3_phase_vcf.sh \
 --snvonly \
 --threads 10
 ```
-**Inspect the phased vcf** Note how the GT field indicates that all the variants are now phased.
+**Inspect the phased vcf** The GT field now has a "|" character, indicating that the variants are now phased.
 ```
 bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT\n]' vcfdir/phasing/pbmc.pass.joint.chr22hcphase.vcf.gz | head -n5
-# chr22,16604409,A,G,1|1
-# chr22,16604416,C,G,1|1
-# chr22,17085614,C,T,1|0
-# chr22,17086116,G,C,0|1
-# chr22,17086917,C,T,1|0
+# chr22,17085042,T,C,1|1
+# chr22,17085084,G,C,1|1
+# chr22,17086116,G,C,1|0
+# chr22,17086809,A,C,0|1
+# chr22,17087008,A,G,1|1
+
 
 ```
 **(Optional) Step 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with GENCODE and gnomAD you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). GATK routinely updates its resources so you may need to change the name of the folder in the tutorial to match the one you downloaded. gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124]). If you want to skip ahead while these files are downloading move the [funcotated vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.pass.joint.chr22hcphase.funco.vcf.gz) and its index to the volume mounted to vcfdir/funcotation and proceed to the next step.
@@ -251,7 +250,7 @@ docker run \
 ```
 # runtime ~3min
 bash SALSA/step4_gatk_anno_vcf.sh \
---library_id pbmc \
+--library_id pbmc_1k \
 --inputvcf vcfdir/phasing/pbmc.pass.joint.chr22hcphase.vcf.gz \
 --outputdir vcfdir/funcotation \
 --outputvcf pbmc.pass.joint.chr22hcphase.funco.vcf.gz \
@@ -260,12 +259,13 @@ bash SALSA/step4_gatk_anno_vcf.sh \
 --funcotation reference/funcotator_dataSources.v1.6.20190124g \
 --threads 10
 ```
-**Inspect the annotation table** GATK Funcotator provides a lot of annotation fields in the vcf INFO field and only a subset are included in this table. Note how these two variants are present in the gnomAD genomes database and have allele frequency annotations in the gnomAD_genome_AF column.
+**Inspect the annotation table** GATK Funcotator provides a lot of annotation fields in the vcf INFO field and only a subset are included in this table. Note how these two variants are present in the gnomAD database and have allele frequency annotations in the gnomAD_exome_AF and gnomAD_genome_AF columns.
 ```
 head -n3 vcfdir/funcotation/pbmc.pass.joint.chr22hcphase.formatted.csv
 # variant_id,CHROM,POS,REF,ALT,GT,FILTER,Gencode_27_variantClassification,Gencode_27_codonChange,gnomAD_exome_AF,gnomAD_genome_AF,Gencode_27_hugoSymbol
-# chr22_16604409_A_G,chr22,16604409,A,G,1|1,.,RNA,,,3.50740e-03,TPTEP1
-# chr22_16604416_C_G,chr22,16604416,C,G,1|1,.,RNA,,,2.99460e-03,TPTEP1
+# chr22_17085042_T_C,chr22,17085042,T,C,1|1,.,FIVE_PRIME_UTR,,8.02559e-01,8.44264e-01,IL17RA
+# chr22_17085084_G_C,chr22,17085084,G,C,1|1,.,FIVE_PRIME_UTR,,8.03628e-01,8.44332e-01,IL17RA
+
 ```
 
 **(Recommended) Step 5:** Use barcode celltype annotations to filter the coordinate-sorted cellranger bam using the CB tag. This step will speed up downstream analysis by eliminating barcodes that do not meet quality control. The barcode annotation file should have three columns where the first column is the barcode, the second column is the library_id, and the third column is the celltype annotation. For the purposes of the tutorial, we will only filter chr22.
@@ -290,7 +290,7 @@ project=/g/salsa
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v $project/cellranger_rna_counts:$HOME/rna_counts \
+-v $project/pbmc_1k:$HOME/rna_counts \
 -v $project/SALSA:$HOME/SALSA \
 -v $project/barcodes:$HOME/barcodes \
 -v $project:$HOME/project \
@@ -301,20 +301,26 @@ docker run \
 **Download clustering analysis for tutorial dataset and create a barcode csv**
 ```
 # download the barcode cluster annotation file from 10X Genomics
-wget -P project https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/SC3_v3_NextGem_DI_PBMC_CSP_1K_analysis.tar.gz
-tar -C project/cellranger_rna_counts -xvzf $project/SC3_v3_NextGem_DI_PBMC_CSP_1K_analysis.tar.gz
+wget -P $project https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_analysis.tar.gz
+tar -C $project/pbmc_1k -xvzf $project/1k_PBMCs_TotalSeq_B_3p_LT_analysis.tar.gz
 
 # use the cluster number as celltype and assign pbmc as the library_id in final csv
-cluster=project/cellranger_rna_counts/analysis/clustering/graphclust/clusters.csv
-(echo "barcode,orig.ident,celltype"; awk 'BEGIN{FS=OFS=","} {if (NR!=1) print $1,"pbmc",$2}' $cluster) |sed 's/-1//g'> barcodes/rna_barcodes.csv
+cluster=$project/pbmc_1k/analysis/clustering/graphclust/clusters.csv
+(echo "barcode,orig.ident,celltype"; awk 'BEGIN{FS=OFS=","} {if (NR!=1) print $1,"pbmc_1k",$2}' $cluster) |sed 's/-1//g'> barcodes/rna_barcodes.csv
+```
+**Inspect the barcode csv**
+```
+head -n3 barcodes/rna_barcodes.csv
+# barcode,orig.ident,celltype
+# AATCACGAGCAGCCCT,pbmc_1k,1
+# AATCACGAGGAACTCG,pbmc_1k,1
 ```
 **Filter cellranger bam with barcode csv**
 ```
-# runtime ~1min
 bash SALSA/step5_filterbam.sh \
 --library_id pbmc \
 --validate \
---inputbam rna_counts/SC3_v3_NextGem_DI_PBMC_CSP_1K_possorted_genome_bam.bam \
+--inputbam rna_counts/possorted_genome_bam.bam \
 --modality rna \
 --interval chr22 \
 --barcodes barcodes/rna_barcodes.csv \
@@ -356,7 +362,7 @@ docker run \
 --rm -it p4rkerw/salsa:latest
 ```
 
-**(Not required for tutorial) Build a STAR index for 🌶️SALSA** To date, all of the cellranger references have been built with STAR-2.5.1b . However, if you are using a different reference you may want to build a new STAR index. The command below will build a new index in rna_ref/salsa_star so it doesn't overwrite the existing reference in rna_ref/star. You will then need to update the step6_wasp.sh command with --stargenome rna_ref/salsa_star . Alternatively, download the version of STAR that matches your existing cellranger reference and link the executable to /usr/bin/STAR . The second approach will be much faster.
+**(Not required for tutorial) Build a STAR index for 🌶️SALSA** The refdata-gex-GRCh38-2020-A STAR index was built with STAR-2.7.4a, however, earlier cellranger references were built with STAR-2.5.1b . If you are using an oldere cellranger reference you will either need to build a new STAR index or download the version of STAR that matches your existing cellranger reference and link the executable to /usr/bin/STAR. The command below will build a new index in rna_ref/salsa_star so it doesn't overwrite the existing reference in rna_ref/star. You will then need to update the step6_wasp.sh command with --stargenome rna_ref/salsa_star . The second approach will be much faster.
 ```
 # runtime ~35min
 # STAR \
@@ -378,7 +384,7 @@ bash SALSA/step6_wasp.sh \
 --outputbam pbmc.hcphase.chr22wasp.bam \
 --genotype joint \
 --stargenome rna_ref/star \
---library_id pbmc \
+--library_id pbmc_1k \
 --modality rna \
 --isphased \
 --interval chr22 \
