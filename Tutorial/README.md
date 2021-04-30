@@ -407,7 +407,7 @@ docker run \
 ```
 **Get phased allele-specific counts**
 ```
-# runtime ~11min
+# runtime ~8min
 bash SALSA/step7_gatk_alleleCount.sh \
 --inputvcf vcfdir/funcotation/pbmc.pass.rna.chr22hcphase.funco.vcf.gz \
 --inputbam project/wasp_rna/pbmc.hcphase.chr22wasp.bam \
