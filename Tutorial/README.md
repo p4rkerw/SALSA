@@ -1,27 +1,27 @@
 🌶️SALSA is a tool for generating and analyzing phased single cell allele-specific read counts from 10X Genomics cellranger datasets. For additional information, please consult the 10X Genomics: https://www.10xgenomics.com/ . The workflow runs in a publicly-available docker container with all the necessary dependencies for code execution. For this tutorial, we will download a dataset from the 10X Genomics website that has already been aligned and annotated. To complete all of the steps in the tutorial, you will need to download a cellranger reference, GATK bundle resources, and 1000G phased reference (see below for more information). However, all of the tutorial outputs are included in the this repository in case you want to compare results or skip a step. If you are analyzing your own data you will need to run cellranger and annotate your barcodes before starting the workflow.
 
-**Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the [10X Genomics website](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest). 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The GRCh38-2020-A.premrna cellranger reference in this tutorial is compatible with the tutorial dataset (which is aligned to GRCh38-2020-A) and is set up to analyze intronic reads encountered in single nucleus RNA sequencing (snRNA-seq). If you'd like to use this reference you can prepare it with cellranger using this [script](https://github.com/p4rkerw/SALSA/blob/main/reference/mkref.sh). Feel free to download a different reference and/or [dataset](https://support.10xgenomics.com/single-cell-gene-expression/datasets) from the 10X Genomics collection; just make sure it's aligned to GRCh38 so it matches the GATK bundle resources and ucsc contig style. Alignment information can be found in the summary html files. 
+**Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the [10X Genomics website](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest). 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The cellranger reference in this tutorial is compatible with the tutorial dataset (which is aligned to GRCh38-2020-A) Feel free to download a different reference and/or [dataset](https://support.10xgenomics.com/single-cell-gene-expression/datasets) from the 10X Genomics collection; just make sure it's aligned to GRCh38 so it matches the GATK bundle resources and ucsc contig style. Alignment information can be found in the summary html files. 
 
 **Step 0: Download tutorial dataset and align to your chosen reference with cellranger** We will download a coordinate-sorted bam for a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor. This dataset uses the single cell gene expression v3 chemistry. 
 ```
-# URL to the dataset: https://support.10xgenomics.com/single-cell-gene-expression/datasets/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K
+# URL to the dataset: https://support.10xgenomics.com/single-cell-gene-expression/datasets/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT
 # create your salsa tutorial directory and download the fastq
 project=$PWD/salsa
-wget -P $project/tar https://cf.10xgenomics.com/samples/cell-exp/4.0.0/SC3_v3_NextGem_DI_PBMC_CSP_1K/SC3_v3_NextGem_DI_PBMC_CSP_1K_fastqs.tar
+wget -P $project/tar https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_fastqs.tar
 
 # check md5
-md5sum $project/tar/SC3_v3_NextGem_DI_PBMC_CSP_1K_fastqs.tar #aa872b4e52afac06d3e2acf51a040b46
+md5sum $project/tar/1k_PBMCs_TotalSeq_B_3p_LT_fastqs.tar #ac98de1046df421ff3d8dc6b1a3d6112
 
 # unpack
-tar -C $project -xvf $project/tar/SC3_v3_NextGem_DI_PBMC_CSP_1K_fastqs.tar
+tar -C $project -xvf $project/tar/1k_PBMCs_TotalSeq_B_3p_LT_fastqs.tar
 
-# align and count with cellranger 6.0.1
+# align and count with cellranger (version 6.0.0)
 # runtime ~45min
 reference=/g/reference
 cellranger count \
 --id pbmc_1k \
---fastqs $project/SC3_v3_NextGem_DI_CSP-Labeled_PBMCs_1K_fastqs/SC3_v3_NextGem_DI_CSP-Labeled_PBMCs_1K_gex_fastqs \
---transcriptome $reference/GRCh38-2020-A.premrna \
+--fastqs $project/1k_PBMCs_TotalSeq_B_3p_LT_fastqs/1k_PBMCs_TotalSeq_B_3p_LT_gex_fastqs \
+--transcriptome $reference/refdata-gex-GRCh38-2020-A \
 --nosecondary \
 --nopreflight \
 --expect-cells 1000 \
