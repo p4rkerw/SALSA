@@ -4,7 +4,7 @@ Here you will find a workflow to analyze single cell allele-specific expression 
 
 If you use 🌶️SALSA please cite the following manuscript:
 ```
-Muto, Y., Wilson, P.C., Ledru, N. et al. Single cell transcriptional and chromatin accessibility profiling redefine cellular heterogeneity in the adult human kidney. Nat Commun 12, 2190 (2021). https://doi.org/10.1038/s41467-021-22368-w
+Muto Y, Wilson PC, Ledru N, Wu H, Dimke H, Waikar SS, Humphreys BD.<br/> Single cell transcriptional and chromatin accessibility profiling redefine cellular heterogeneity in the adult human kidney. Nat Commun. 2021 Apr 13;12(1):2190. doi: 10.1038/s41467-021-22368-w. PMID: 33850129.
 ```
 Thanks!  
 Parker
