@@ -104,12 +104,11 @@ bash SALSA/step1_gatk_genotype.sh \
 **Inspect the genotyped vcf** Note how the GT field has a "/" character, which indicates that the variants are not phased. 
 ```
 bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT,%FILTER\n]' vcfdir/rna_genotype/pbmc.rna.chr22.vcf.gz | head -n5
-# chr22,17085042,T,C,1/1,PASS
-# chr22,17085084,G,C,1/1,PASS
-# chr22,17086116,G,C,0/1,PASS
-# chr22,17086809,A,C,0/1,PASS
-# chr22,17087008,A,G,1/1,PASS
-
+# chr22,17085042,T,C,1/1
+# chr22,17085084,G,C,1/1
+# chr22,17110243,A,G,0/1
+# chr22,17110377,A,G,0/1
+# chr22,17111083,G,T,0/1
 ```
 **(Not required for tutorial) Step 2: Merge genotypes from the same patient** If you genotyped a paired single cell gene expression and ATAC dataset from a split sample (or a single cell Multiome) you can merge genotypes into a single vcf. If you're following the tutorial, you can skip this step.
 ```
@@ -206,7 +205,7 @@ bash SALSA/step3_phase_vcf.sh \
 --snvonly \
 --threads 10
 ```
-**Inspect the phased vcf** The GT field now has a "|" character, indicating that the variants are now phased.
+**Inspect the phased vcf** The GT field has a "|" character, indicating that the variants are now phased.
 ```
 bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT\n]' vcfdir/phasing/pbmc.pass.joint.chr22hcphase.vcf.gz | head -n5
 # chr22,17085042,T,C,1|1
@@ -362,16 +361,15 @@ docker run \
 --rm -it p4rkerw/salsa:latest
 ```
 
-**(Not required for tutorial) Build a STAR index for 🌶️SALSA** The refdata-gex-GRCh38-2020-A STAR index was built with STAR-2.7.4a, however, earlier cellranger references were built with STAR-2.5.1b . If you are using an oldere cellranger reference you will either need to build a new STAR index or download the version of STAR that matches your existing cellranger reference and link the executable to /usr/bin/STAR. The command below will build a new index in rna_ref/salsa_star so it doesn't overwrite the existing reference in rna_ref/star. You will then need to update the step6_wasp.sh command with --stargenome rna_ref/salsa_star . The second approach will be much faster.
+**Build a STAR index for 🌶️SALSA** The refdata-gex-GRCh38-2020-A reference comes with a pre-packaged STAR reference built with STAR-2.7.4a, but earlier cellranger references were built with STAR-2.5.1b. 
 ```
-# runtime ~35min
-# STAR \
-# --runMode genomeGenerate \
-# --genomeDir rna_ref/salsa_star \
-# --genomeFastaFiles rna_ref/fasta/genome.fa \
-# --sjdbGTFfile rna_ref/genes/genes.gtf \
-# --genomeSAsparseD 3 \
-# --runThreadN 10
+STAR \
+--runMode genomeGenerate \
+--genomeDir rna_ref/salsa_star \
+--genomeFastaFiles rna_ref/fasta/genome.fa \
+--sjdbGTFfile rna_ref/genes/genes.gtf \
+--genomeSAsparseD 3 \
+--runThreadN 10
 ```
 
 **Run WASP on the barcode-filtered bam**
