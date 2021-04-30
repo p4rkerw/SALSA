@@ -166,6 +166,7 @@ Usage: step3_phase_vcf.sh [-nvdolpsitrh]
 
 You will eventually need to download the vcf for every chromosome, but for the purposes of the tutorial just download the SNV reference for chr22 to $reference/phasing/biallelic_SNV . The reference may take awhile to download so feel free to move ahead to the next step using the [phased vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.pass.joint.chr22hcphase.vcf.gz) in the repository. You can come back to step 3 when the download finishes.
 ```
+# download to /mnt/g/reference/phasing
 ALL.chr22.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz
 ```
 
