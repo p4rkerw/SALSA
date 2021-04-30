@@ -93,8 +93,9 @@ docker run \
 -e SCRATCH1="/mnt/g/scratch" \
 --rm -it p4rkerw/salsa:latest
 ```
-**Genotype an RNA sample** If you skipped the cellranger alignment step you can replace rna_counts/outs/possorted_genome_bam.bam with /path/to/1k_PBMCs_TotalSeq_B_3p_LT_possorted_genome_bam.bam 
+**Genotype an RNA sample** 
 ```
+# if you followed the cellranger alignment step
 # runtime ~3min
 bash SALSA/step1_gatk_genotype.sh \
 --bam rna_counts/outs/possorted_genome_bam.bam \
@@ -104,6 +105,9 @@ bash SALSA/step1_gatk_genotype.sh \
 --interval chr22 \
 --modality rna \
 --threads 10
+
+# if you skipped the cellranger alignment step
+
 ```
 **Inspect the genotyped vcf** Note how the GT field has a "/" character, which indicates that the variants are not phased. 
 ```
