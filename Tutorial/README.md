@@ -210,11 +210,9 @@ bash SALSA/step3_phase_vcf.sh \
 bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT\n]' vcfdir/phasing/pbmc.pass.joint.chr22hcphase.vcf.gz | head -n5
 # chr22,17085042,T,C,1|1
 # chr22,17085084,G,C,1|1
-# chr22,17086116,G,C,1|0
-# chr22,17086809,A,C,0|1
-# chr22,17087008,A,G,1|1
-
-
+# chr22,17111083,G,T,0|1
+# chr22,17115288,T,C,0|1
+# chr22,17115498,G,C,0|1
 ```
 **(Optional) Step 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with GENCODE and gnomAD you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). GATK routinely updates its resources so you may need to change the name of the folder in the tutorial to match the one you downloaded. gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124]). If you want to skip ahead while these files are downloading move the [funcotated vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.pass.joint.chr22hcphase.funco.vcf.gz) and its index to the volume mounted to vcfdir/funcotation and proceed to the next step.
 ```
@@ -264,7 +262,6 @@ head -n3 vcfdir/funcotation/pbmc.pass.joint.chr22hcphase.formatted.csv
 # variant_id,CHROM,POS,REF,ALT,GT,FILTER,Gencode_27_variantClassification,Gencode_27_codonChange,gnomAD_exome_AF,gnomAD_genome_AF,Gencode_27_hugoSymbol
 # chr22_17085042_T_C,chr22,17085042,T,C,1|1,.,FIVE_PRIME_UTR,,8.02559e-01,8.44264e-01,IL17RA
 # chr22_17085084_G_C,chr22,17085084,G,C,1|1,.,FIVE_PRIME_UTR,,8.03628e-01,8.44332e-01,IL17RA
-
 ```
 
 **(Recommended) Step 5:** Use barcode celltype annotations to filter the coordinate-sorted cellranger bam using the CB tag. This step will speed up downstream analysis by eliminating barcodes that do not meet quality control. The barcode annotation file should have three columns where the first column is the barcode, the second column is the library_id, and the third column is the celltype annotation. For the purposes of the tutorial, we will only filter chr22.
@@ -361,15 +358,15 @@ docker run \
 --rm -it p4rkerw/salsa:latest
 ```
 
-**Build a STAR index for 🌶️SALSA** The refdata-gex-GRCh38-2020-A reference comes with a pre-packaged STAR reference built with STAR-2.7.4a, but earlier cellranger references were built with STAR-2.5.1b. 
+**(Not required for tutorial) Build a STAR index for 🌶️SALSA** The refdata-gex-GRCh38-2020-A reference comes with a pre-packaged STAR reference built with STAR-2.5.1b. If you want to use a more recent version of STAR or a different index you will need to build a new one. 
 ```
-STAR \
---runMode genomeGenerate \
---genomeDir rna_ref/salsa_star \
---genomeFastaFiles rna_ref/fasta/genome.fa \
---sjdbGTFfile rna_ref/genes/genes.gtf \
---genomeSAsparseD 3 \
---runThreadN 10
+# STAR \
+# --runMode genomeGenerate \
+# --genomeDir rna_ref/salsa_star \
+# --genomeFastaFiles rna_ref/fasta/genome.fa \
+# --sjdbGTFfile rna_ref/genes/genes.gtf \
+# --genomeSAsparseD 3 \
+# --runThreadN 10
 ```
 
 **Run WASP on the barcode-filtered bam**
@@ -432,7 +429,7 @@ bash SALSA/step7_gatk_alleleCount.sh \
 --outputdir project/wasp_rna/counts \
 --barcodes barcodes/rna_barcodes.csv \
 --genotype rna_genotype \
---library_id pbmc \
+--library_id pbmc_1k \
 --modality rna \
 --pseudobulk_counts \
 --single_cell_counts \
@@ -440,8 +437,19 @@ bash SALSA/step7_gatk_alleleCount.sh \
 --interval chr22 \
 --isphased \
 --threads 10
-
 ```
+**Inspect a single cell count table**
+```
+head -n5 project/wasp_rna/counts/pbmc_1k.chr22counts.single_cell.table
+#contig  position        variantID       refAllele       altAllele       refCount        altCount        totalCount      lowMAPQDepth    lowBaseQDepth   rawDepth     otherBases # improperPairs    barcode
+# chr22   50223608        .       G       A       1       0       1       0       0       1       0       0       AATCACGAGGAACTCG-1
+# chr22   37282510        .       A       G       0       1       1       0       0       1       0       0       AATCACGCACTACCGG-1
+# chr22   36281868        .       A       G       0       1       1       0       0       1       0       0       AATCACGGTATAGGAT-1
+# chr22   36767036        .       C       T       0       1       1       0       0       1       0       0       AATCACGGTATAGGAT-1
+
+
+
+
 
 
 
