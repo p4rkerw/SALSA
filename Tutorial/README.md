@@ -280,7 +280,7 @@ docker run \
 wget -P $project https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_analysis.tar.gz
 tar -C $project/pbmc_1k -xvzf $project/1k_PBMCs_TotalSeq_B_3p_LT_analysis.tar.gz
 
-# use the cluster number as celltype and assign pbmc as the library_id in final csv
+# use the cluster number as celltype and assign pbmc_1k as the library_id in final csv
 cluster=$project/pbmc_1k/analysis/clustering/graphclust/clusters.csv
 (echo "barcode,orig.ident,celltype"; awk 'BEGIN{FS=OFS=","} {if (NR!=1) print $1,"pbmc_1k",$2}' $cluster) |sed 's/-1//g'> barcodes/rna_barcodes.csv
 ```
