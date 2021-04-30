@@ -93,9 +93,9 @@ docker run \
 -e SCRATCH1="/mnt/g/scratch" \
 --rm -it p4rkerw/salsa:latest
 ```
-**Genotype an RNA sample** Pick an option depending on whether you did the cellranger alignment or skipped ahead.
+**Genotype an RNA sample** There are two options in the tutorial workflow depending on whether you did the cellranger alignment or skipped ahead. You only need to do one. 
 ```
-# if you followed the cellranger alignment step...
+# Option 1: if you followed the cellranger alignment step...
 # runtime ~3min
 bash SALSA/step1_gatk_genotype.sh \
 --bam rna_counts/outs/possorted_genome_bam.bam \
@@ -106,7 +106,7 @@ bash SALSA/step1_gatk_genotype.sh \
 --modality rna \
 --threads 10
 
-# if you skipped the cellranger alignment step...
+# Option 2: if you skipped the cellranger alignment step...
 wget -P rna_counts/outs https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_possorted_genome_bam.bam
 wget -P rna_counts/outs https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_possorted_genome_bam.bam.bai
 bash SALSA/step1_gatk_genotype.sh \
