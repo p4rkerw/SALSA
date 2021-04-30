@@ -199,8 +199,8 @@ if [ $hcphase = "true" ]; then
   echo "Number of variants phased by shapeit or physically phased by haplotypecaller"
   bcftools view -p $workdir/anno_output.vcf.gz|bcftools stats --threads $threads -|grep record
 
-  cp $workdir/anno_output.vcf.gz $outputdir/$outputvcf
-  bcftools index --threads $threads --tbi $outputdir/$outputvcf
+  mv $workdir/anno_output.vcf.gz $outputdir/$outputvcf
+  bcftools index -f --threads $threads --tbi $outputdir/$outputvcf
 fi
 
 format_time() {
