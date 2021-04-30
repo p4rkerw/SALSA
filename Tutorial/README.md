@@ -47,7 +47,7 @@ resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
 ```
 docker pull p4rkerw/salsa:latest
 ```
-The 🌶️SALSA Docker container is built on [broadinstitute/gatk:4.2.0.0](https://hub.docker.com/r/broadinstitute/gatk) with additional dependencies pre-installed (see below). Docker is a set of platform as a service (PaaS) products that use OS-level virtualization to deliver software in packages called containers, which can be used to enhance reproducibility. You can find the the 🌶️SALSA Dockerfile [here](https://github.com/p4rkerw/SALSA/blob/main/docker/Dockerfile).
+The 🌶️SALSA docker container is built on [broadinstitute/gatk:4.2.0.0](https://hub.docker.com/r/broadinstitute/gatk) with additional dependencies pre-installed (see below). Docker is a set of platform as a service (PaaS) products that use OS-level virtualization to deliver software in packages called containers, which can be used to enhance reproducibility. You can find the the 🌶️SALSA Dockerfile [here](https://github.com/p4rkerw/SALSA/blob/main/docker/Dockerfile).
 ```
 # container dependencies
 GATK 4.2.0.0
