@@ -1,11 +1,16 @@
-# SALSA
-**Welcome to 🌶️ SALSA! - Single Cell Allele-Specific Analysis**
+# **Welcome to 🌶️ SALSA! - Single Cell Allele Specific Analysis**
 
-Here you will find a workflow to analyze single cell allele-specific expression and chromatin accessibility obtained from 10X Genomics Single Cell Gene Expression and Single Cell ATAC datasets. To get started follow along with the [tutorial](https://github.com/p4rkerw/SALSA/tree/main/Tutorial/README.md). An earlier version of this software was written for the following manuscript:
+Here you will find a workflow to analyze single cell allele-specific expression and chromatin accessibility obtained from 10X Genomics Single Cell Gene Expression and Single Cell ATAC datasets. To get started follow along with the [tutorial](https://github.com/p4rkerw/SALSA/tree/main/Tutorial/README.md). 
 
-Muto, Y., Wilson, P.C., Ledru, N. et al. Single cell transcriptional and chromatin accessibility profiling redefine cellular heterogeneity in the adult human kidney. Nat Commun 12, 2190 (2021). https://doi.org/10.1038/s41467-021-22368-w
-
-Thanks,  
+If you use 🌶️SALSA please cite the following manuscript:
+```
+Muto Y, Wilson PC, Ledru N, Wu H, Dimke H, Waikar SS, Humphreys BD.
+Single cell transcriptional and chromatin accessibility profiling redefine cellular heterogeneity in the adult human kidney. 
+Nat Commun. 2021 Apr 13;12(1):2190. 
+doi: 10.1038/s41467-021-22368-w. 
+PMID: 33850129.
+```
+Thanks!  
 Parker
 <br/><br/>
 ![alt text](http://humphreyslab.com/wp-content/uploads/2015/12/favicon-H.jpg)  
@@ -24,15 +29,4 @@ Find us on Docker Hub:
 [p4rkerw@dockerhub](https://hub.docker.com/search?q=p4rkerw&type=image)
 <br/>
 
-**Allele Specific Analysis:**    
-These scripts can be run in a publicly-available docker container found here: [p4rkerw@dockerhub](https://hub.docker.com/search?q=p4rkerw&type=image)
-
-(Follow the steps in order) 
-1. Genotype snRNA or snATAC libraries using GATK
-2. (Optional) - Merge genotypes obtained from matched snRNA-snATAC or multimodal libraries
-3. (Recommended) - Phase the genotype using shapeit and the 1000G reference    
-4. (Optional) - Annotate the vcf with GATK Funcotator to evaluate gnomAD MAF and variant context  
-5. Filter the 10X genomics positions sorted bam file by cell barcode using the subsetbam utility  
-6. Apply the WASP pipeline to barcode-filtered bam files to perform variant-aware realignment  
-7. Obtain pseudobulk, cell-specific, or single cell allele-specific counts with GATK ASEReadCounter  
 
