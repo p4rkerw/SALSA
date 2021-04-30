@@ -6,7 +6,7 @@
 ```
 # URL to the dataset: https://support.10xgenomics.com/single-cell-gene-expression/datasets/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT
 # create your salsa tutorial directory and download the fastq
-project=/mnt/g/salsa
+project=$PWD/salsa
 wget -P $project/tar https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_fastqs.tar
 
 # check md5
@@ -16,6 +16,8 @@ md5sum $project/tar/1k_PBMCs_TotalSeq_B_3p_LT_fastqs.tar #ac98de1046df421ff3d8dc
 tar -C $project -xvf $project/tar/1k_PBMCs_TotalSeq_B_3p_LT_fastqs.tar
 
 # align and count with cellranger (version 6.0.1)
+# the output will appear in the working directory which should be $project
+# runtime ~40min
 reference=/mnt/g/reference
 cellranger count \
 --id pbmc_1k \
@@ -82,7 +84,7 @@ reference=/mnt/g/reference
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v $project/pbmc:$HOME/rna_counts \
+-v $project/pbmc_1k:$HOME/rna_counts \
 -v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
 -v $project/vcf_output:$HOME/vcfdir \
 -v $project/SALSA:$HOME/SALSA \
