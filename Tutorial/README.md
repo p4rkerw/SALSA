@@ -88,7 +88,7 @@ docker run \
 -v $project/SALSA:$HOME/SALSA \
 -v $reference/gatk:$HOME/gatk_bundle \
 -v $SCRATCH1:$SCRATCH1 \
--e SCRATCH1="/g/scratch" \
+-e SCRATCH1="/mnt/g/scratch" \
 --rm -it p4rkerw/salsa:latest
 ```
 **Genotype an RNA sample** 
@@ -132,7 +132,7 @@ Usage: step2_merge_geno.sh [-nabdit]
 # -v $project/vcf_output:$HOME/vcfdir \
 # -v $project/SALSA:$HOME/SALSA \
 # -v $SCRATCH1:$SCRATCH1 \
-# -e SCRATCH1="/g/scratch" \
+# -e SCRATCH1="/mnt/g/scratch" \
 # --rm -it p4rkerw/salsa:latest
 ```
 **Merge two genotypes**
@@ -182,7 +182,7 @@ docker run \
 -v $project/SALSA:$HOME/SALSA \
 -v $reference/phasing/biallelic_SNV:$HOME/phasing \
 -v $SCRATCH1:$SCRATCH1 \
--e SCRATCH1="/g/scratch" \
+-e SCRATCH1="/mnt/g/scratch" \
 --rm -it p4rkerw/salsa:latest
 ```
 **Rename the reference contigs** The 1000G vcf reference files do not have the same contig style as the cellranger reference. You will need to update the 1000G contig style using bcftools. For the tutorial, we will only do chromosome 22. 
@@ -242,7 +242,7 @@ docker run \
 -v $project/SALSA:$HOME/SALSA \
 -v $reference:$HOME/reference \
 -v $SCRATCH1:$SCRATCH1 \
--e SCRATCH1="/g/scratch" \
+-e SCRATCH1="/mnt/g/scratch" \
 --rm -it p4rkerw/salsa:latest
 ```
 **Annotate a vcf**
@@ -293,7 +293,7 @@ docker run \
 -v $project/barcodes:$HOME/barcodes \
 -v $project:$HOME/project \
 -v $SCRATCH1:$SCRATCH1 \
--e SCRATCH1="/g/scratch" \
+-e SCRATCH1="/mnt/g/scratch" \
 --rm -it p4rkerw/salsa:latest
 ```
 **Download clustering analysis for tutorial dataset and create a barcode csv**
@@ -356,7 +356,7 @@ docker run \
 -v $project/SALSA:$HOME/SALSA \
 -v $project:$HOME/project \
 -v $SCRATCH1:$SCRATCH1 \
--e SCRATCH1="/g/scratch" \
+-e SCRATCH1="/mnt/g/scratch" \
 --rm -it p4rkerw/salsa:latest
 ```
 
@@ -419,7 +419,7 @@ docker run \
 -v $project/barcodes:$HOME/barcodes \
 -v $project:$HOME/project \
 -v $SCRATCH1:$SCRATCH1 \
--e SCRATCH1="/g/scratch" \
+-e SCRATCH1="/mnt/g/scratch" \
 --rm -it p4rkerw/salsa:latest
 ```
 **Get phased allele-specific counts**
