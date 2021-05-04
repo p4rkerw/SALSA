@@ -105,7 +105,7 @@ docker run \
 -e SCRATCH1="/mnt/g/scratch" \
 --rm -it p4rkerw/salsa:latest
 ```
-**Genotype an RNA sample** There are two options in the tutorial workflow depending on whether you did the cellranger alignment or skipped ahead. You only need to do one. 
+**Genotype an RNA sample with 🌶️SALSA** There are two options in the tutorial workflow depending on whether you did the cellranger alignment or skipped ahead. You only need to do one. 
 ```
 # Option 1: if you followed the cellranger alignment step...
 # runtime ~3min
@@ -155,7 +155,7 @@ Usage: step2_merge_geno.sh [-nabdit]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
 ```
-**(Recommended) Step 3: Phase genotype** If you want to perform your analysis with phased genotypes you will need a phased reference. We will use [shapeit4](https://github.com/odelaneau/shapeit4) to phase our variants. To explore additional phasing options type 'shapeit4.2' into your terminal. Variant phasing increases the performance of the WASP variant-realignment and downstream analysis steps. Download the 1000G phased reference files for SNV only or SNV_and_INDEL from ftp.1000genomes.ebi.ac.uk . If you are analyzing the tutorial RNA dataset select the SNV reference. If you want to skip ahead download the [phased vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.pass.joint.chr22hcphase.vcf.gz) and its index to the volume mounted to project/phasing and proceed to the next step.
+**(Recommended) Step 3: Phase genotype with 🌶️SALSA** If you want to perform your analysis with phased genotypes you will need a phased reference. We will use [shapeit4](https://github.com/odelaneau/shapeit4) to phase our variants. To explore additional phasing options type 'shapeit4.2' into your terminal. Variant phasing increases the performance of the WASP variant-realignment and downstream analysis steps. Download the 1000G phased reference files for SNV only or SNV_and_INDEL from ftp.1000genomes.ebi.ac.uk . If you are analyzing the tutorial RNA dataset select the SNV reference. If you want to skip ahead download the [phased vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.pass.joint.chr22hcphase.vcf.gz) and its index to the volume mounted to project/phasing and proceed to the next step.
 
 a) SNV only: [/vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV/) </br>
 b) SNV_and_INDEL: [/vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL/)
@@ -191,7 +191,7 @@ bcftools annotate reference/phasing/biallelic_SNV/$inputvcf --threads 4 --rename
 mv $SCRATCH1/$inputvcf reference/phasing/biallelic_SNV
 bcftools index --threads 4 reference/phasing/biallelic_SNV/$inputvcf
 ```
-**Phase an interval** For the tutorial, we will use multithreading to phase the variants, which means we will not set the --reproduce flag. As a result, there may be small differences between the phased vcf in the repository and your vcf. 
+**Phase an interval with 🌶️SALSA** For the tutorial, we will use multithreading to phase the variants, which means we will not set the --reproduce flag. As a result, there may be small differences between the phased vcf in the repository and your vcf. 
 ```
 # runtime ~9min
 bash SALSA/step3_phase_vcf.sh \
@@ -228,7 +228,7 @@ Usage: step4_gatk_anno_vcf.sh [-nvdoamfth]
   -h  | --help                     show usage
 ```
 
-**Annotate a vcf**
+**Annotate a vcf with 🌶️SALSA**
 ```
 # runtime ~1min
 bash SALSA/step4_gatk_anno_vcf.sh \
@@ -250,7 +250,7 @@ head -n3 project/funcotation/pbmc.pass.rna.chr22hcphase.formatted.csv
 # chr22_17085084_G_C,chr22,17085084,G,C,1|1,.,FIVE_PRIME_UTR,,8.03628e-01,8.44332e-01,IL17RA
 ```
 
-**(Recommended) Step 5:** Use barcode celltype annotations to filter the coordinate-sorted cellranger bam using the CB tag. This step will speed up downstream analysis by eliminating barcodes that do not meet quality control. The barcode annotation file should have three columns where the first column is the barcode, the second column is the library_id, and the third column is the celltype annotation. For the purposes of the tutorial, we will only filter chr22.
+**(Recommended) Step 5: Filter the bam file with cell barcodes** Use barcode celltype annotations to filter the coordinate-sorted cellranger bam using the CB tag. This step will speed up downstream analysis by eliminating barcodes that do not meet quality control. The barcode annotation file should have three columns where the first column is the barcode, the second column is the library_id, and the third column is the celltype annotation. For the purposes of the tutorial, we will only filter chr22.
 ```
 Usage: step5_filterbam.sh [-nidolmbeth]
 -n  | --library_id         STR   library_id: eg. [sample_1]
@@ -358,7 +358,7 @@ Usage: step7_gatk_alleleCount.sh [-viognmlCcspt]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
 ```
-**Get phased allele-specific counts**
+**Get phased allele-specific counts with 🌶️SALSA**
 ```
 # runtime ~8min
 bash SALSA/step7_gatk_alleleCount.sh \
