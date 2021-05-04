@@ -380,7 +380,7 @@ bash SALSA/step7_gatk_alleleCount.sh \
 **Inspect a single cell count table**
 ```
 head -n5 project/wasp_rna/counts/pbmc_1k.chr22counts.single_cell.table
-#contig  position        variantID       refAllele       altAllele       refCount        altCount        totalCount      lowMAPQDepth    lowBaseQDepth   rawDepth     otherBases # improperPairs    barcode
+# contig  position        variantID       refAllele       altAllele       refCount        altCount        totalCount      lowMAPQDepth    lowBaseQDepth   rawDepth otherBases improperPairs    barcode
 # chr22   50223608        .       G       A       1       0       1       0       0       1       0       0       AATCACGAGGAACTCG-1
 # chr22   37282510        .       A       G       0       1       1       0       0       1       0       0       AATCACGCACTACCGG-1
 # chr22   36281868        .       A       G       0       1       1       0       0       1       0       0       AATCACGGTATAGGAT-1
