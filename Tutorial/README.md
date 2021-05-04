@@ -87,11 +87,9 @@ reference=/mnt/g/reference
 docker run \
 --workdir $HOME \
 -v $HOME:$HOME \
--v $project/pbmc_1k:$HOME/rna_counts \
--v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
--v $project/vcf_output:$HOME/vcfdir \
+-v $project:$HOME/project \
+-v $reference:$HOME/reference \
 -v $project/SALSA:$HOME/SALSA \
--v $reference/gatk:$HOME/gatk_bundle \
 -v $SCRATCH1:$SCRATCH1 \
 -e SCRATCH1="/mnt/g/scratch" \
 --rm -it p4rkerw/salsa:latest
@@ -101,21 +99,25 @@ docker run \
 # Option 1: if you followed the cellranger alignment step...
 # runtime ~3min
 bash SALSA/step1_gatk_genotype.sh \
---bam rna_counts/outs/possorted_genome_bam.bam \
+--inputbam project/pbmc_1k/outs/possorted_genome_bam.bam \
 --library_id pbmc_1k \
---outputdir vcfdir/rna_genotype \
+--reference reference/refdata-gex-GRCh38-2020-A \
+--gatk_bundle reference/gatk \
+--outputdir project/rna_genotype \
 --outputvcf pbmc.rna.chr22.vcf.gz \
 --interval chr22 \
 --modality rna \
 --threads 10
 
 # Option 2: if you skipped the cellranger alignment step...
-wget -P rna_counts/outs https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_possorted_genome_bam.bam
-wget -P rna_counts/outs https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_possorted_genome_bam.bam.bai
+wget -P project/pbmc_1k/outs https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_possorted_genome_bam.bam
+wget -P project/pbmc_1k/outs https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_possorted_genome_bam.bam.bai
 bash SALSA/step1_gatk_genotype.sh \
---bam rna_counts/outs/1k_PBMCs_TotalSeq_B_3p_LT_possorted_genome_bam.bam \
+--inputbam project/pbmc_1k/outs/1k_PBMCs_TotalSeq_B_3p_LT_possorted_genome_bam.bam \
 --library_id pbmc_1k \
---outputdir vcfdir/rna_genotype \
+--reference reference/refdata-gex-GRCh38-2020-A \
+--gatk_bundle reference/gatk \
+--outputdir project/rna_genotype \
 --outputvcf pbmc.rna.chr22.vcf.gz \
 --interval chr22 \
 --modality rna \
@@ -123,7 +125,7 @@ bash SALSA/step1_gatk_genotype.sh \
 ```
 **Inspect the genotyped vcf** Note how the GT field has a "/" character, which indicates that the variants are not phased. 
 ```
-bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT,%FILTER\n]' vcfdir/rna_genotype/pbmc.rna.chr22.vcf.gz | head -n5
+bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT,%FILTER\n]' project/rna_genotype/pbmc.rna.chr22.vcf.gz | head -n5
 # chr22,17085042,T,C,1/1,PASS
 # chr22,17085084,G,C,1/1,PASS
 # chr22,17110243,A,G,0/1,QD
@@ -167,30 +169,15 @@ You will eventually need to download the vcf for every chromosome, but for the p
 ALL.chr22.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz
 ```
 
-**Launch 🌶️SALSA container**
-```
-SCRATCH1=/mnt/g/scratch
-project=/mnt/g/salsa
-reference=/mnt/g/reference
-docker run \
---workdir $HOME \
--v $HOME:$HOME \
--v $project/vcf_output:$HOME/vcfdir \
--v $project/SALSA:$HOME/SALSA \
--v $reference/phasing/biallelic_SNV:$HOME/phasing \
--v $SCRATCH1:$SCRATCH1 \
--e SCRATCH1="/mnt/g/scratch" \
---rm -it p4rkerw/salsa:latest
-```
 **Rename the reference contigs** The 1000G vcf reference files do not have the same contig style as the cellranger reference. You will need to update the 1000G contig style using bcftools. For the tutorial, we will only do chromosome 22. 
 ```
 # runtime ~10min
 # rename the contigs in the 1000G reference from 22 to chr22
 for i in {1..22} X;do echo "${i} chr${i}";done > /tmp/rename_chrm.txt
 inputvcf=ALL.chr22.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz
-bcftools annotate phasing/$inputvcf --threads 4 --rename-chrs /tmp/rename_chrm.txt -Oz -o $SCRATCH1/$inputvcf
-mv $SCRATCH1/$inputvcf phasing/
-bcftools index --threads 4 phasing/$inputvcf
+bcftools annotate reference/phasing/biallelic_SNV/$inputvcf --threads 4 --rename-chrs /tmp/rename_chrm.txt -Oz -o $SCRATCH1/$inputvcf
+mv $SCRATCH1/$inputvcf reference/phasing/biallelic_SNV
+bcftools index --threads 4 reference/phasing/biallelic_SNV/$inputvcf
 ```
 **Phase an interval** For the tutorial, we will use multithreading to phase the variants. This means we will not set the --reproduce flag and, as a result, there may be small differences between the phased vcf in the repository and your results. 
 ```
