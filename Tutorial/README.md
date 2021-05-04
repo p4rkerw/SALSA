@@ -161,11 +161,12 @@ Usage: step2_merge_geno.sh [-nabdit]
 a) SNV only: [/vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV/) </br>
 b) SNV_and_INDEL: [/vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL/)
 ```
-Usage: step3_phase_vcf.sh [-nvdolpsitrh]
+Usage: step3_phase_vcf.sh [-nvdorlpsitrh]
   -n  | --library_id         STR   library_id: eg. [sample_1]
-  -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [project/rna_genotype/sample_1.pass.joint.vcf.gz]
+  -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [project/joint_genotype/sample_1.pass.joint.vcf.gz]
   -d  | --outputdir          STR   output directory name eg. [project/phasing]
   -o  | --outputvcf          STR   name of output vcf eg. [sample_1.pass.joint.phase.vcf.gz]
+  -r  | --phasingref         STR   path/to/1000G reference eg. [reference/phasing/biallelic_SNV]
   -l  | --interval           STR   optional: phase a single chromosome eg. [chr22]
   -p  | --hcphase                  optional: recover haplotypecaller physical phasing variants that are not in shapeit reference. Default=[false]
   -s  | --snvonly            STR   use the biallelic_SNV reference for phasing
@@ -217,11 +218,12 @@ bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT\n]' project/phasing/pbmc.pass.rna.
 ```
 **(Optional) Step 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with GENCODE and gnomAD you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). GATK routinely updates its resources so you may need to change the name of the folder in the tutorial to match the one you downloaded. gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded, move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124]). If you want to skip ahead while these files are downloading move the [funcotated vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.pass.joint.chr22hcphase.funco.vcf.gz) and its index to the volume mounted to project/funcotation and proceed to the next step.
 ```
-Usage: step4_gatk_anno_vcf.sh [-nvdoamfth]
+Usage: step4_gatk_anno_vcf.sh [-nvdoramfth]
   -n  | --library_id         STR   library_id: eg. [sample_1]
   -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [project/phasing/sample_1.pass.joint.hcphase.vcf.gz]
   -d  | --outputdir          STR   output directory name eg. [project/funcotation]
   -o  | --outputvcf          STR   name of output vcf eg. [sample_1.pass.joint.hcphase.funco.vcf.gz]
+  -r  | --reference          STR   path/to/cellranger_ref eg. [reference/refdata-gex-GRCh38-2020-A]
   -a  | --output_table       STR   name of output funcotation csv eg. [sample_1.pass.joint.hcphase.formatted.csv]
   -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
   -f  | --funcotation        STR   path/to/funcotation directory eg. [reference/funcotator_dataSources.v1.6.20190124g]
