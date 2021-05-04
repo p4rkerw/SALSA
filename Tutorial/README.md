@@ -6,7 +6,7 @@
 ```
 # URL to the dataset: https://support.10xgenomics.com/single-cell-gene-expression/datasets/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT
 # create your salsa tutorial directory and download the fastq
-project=$PWD/salsa
+project=/mnt/g/salsa
 wget -P $project/tar https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_fastqs.tar
 
 # check md5
@@ -61,6 +61,7 @@ WASP 0.3.4
 
 **Step 0: Clone 🌶️SALSA github repository** The repository is cloned to the $project directory, which is the same directory that the tutorial dataset was downloaded to. The tutorial assumes that the path to your project directory is /g/salsa so make sure to change the path if you chose a different directory.
 ```
+project=/mnt/g/salsa
 git -C $project clone https://github.com/p4rkerw/SALSA
 ```
 
