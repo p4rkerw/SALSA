@@ -69,13 +69,13 @@ shapeit 4.2
 WASP 0.3.4
 ```
 
-**Step 0: Clone 🌶️SALSA github repository** The repository is cloned to the $project directory, which is the same directory that the tutorial dataset was downloaded to. The tutorial assumes that the path to your project directory is /g/salsa so make sure to change the path if you chose a different directory.
+**Step 0: Clone 🌶️SALSA github repository** The repository is cloned to the $project directory, which is the same directory that the tutorial dataset was downloaded to. The tutorial assumes that the path to your project directory is /mnt/g/salsa so make sure to change the path if you chose a different directory.
 ```
 project=/mnt/g/salsa
 git -C $project clone https://github.com/p4rkerw/SALSA
 ```
 
-**Step 1: Genotype a single cell gene expression dataset** The tutorial workflow is based on the GATK germline short variant discovery pipeline for RNAseq. Additional info can be found on the [GATK website](https://gatk.broadinstitute.org/hc/en-us/articles/360035531192-RNAseq-short-variant-discovery-SNPs-Indels-) . To explore additional GATK options type 'gatk --list' into the terminal. If you want to skip ahead move the [genotyped vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.rna.chr22.vcf.gz) and its index to the volume mounted to vcfdir/rna_genotype and proceed to the next step.
+**Step 1: Genotype a single cell gene expression dataset** The tutorial workflow is based on the GATK germline short variant discovery pipeline for RNAseq. Additional info can be found on the [GATK website](https://gatk.broadinstitute.org/hc/en-us/articles/360035531192-RNAseq-short-variant-discovery-SNPs-Indels-) . To explore additional GATK options type 'gatk --list' into the terminal. If you want to skip ahead move the [genotyped vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.rna.chr22.vcf.gz) and its index to the volume mounted to project/rna_genotype and proceed to the next step.
 ```
 Usage: step1_gatk_genotype.sh [-inrgdomlt]
   -i  | --inputbam           STR   path/to/input.bam eg. [rna_counts/sample_1/outs/possorted*.bam]
@@ -147,9 +147,9 @@ bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT,%FILTER\n]' project/rna_genotype/p
 ```
 Usage: step2_merge_geno.sh [-nabdit]
   -n  | --library_id         STR   library_id: eg. [sample_1]
-  -a  | --vcfone             STR   path/to/first.vcf.gz eg. [vcfdir/atac_genotype/sample_1.atac.vcf.gz]. Prioritize annotations from first vcf if there is overlap.
-  -b  | --vcftwo             STR   path/to/second.vcf.gz eg. [vcfdir/rna_genotype/sample_1.rna.vcf.gz]
-  -d  | --outputdir          STR   output directory [vcfdir/joint_genotype]
+  -a  | --vcfone             STR   path/to/first.vcf.gz eg. [project/atac_genotype/sample_1.atac.vcf.gz]. Prioritize annotations from first vcf if there is overlap.
+  -b  | --vcftwo             STR   path/to/second.vcf.gz eg. [project/rna_genotype/sample_1.rna.vcf.gz]
+  -d  | --outputdir          STR   output directory [project/joint_genotype]
   -o  | --outputvcf          STR   name of output vcf eg. [sample_1.pass.joint.vcf.gz]
   -i  | --includefiltered          optional: include filtered variants in output vcf. Default=[false]
   -t  | --threads            INT   number of threads. Default=[1]
@@ -214,7 +214,7 @@ bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT\n]' project/phasing/pbmc.pass.rna.
 # chr22,17115288,T,C,1|0
 # chr22,17115498,G,C,1|0
 ```
-**(Optional) Step 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with GENCODE and gnomAD you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). GATK routinely updates its resources so you may need to change the name of the folder in the tutorial to match the one you downloaded. gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded, move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124]). If you want to skip ahead while these files are downloading move the [funcotated vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.pass.joint.chr22hcphase.funco.vcf.gz) and its index to the volume mounted to vcfdir/funcotation and proceed to the next step.
+**(Optional) Step 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with GENCODE and gnomAD you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). GATK routinely updates its resources so you may need to change the name of the folder in the tutorial to match the one you downloaded. gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded, move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124]). If you want to skip ahead while these files are downloading move the [funcotated vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.pass.joint.chr22hcphase.funco.vcf.gz) and its index to the volume mounted to project/funcotation and proceed to the next step.
 ```
 Usage: step4_gatk_anno_vcf.sh [-nvdoamfth]
   -n  | --library_id         STR   library_id: eg. [sample_1]
@@ -344,7 +344,7 @@ bash SALSA/step6_wasp.sh \
 **Step 7: Get allele-specific read counts with 🌶️SALSA** This step will filter a phased and genotyped vcf for heterozygous SNV to perform allele-specific counting in a coordinate-sorted and indexed bam file after WASP realignment. There are multiple options for count table outputs. The --pseudobulk option will group all barcodes together to perform allele-specific counting. This is analogous to bulk RNA-seq. The --celltype_counts option will use the barcode annotations to split the bam into cell-type-specific bam files before performing allele-specific counting. The --single_cell_counts option will split the input into individual single cell bam files and perform allele-specific counting. If your input vcf is phased you can select the --isphased option to add a phased genotype to the count tables.
 ```
 Usage: step7_gatk_alleleCount.sh [-viognmlCcspt]
-  -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [vcfdir/funcotation/sample_1.pass.joint.hcphase.funco.vcf.gz]
+  -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [project/funcotation/sample_1.pass.joint.hcphase.funco.vcf.gz]
   -i  | --inputbam           STR   path/to/wasp.bam eg. [project/wasp_rna/sample_1.phase.wasp.bam]
   -b  | --barcodes           STR   path/to/barcodes.csv eg. [barcodes/rna_barcodes.csv]
   -g  | --genotype           STR   genotype: [rna] [atac] [joint]
