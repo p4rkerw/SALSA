@@ -5,6 +5,7 @@
 inputvcf=""
 genotype=""
 stargdir=""
+atacref=""
 library_id=""
 modality=""
 isphased=false
@@ -31,13 +32,14 @@ Author: Parker C. Wilson MD, PhD
 Contact: parkerw@wustl.edu
 Version: 1.0
 
-Usage: step6_wasp.sh [-vbdoginlmpt]
-  -v  | --inputvcf          STR   vcfdir/funcotation/sample_1.pass.joint.hcphase.funco.vcf.gz
+Usage: step6_wasp.sh [-vbdogianlmpt]
+  -v  | --inputvcf          STR   project/funcotation/sample_1.pass.joint.hcphase.funco.vcf.gz
   -b  | --inputbam          STR   path/to/input.bam eg. [project/wasp_rna/sample_1.bcfilter.bam]
   -d  | --outputdir         STR   name of output directory eg. [project/wasp_rna]
   -o  | --outputbam         STR   name of output wasp bam eg. [sample_1.phase.wasp.bam]
   -g  | --genotype          STR   genotype: [rna] [atac] [joint]
-  -i  | --stargenome        STR   path/to/star genomeDir eg. [reference/refdata-gex-GRCh38-2020-A/star]
+  -i  | --stargenome        STR   path/to/star genome index for STAR alignment eg. [reference/refdata-gex-GRCh38-2020-A/star]
+  -a  | --atacref           STR   path/to/atac_reference for bwa alignment eg. [reference/refdata-cellranger-atac-GRCh38-1.2.0]
   -n  | --library_id        STR   library_id: eg. [sample_1]
   -m  | --modality          STR   modality: [rna] [atac]
   -l  | --interval          STR   optional: analyze a single chromosome eg. [chr22]
@@ -54,8 +56,8 @@ if [[ ${#} -eq 0 ]]; then
 fi
 
 PARSED_ARGUMENTS=$(getopt -a -n step6_wasp.sh \
--o v:b:d:o:g:i:n:m:l:pt:h \
---long inputvcf:,inputbam:,outputdir:,outputbam:,genotype:,stargenome:,library_id:,modality:,interval:,isphased,threads:,help -- "$@")
+-o v:b:d:o:g:i:a:n:m:l:pt:h \
+--long inputvcf:,inputbam:,outputdir:,outputbam:,genotype:,stargenome:,atacref:,library_id:,modality:,interval:,isphased,threads:,help -- "$@")
 
 echo "PARSED_ARGUMENTS are $PARSED_ARGUMENTS"
 eval set -- "$PARSED_ARGUMENTS"
@@ -68,6 +70,7 @@ do
     -o | --outputbam)         outputbam=$2     ; shift 2 ;;
     -g | --genotype)          genotype=$2      ; shift 2 ;;
     -i | --stargenome)        stargdir=$2      ; shift 2 ;;
+    -a | --atacref)           atacref=$2       ; shift 2 ;;
     -n | --library_id)        library_id=$2    ; shift 2 ;;
     -m | --modality)          modality=$2      ; shift 2 ;;
     -l | --interval)          interval=$2      ; shift 2 ;;
@@ -86,6 +89,7 @@ echo "inputbam     : $inputbam"
 echo "outputdir    : $outputdir"
 echo "outputbam    : $outputbam"
 echo "stargenome   : $stargdir"
+echo "atacref      : $atacref"
 echo "modality     : $modality"
 echo "interval     : $interval"
 echo "isphased     : $isphased"
@@ -237,13 +241,13 @@ fi
 ###########SNATAC SPECIFIC WORKFLOW###########
 if [ $modality == "atac" ]; then
   # check for bwa mem index
-  if [ ! -f ${modality}_ref/fasta/genome.dict ]; then
+  if [ ! -f $atacref/fasta/genome.dict ]; then
   echo "Generating BWA index and putting in atac_ref directory"
   bwa index atac_ref/fasta/genome.fa 
   fi  
   # use bwa to remap reads
   echo "Realigning reads with BWA" 
-  bwa mem -t $threads ${modality}_ref/fasta/genome.fa $workdir/$bn.remap.fq1.gz $workdir/$bn.remap.fq2.gz > $workdir/$bn.realigned.sam
+  bwa mem -t $threads $atacrefref/fasta/genome.fa $workdir/$bn.remap.fq1.gz $workdir/$bn.remap.fq2.gz > $workdir/$bn.realigned.sam
   # sort the realigned bam file
   samtools view -bS $workdir/$bn.realigned.sam > $workdir/$bn.realigned.bam
   samtools sort -@ $threads -o $workdir/$bn.sorted.realigned.bam $workdir/$bn.realigned.bam
