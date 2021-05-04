@@ -63,7 +63,7 @@ The 🌶️SALSA docker container is built on [broadinstitute/gatk:4.2.0.0](http
 # container dependencies
 GATK 4.2.0.0
 bwa 0.7.17
-STAR 2.7.4a
+STAR 2.5.1b
 bcftools 1.9 
 pysam 0.15.3
 shapeit 4.2
