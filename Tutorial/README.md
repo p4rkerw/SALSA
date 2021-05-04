@@ -1,6 +1,16 @@
 **🌶️SALSA** is a tool for generating and analyzing phased single cell allele-specific read counts from 10X Genomics cellranger datasets. For additional information, please consult the 10X Genomics website: https://www.10xgenomics.com/ . The workflow runs in a publicly-available docker container with all the necessary dependencies for code execution. For this tutorial, we will download a dataset from the 10X Genomics website. To complete all of the steps in the tutorial, you will need to download a cellranger reference, GATK bundle resources, and 1000G phased reference (see below for more information). However, all of the tutorial outputs are included either in the this repository or on the 10X Genomics website in case you want to skip a step or compare results. If you are analyzing your own data you will need to run cellranger and annotate your barcodes before starting the workflow.
 
-**Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the [10X Genomics website](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest). 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The cellranger reference in this tutorial is compatible with the tutorial dataset (which is aligned to GRCh38-2020-A). Feel free to download a different reference and/or [dataset](https://support.10xgenomics.com/single-cell-gene-expression/datasets) from the 10X Genomics collection; just make sure it's aligned to GRCh38 so it matches the GATK bundle resources and ucsc contig style. Alignment information can be found in the summary html files. 
+**Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the [10X Genomics website](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest). 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The cellranger reference in this tutorial is compatible with the tutorial dataset (which is aligned to GRCh38-2020-A). Feel free to download a different reference and/or [dataset](https://support.10xgenomics.com/single-cell-gene-expression/datasets) from the 10X Genomics collection; just make sure it's aligned to GRCh38 so it matches the GATK bundle resources and ucsc contig style. Alignment information can be found in the summary html files.
+```
+reference=/mnt/g/reference
+wget -P $reference https://cf.10xgenomics.com/supp/cell-exp/refdata-gex-GRCh38-2020-A.tar.gz
+
+# check md5
+md5sum $reference/refdata-gex-GRCh38-2020-A.tar.gz #dfd654de39bff23917471e7fcc7a00cd
+
+# unpack
+tar -xvzf $reference/refdata-gex-GRCh38-2020-A.tar.gz
+```
 
 **Step 0: Download tutorial dataset and align to your chosen reference with cellranger** We will download a a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor and align it to our reference. This dataset uses the single cell gene expression v3 chemistry. If you want to skip ahead to the 🌶️SALSA workflow, you can download the coordinate-sorted bam and index from the 10X Genomics website (see below).
 ```
