@@ -91,7 +91,7 @@ Usage: step1_gatk_genotype.sh [-inrgdomlt]
   -h  | --help                     show usage
 
 ```
-**Launch 🌶️SALSA container** : Mount the required volumes in an interactive session. The $SCRATCH1 variable designates a temporary file directory. 
+**Launch 🌶️SALSA container** : Mount the required volumes in an interactive session. The $SCRATCH1 variable designates a temporary file directory. The tutorial assumes that your scratch directory is located at /mnt/g/scratch so make sure to change the path if you're using a different directory. 
 ```
 SCRATCH1=/mnt/g/scratch
 project=/mnt/g/salsa
