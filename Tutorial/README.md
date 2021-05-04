@@ -385,15 +385,3 @@ head -n5 project/wasp_rna/counts/pbmc_1k.chr22counts.single_cell.table
 # chr22   37282510        .       A       G       0       1       1       0       0       1       0       0       AATCACGCACTACCGG-1
 # chr22   36281868        .       A       G       0       1       1       0       0       1       0       0       AATCACGGTATAGGAT-1
 # chr22   36767036        .       C       T       0       1       1       0       0       1       0       0       AATCACGGTATAGGAT-1
-
-
-
-
-
-
-
-
-
-
-
-
