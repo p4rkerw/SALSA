@@ -1,6 +1,6 @@
-**🌶️SALSA** is a tool for generating and analyzing phased single cell allele-specific read counts from 10X Genomics cellranger datasets. For additional information, please consult the 10X Genomics website: https://www.10xgenomics.com/ . The workflow runs in a publicly-available docker container with all the necessary dependencies for code execution. For this tutorial, we will download a dataset from the 10X Genomics website. To complete all of the steps in the tutorial, you will need to download a cellranger reference, GATK bundle resources, and 1000G phased reference (see below for more information). However, all of the tutorial outputs are included either in the this repository or on the 10X Genomics website in case you want to skip a step or compare results. If you are analyzing your own data you will need to run cellranger and annotate your barcodes before starting the workflow.
+**🌶️SALSA** is a tool for generating and analyzing phased single cell allele-specific read counts from 10X Genomics cellranger datasets. For additional information, please consult the [10X Genomics website](https://www.10xgenomics.com/). The workflow runs in a publicly-available docker container with all the necessary dependencies for code execution. For this tutorial, we will download a dataset from the 10X Genomics website. To complete all of the steps in the tutorial, you will need to download a cellranger reference, GATK bundle resources, and 1000G phased reference (see below for more information). All of the tutorial outputs are included in the this repository or on the 10X Genomics website in case you want to skip a step or compare results. If you are analyzing your own data, you will need to run cellranger and annotate your barcodes before starting the workflow.
 
-**Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the [10X Genomics website](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest). 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The cellranger reference in this tutorial is compatible with the tutorial dataset (which is aligned to GRCh38-2020-A). Feel free to download a different reference and/or [dataset](https://support.10xgenomics.com/single-cell-gene-expression/datasets) from the 10X Genomics collection; just make sure it's aligned to GRCh38 so it matches the GATK bundle resources and ucsc contig style. Alignment information can be found in the summary html files.
+**Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the [10X Genomics website](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest). 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The cellranger reference in this tutorial is compatible with the tutorial dataset (which is aligned to GRCh38-2020-A). Feel free to download a different reference and/or [dataset](https://support.10xgenomics.com/single-cell-gene-expression/datasets) from the 10X Genomics collection; just make sure it's aligned to GRCh38 so it matches the GATK bundle resources and ucsc contig style. Alignment information can be found in the summary html files. The tutorial assumes that you downloaded a reference to /mnt/g/reference so make sure you change the path if you used a different directory. 
 ```
 reference=/mnt/g/reference
 wget -P $reference https://cf.10xgenomics.com/supp/cell-exp/refdata-gex-GRCh38-2020-A.tar.gz
@@ -63,7 +63,7 @@ The 🌶️SALSA docker container is built on [broadinstitute/gatk:4.2.0.0](http
 # container dependencies
 GATK 4.2.0.0
 bwa 0.7.17
-STAR 2.7.4a
+STAR 2.5.1b
 bcftools 1.9 
 pysam 0.15.3
 shapeit 4.2
@@ -91,7 +91,7 @@ Usage: step1_gatk_genotype.sh [-inrgdomlt]
   -h  | --help                     show usage
 
 ```
-**Launch 🌶️SALSA container** : Mount the required volumes in an interactive session. The $SCRATCH1 variable designates a temporary file directory. 
+**Launch 🌶️SALSA container** : Mount the required volumes in an interactive session. The $SCRATCH1 variable designates a temporary file directory. The tutorial assumes that your scratch directory is located at /mnt/g/scratch so make sure to change the path if you're using a different directory. 
 ```
 SCRATCH1=/mnt/g/scratch
 project=/mnt/g/salsa
@@ -161,11 +161,12 @@ Usage: step2_merge_geno.sh [-nabdit]
 a) SNV only: [/vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV/) </br>
 b) SNV_and_INDEL: [/vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL/)
 ```
-Usage: step3_phase_vcf.sh [-nvdolpsitrh]
+Usage: step3_phase_vcf.sh [-nvdorlpsitrh]
   -n  | --library_id         STR   library_id: eg. [sample_1]
-  -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [project/rna_genotype/sample_1.pass.joint.vcf.gz]
+  -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [project/joint_genotype/sample_1.pass.joint.vcf.gz]
   -d  | --outputdir          STR   output directory name eg. [project/phasing]
   -o  | --outputvcf          STR   name of output vcf eg. [sample_1.pass.joint.phase.vcf.gz]
+  -r  | --phasingref         STR   path/to/1000G reference eg. [reference/phasing/biallelic_SNV]
   -l  | --interval           STR   optional: phase a single chromosome eg. [chr22]
   -p  | --hcphase                  optional: recover haplotypecaller physical phasing variants that are not in shapeit reference. Default=[false]
   -s  | --snvonly            STR   use the biallelic_SNV reference for phasing
@@ -217,11 +218,12 @@ bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT\n]' project/phasing/pbmc.pass.rna.
 ```
 **(Optional) Step 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with GENCODE and gnomAD you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). GATK routinely updates its resources so you may need to change the name of the folder in the tutorial to match the one you downloaded. gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded, move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124]). If you want to skip ahead while these files are downloading move the [funcotated vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.pass.joint.chr22hcphase.funco.vcf.gz) and its index to the volume mounted to project/funcotation and proceed to the next step.
 ```
-Usage: step4_gatk_anno_vcf.sh [-nvdoamfth]
+Usage: step4_gatk_anno_vcf.sh [-nvdoramfth]
   -n  | --library_id         STR   library_id: eg. [sample_1]
   -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [project/phasing/sample_1.pass.joint.hcphase.vcf.gz]
   -d  | --outputdir          STR   output directory name eg. [project/funcotation]
   -o  | --outputvcf          STR   name of output vcf eg. [sample_1.pass.joint.hcphase.funco.vcf.gz]
+  -r  | --reference          STR   path/to/cellranger_ref eg. [reference/refdata-gex-GRCh38-2020-A]
   -a  | --output_table       STR   name of output funcotation csv eg. [sample_1.pass.joint.hcphase.formatted.csv]
   -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
   -f  | --funcotation        STR   path/to/funcotation directory eg. [reference/funcotator_dataSources.v1.6.20190124g]
@@ -255,13 +257,13 @@ head -n3 project/funcotation/pbmc.pass.rna.chr22hcphase.formatted.csv
 ```
 Usage: step5_filterbam.sh [-nidolmbeth]
 -n  | --library_id         STR   library_id: eg. [sample_1]
--i  | --inputbam           STR   path/to/input.bam eg. [rna_counts/sample_1/outs/possorted_genome_bam.bam]
+-i  | --inputbam           STR   path/to/input.bam eg. [project/sample_1/outs/possorted_genome_bam.bam]
 -d  | --outputdir          STR   output directory eg. [project/wasp_rna]
 -o  | --outputbam          STR   filtered output bam eg. [sample_1.bcfilter.bam]
 -l  | --interval           STR   optional: filter a single chromosome eg. [chr22]
 -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
 -b  | --barcodes           STR   path/to/barcodes.csv with headers and two columns. First column is named "barcodes"
-                                 second column is group "orig.ident" and third column is cell type eg. [barcodes/rna_barcodes.csv]
+                                 second column is group "orig.ident" and third column is cell type eg. [project/barcodes/rna_barcodes.csv]
 -e  | --validate                 validate the barcode-filtered bam file. Default=[false]
 -t  | --threads            INT   number of threads. Default=[1]
 -h  | --help                     show usage
@@ -298,19 +300,20 @@ bash SALSA/step5_filterbam.sh \
 --outputbam pbmc.bcfilter.chr22.bam \
 --threads 10
 ```
-**Step 6: Perform variant-aware realignment with WASP** This step takes a genotyped vcf and performs variant-aware realignment on a coordinate-sorted and indexed bam file with WASP. WASP is a tool to perform unbiased allele-specific read mapping and you can read more about it here: https://github.com/bmvdgeijn/WASP . For the purposes of the tutorial, we will only analyze chromosome 22. For RNA analysis, this step requires a STAR index of the cellranger reference. A STAR index can be built ahead of time using the command below. Building a new index takes awhile, but it only needs to be done once.
+**Step 6: Perform variant-aware realignment with WASP** This step takes a genotyped vcf and performs variant-aware realignment on a coordinate-sorted and indexed bam file with WASP. WASP is a tool to perform unbiased allele-specific read mapping and you can read more about it [here](https://github.com/bmvdgeijn/WASP). For the purposes of the tutorial, we will only analyze chromosome 22. For RNA analysis, this step requires a STAR index of the cellranger reference. A STAR index can be built ahead of time using the command below. Building a new index takes awhile, but it only needs to be done once.
 ```
-Usage: step6_wasp.sh [-vbdoginlmpt]
+Usage: step6_wasp.sh [-vbdogianlmpt]
   -v  | --inputvcf          STR   project/funcotation/sample_1.pass.joint.hcphase.funco.vcf.gz
   -b  | --inputbam          STR   path/to/input.bam eg. [project/wasp_rna/sample_1.bcfilter.bam]
   -d  | --outputdir         STR   name of output directory eg. [project/wasp_rna]
   -o  | --outputbam         STR   name of output wasp bam eg. [sample_1.phase.wasp.bam]
   -g  | --genotype          STR   genotype: [rna] [atac] [joint]
-  -i  | --stargenome        STR   path/to/star genomeDir eg. [reference/refdata-gex-GRCh38-2020-A/star]
+  -i  | --stargenome        STR   path/to/star genome index for STAR alignment eg. [reference/refdata-gex-GRCh38-2020-A/star]
+  -a  | --atacref           STR   path/to/atac_reference for bwa alignment eg. [reference/refdata-cellranger-atac-GRCh38-1.2.0]
   -n  | --library_id        STR   library_id: eg. [sample_1]
   -m  | --modality          STR   modality: [rna] [atac]
   -l  | --interval          STR   optional: analyze a single chromosome eg. [chr22]
-  -p  | --isphased                input vcf is phased. Default=[FALSE]
+  -p  | --isphased                input vcf is phased. Default=[false]
   -t  | --threads           INT   number of threads. Default=[1]
   -h  | --help                    show usage
 ```
@@ -344,16 +347,17 @@ bash SALSA/step6_wasp.sh \
 ```
 **Step 7: Get allele-specific read counts with 🌶️SALSA** This step will filter a phased and genotyped vcf for heterozygous SNV to perform allele-specific counting in a coordinate-sorted and indexed bam file after WASP realignment. There are multiple options for count table outputs. The --pseudobulk option will group all barcodes together to perform allele-specific counting. This is analogous to bulk RNA-seq. The --celltype_counts option will use the barcode annotations to split the bam into cell-type-specific bam files before performing allele-specific counting. The --single_cell_counts option will split the input into individual single cell bam files and perform allele-specific counting. If your input vcf is phased you can select the --isphased option to add a phased genotype to the count tables.
 ```
-Usage: step7_gatk_alleleCount.sh [-viognmlCcspt]
+Usage: step7_gatk_alleleCount.sh [-viognmrlCcspt]
   -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [project/funcotation/sample_1.pass.joint.hcphase.funco.vcf.gz]
   -i  | --inputbam           STR   path/to/wasp.bam eg. [project/wasp_rna/sample_1.phase.wasp.bam]
-  -b  | --barcodes           STR   path/to/barcodes.csv eg. [barcodes/rna_barcodes.csv]
+  -b  | --barcodes           STR   path/to/barcodes.csv eg. [project/barcodes/rna_barcodes.csv]
   -g  | --genotype           STR   genotype: [rna] [atac] [joint]
   -n  | --library_id         STR   library_id: eg. [sample_1]
   -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
+  -r  | --reference          STR   path/to/cellranger_ref eg. [reference/refdata-gex-GRCh38-2020-A]
   -l  | --interval           STR   optional: count a specified chromosome eg. [chr22]
   -C  | --pseudobulk_counts        allele-specific counts with all cells grouped together
-  -c  | --celltype_counts          allele-specific counts after grouping cells by barcode annotation
+  -c  | --celltype_counts          allele-specific counts after grouping cells by barcode celltype annotation
   -s  | --single_cell_counts       single cell allele-specific counts for provided barcodes     
   -p  | --isphased                 optional: input vcf is phased. Default=[false]
   -t  | --threads            INT   number of threads. Default=[1]
