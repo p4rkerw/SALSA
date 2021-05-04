@@ -5,23 +5,46 @@ includefiltered=false
 threads=1
 
 function usage {
-        echo "Usage: $(basename $0) [-nabdit]" 2>&1
-        echo '   -n  | --library_id         STR   library_id: eg. [Control_1]'
-        echo '   -a  | --vcfone             STR   path/to/first.vcf.gz eg. [vcfdir/atac_genotype/Control_1.atac.vcf.gz]. Prioritize annotations from first vcf if there is overlap.'
-        echo '   -b  | --vcftwo				STR   path/to/second.vcf.gz eg. [vcfdir/rna_genotype/Control_1.rna.vcf.gz]'
-        echo '	 -d  | --outputdir			STR   output directory [vcfdir/joint_genotype]'
-        echo '   -o  | --outputvcf          STR   name of output vcf eg. [Control_1.pass.joint.vcf.gz]'
-        echo '   -i  | --includefiltered          optional: include filtered variants in output vcf. Default=[false]'
-        echo '   -t  | --threads            INT   number of threads. Default=[1]'
-        echo '   -h  | --help                     show usage'
-        exit 1
+cat << "EOF"
+
+
+        /|      (                (      (              
+     .-((--.     )\ )     (       )\ )   )\ )     (    
+    ( '`^'; )   (()/(     )\     (()/(  (()/(     )\   
+    `;#    |     /(_)) ((((_)(    /(_))  /(_)) ((((_)( 
+     \#    |    (_))    )\ _ )\  (_))   (_))    )\ _ )\ 
+      \#   \    / __|   (_)_\(_) | |    / __|   (_)_\(_) 
+       '-.  )   \__ \    / _ \   | |__  \__ \    / _ \   
+          \(    |___/   /_/ \_\  |____| |___/   /_/ \_\ 
+           `
+
+Single Cell Allele Specific Analysis
+Author: Parker C. Wilson MD, PhD
+Contact: parkerw@wustl.edu
+Version: 1.0
+
+Usage: step2_merge_geno.sh [-nabdit]
+  -n  | --library_id         STR   library_id: eg. [sample_1]
+  -a  | --vcfone             STR   path/to/first.vcf.gz eg. [project/atac_genotype/sample_1.atac.vcf.gz]. Prioritize annotations from first vcf if there is overlap.
+  -b  | --vcftwo             STR   path/to/second.vcf.gz eg. [project/rna_genotype/sample_1.rna.vcf.gz]
+  -d  | --outputdir          STR   output directory [project/joint_genotype]
+  -o  | --outputvcf          STR   name of output vcf eg. [sample_1.pass.joint.vcf.gz]
+  -i  | --includefiltered          optional: include filtered variants in output vcf. Default=[false]
+  -t  | --threads            INT   number of threads. Default=[1]
+  -h  | --help                     show usage
+
+EOF
+exit 1
 }
+
 
 if [[ ${#} -eq 0 ]]; then
    usage
 fi
 
-PARSED_ARGUMENTS=$(getopt -a -n step2_merge_genh.sh -o n:a:b:d:o:it:h --long library_id:,vcfone:,vcftwo:,outputdir:,outputvcf:,includefiltered,threads:,help -- "$@")
+PARSED_ARGUMENTS=$(getopt -a -n step2_merge_geno.sh \
+-o n:a:b:d:o:it:h \
+--long library_id:,vcfone:,vcftwo:,outputdir:,outputvcf:,includefiltered,threads:,help -- "$@")
 
 echo "PARSED_ARGUMENTS are $PARSED_ARGUMENTS"
 eval set -- "$PARSED_ARGUMENTS"
@@ -31,9 +54,9 @@ do
     -n | --library_id)        library_id=$2        ; shift 2 ;;
     -a | --vcfone)            vcfone=$2            ; shift 2 ;;
     -b | --vcftwo)            vcftwo=$2            ; shift 2 ;;
-	-d | --outputdir)         outputdir=$2         ; shift 2 ;;
-	-o | --outputvcf)         outputvcf=$2         ; shift 2 ;;
-	-i | --includefiltered)   includefiltered=true ; shift 1 ;;
+  	-d | --outputdir)         outputdir=$2         ; shift 2 ;;
+  	-o | --outputvcf)         outputvcf=$2         ; shift 2 ;;
+  	-i | --includefiltered)   includefiltered=true ; shift 1 ;;
     -t | --threads)           threads=$2           ; shift 2 ;;
     -h | --help)              usage ;;
     --) shift; break ;;

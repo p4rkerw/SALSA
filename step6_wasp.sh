@@ -7,34 +7,55 @@ genotype=""
 stargdir=""
 library_id=""
 modality=""
-isphased=FALSE
+isphased=false
 threads=1
-r2only=FALSE
+r2only=false
 interval=""
 
 function usage {
-        echo "Usage: $(basename $0) [-vbdoginlmpt]" 2>&1
-        echo '   -v  | --inputvcf          STR   vcfdir/funcotation/Control_1.pass.joint.hcphase.funco.vcf.gz'
-        echo '   -b  | --inputbam          STR   path/to/input.bam eg. [project/wasp_rna/Control_1.bcfilter.bam]'
-        echo '   -d  | --outputdir         STR   name of output directory eg. [project/wasp_rna]'
-        echo '   -o  | --outputbam         STR   name of output wasp bam eg. [Control_1.phase.wasp.bam]'
-        echo '   -g  | --genotype          STR   genotype: [rna] [atac] [joint]'
-        echo '   -i  | --stargenome        STR   path/to/star genomeDir made with genomeGenerate eg. [rna_ref/star]. If absent create new STAR index in $SCRATCH1/rna_ref'
-        echo '   -n  | --library_id        STR   library_id: eg. [Control_1]'
-        echo '   -m  | --modality          STR   modality: [rna] [atac]'
-        echo '   -l  | --interval          STR   specified interval eg. [chr10]'
-        echo '   -p  | --isphased                input vcf is phased. Default=[FALSE]'
-        echo '   -t  | --threads           INT   number of THREADS. Default=[1]'
-        echo '   -h  | --help                    show usage'
-        exit 1
+cat << "EOF"
+
+
+        /|      (                (      (              
+     .-((--.     )\ )     (       )\ )   )\ )     (    
+    ( '`^'; )   (()/(     )\     (()/(  (()/(     )\   
+    `;#    |     /(_)) ((((_)(    /(_))  /(_)) ((((_)( 
+     \#    |    (_))    )\ _ )\  (_))   (_))    )\ _ )\ 
+      \#   \    / __|   (_)_\(_) | |    / __|   (_)_\(_) 
+       '-.  )   \__ \    / _ \   | |__  \__ \    / _ \   
+          \(    |___/   /_/ \_\  |____| |___/   /_/ \_\ 
+           `
+
+Single Cell Allele Specific Analysis
+Author: Parker C. Wilson MD, PhD
+Contact: parkerw@wustl.edu
+Version: 1.0
+
+Usage: step6_wasp.sh [-vbdoginlmpt]
+  -v  | --inputvcf          STR   vcfdir/funcotation/sample_1.pass.joint.hcphase.funco.vcf.gz
+  -b  | --inputbam          STR   path/to/input.bam eg. [project/wasp_rna/sample_1.bcfilter.bam]
+  -d  | --outputdir         STR   name of output directory eg. [project/wasp_rna]
+  -o  | --outputbam         STR   name of output wasp bam eg. [sample_1.phase.wasp.bam]
+  -g  | --genotype          STR   genotype: [rna] [atac] [joint]
+  -i  | --stargenome        STR   path/to/star genomeDir eg. [reference/refdata-gex-GRCh38-2020-A/star]
+  -n  | --library_id        STR   library_id: eg. [sample_1]
+  -m  | --modality          STR   modality: [rna] [atac]
+  -l  | --interval          STR   optional: analyze a single chromosome eg. [chr22]
+  -p  | --isphased                input vcf is phased. Default=[false]
+  -t  | --threads           INT   number of threads. Default=[1]
+  -h  | --help                    show usage
+
+EOF
+exit 1
 }
 
 if [[ ${#} -eq 0 ]]; then
    usage
 fi
 
-PARSED_ARGUMENTS=$(getopt -a -n step7_wasp.sh -o v:b:d:o:g:i:n:m:l:pt:h --long inputvcf:,inputbam:,outputdir:,outputbam:,\
-genotype:,stargenome:,library_id:,modality:,interval:,isphased,threads:,help -- "$@")
+PARSED_ARGUMENTS=$(getopt -a -n step6_wasp.sh \
+-o v:b:d:o:g:i:n:m:l:pt:h \
+--long inputvcf:,inputbam:,outputdir:,outputbam:,genotype:,stargenome:,library_id:,modality:,interval:,isphased,threads:,help -- "$@")
 
 echo "PARSED_ARGUMENTS are $PARSED_ARGUMENTS"
 eval set -- "$PARSED_ARGUMENTS"
@@ -50,7 +71,7 @@ do
     -n | --library_id)        library_id=$2    ; shift 2 ;;
     -m | --modality)          modality=$2      ; shift 2 ;;
     -l | --interval)          interval=$2      ; shift 2 ;;
-    -p | --isphased)          isphased=TRUE    ; shift 1 ;;
+    -p | --isphased)          isphased=true    ; shift 1 ;;
     -t | --threads)           threads=$2       ; shift 2 ;;
     -h | --help)              usage ;;
     --) shift; break ;;
@@ -85,11 +106,11 @@ mkdir -p $contigdir
 read_config=$((samtools view -H $inputbam ; samtools view $inputbam |head -n1000) | samtools view -c -f 1)
 echo "Sampling first 1000 reads of input bam to determine read confguration"
 if [ $read_config -eq 0 ]; then
-echo "Detected single-end bam"
-r2only=TRUE
+  echo "Detected single-end bam"
+  r2only=true
 elif [ $read_config -eq 1000 ]; then
-echo "Detected paired-end bam"
-is_paired_end="--is_paired_end"
+  echo "Detected paired-end bam"
+  is_paired_end="--is_paired_end"
 fi
 
 # index the input bam if no index is detected
@@ -103,130 +124,130 @@ bn=$(basename $inputbam .bam)
 # filter by selected interval if specified
 bcftools index --threads $threads --tbi $inputvcf 2> /dev/null
 if [ $interval ]; then
-echo "Selected interval is ${interval}"
-workdir=$workdir/$interval
-mkdir -p $workdir
-# filter input bam for selected interval
-echo "Filtering bam for selected interval $interval"
-samtools view -@ $threads -bS $inputbam $interval|samtools sort -@ $threads -T $workdir > $workdir/$bn.bam
-inputbam=$workdir/$bn.bam
-bn=$(basename $inputbam .bam)
-samtools index -@ $threads $inputbam
-contigs=($interval)
+  echo "Selected interval is ${interval}"
+  workdir=$workdir/$interval
+  mkdir -p $workdir
+  # filter input bam for selected interval
+  echo "Filtering bam for selected interval $interval"
+  samtools view -@ $threads -bS $inputbam $interval|samtools sort -@ $threads -T $workdir > $workdir/$bn.bam
+  inputbam=$workdir/$bn.bam
+  bn=$(basename $inputbam .bam)
+  samtools index -@ $threads $inputbam
+  contigs=($interval)
 else
-# generate array of unique contigs
-echo "Creating contig files from vcf"
-contigs=($(bcftools query -f'[%CHROM\n]' $inputvcf|grep chr|sort|uniq))
+  # generate array of unique contigs
+  echo "Creating contig files from vcf"
+  contigs=($(bcftools query -f'[%CHROM\n]' $inputvcf|grep chr|sort|uniq))
 fi
 
 
-if [ $isphased == "TRUE" ]; then
-# set output file name to indicate that it's phased
-echo "Input vcf is phased"
-# chrominfo from http://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/chromInfo.txt.gz
-# first separate input vcf into contigs as required by snp2h5 utility
-rm /tmp/haplotypes.h5 /tmp/snp_index.h5 /tmp/snp_tab.h5 /tmp/haplotype.chr*.vcf.gz 2> /dev/null
-for contig in ${contigs[@]}; do
-echo "Subsetting vcf for $contig"
-bcftools view -Oz $inputvcf $contig -o /tmp/haplotype.$contig.vcf.gz
-done
-# create snp hdf5 file
-echo "Generating snp hdf5"
-$wasp/snp2h5/snp2h5 \
---chrom reference/hg38_chromInfo.txt.gz \
---format vcf \
---haplotype /tmp/haplotypes.h5 \
---snp_index /tmp/snp_index.h5 \
---snp_tab   /tmp/snp_tab.h5 \
-/tmp/haplotype.chr*.vcf.gz
-# the is_paired_end variable expands to --is_paired_end for paired-end reads
-echo "Running WASP and writing to $workdir"
-python $wasp/mapping/find_intersecting_snps.py \
-${is_paired_end} \
---is_sorted \
---output_dir $workdir \
---snp_index /tmp/snp_index.h5 \
---snp_tab /tmp/snp_tab.h5 \
---haplotype /tmp/haplotypes.h5 \
-$inputbam
+if [ $isphased == "true" ]; then
+  # set output file name to indicate that it's phased
+  echo "Input vcf is phased"
+  # chrominfo from http://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/chromInfo.txt.gz
+  # first separate input vcf into contigs as required by snp2h5 utility
+  rm /tmp/haplotypes.h5 /tmp/snp_index.h5 /tmp/snp_tab.h5 /tmp/haplotype.chr*.vcf.gz 2> /dev/null
+  for contig in ${contigs[@]}; do
+    echo "Subsetting vcf for $contig"
+    bcftools view -Oz $inputvcf $contig -o /tmp/haplotype.$contig.vcf.gz
+  done
+  # create snp hdf5 file
+  echo "Generating snp hdf5"
+  $wasp/snp2h5/snp2h5 \
+  --chrom reference/hg38_chromInfo.txt.gz \
+  --format vcf \
+  --haplotype /tmp/haplotypes.h5 \
+  --snp_index /tmp/snp_index.h5 \
+  --snp_tab   /tmp/snp_tab.h5 \
+  /tmp/haplotype.chr*.vcf.gz
+  # the is_paired_end variable expands to --is_paired_end for paired-end reads
+  echo "Running WASP and writing to $workdir"
+  python $wasp/mapping/find_intersecting_snps.py \
+  ${is_paired_end} \
+  --is_sorted \
+  --output_dir $workdir \
+  --snp_index /tmp/snp_index.h5 \
+  --snp_tab /tmp/snp_tab.h5 \
+  --haplotype /tmp/haplotypes.h5 \
+  $inputbam
 fi
 
 
 # for unphased vcf use a text-based snv file as recommended by WASP
-if [ $isphased == "FALSE" ]; then
-# set output file name to indicate that it was not phased
-# split the vcf into separate files by contig and print ref and alt for each variant
-contigdir=/tmp/vcf 
-mkdir $contigdir 2> /dev/null
-for contig in $contigs; do
-echo "Generating snv contig file for $contig"
-output_file=$contigdir/$contig.snps.txt.gz
-# get SNPs from VCF files:
-bcftools view -H $inputvcf|awk -v a=$contig '{if($1 == a) {print $2,$4,$5}}'|gzip > $output_file
-done
-# the is_paired_end variable expands to --is_paired_end for paired-end reads
-echo "Running WASP and writing to $workdir"
-python $wasp/mapping/find_intersecting_snps.py \
-${is_paired_end} \
---is_sorted \
---output_dir $workdir \
---snp_dir $contigdir \
-$inputbam
+if [ $isphased == "false" ]; then
+  # set output file name to indicate that it was not phased
+  # split the vcf into separate files by contig and print ref and alt for each variant
+  contigdir=/tmp/vcf 
+  mkdir $contigdir 2> /dev/null
+  for contig in $contigs; do
+    echo "Generating snv contig file for $contig"
+    output_file=$contigdir/$contig.snps.txt.gz
+    # get SNPs from VCF files:
+    bcftools view -H $inputvcf|awk -v a=$contig '{if($1 == a) {print $2,$4,$5}}'|gzip > $output_file
+  done
+  # the is_paired_end variable expands to --is_paired_end for paired-end reads
+  echo "Running WASP and writing to $workdir"
+  python $wasp/mapping/find_intersecting_snps.py \
+  ${is_paired_end} \
+  --is_sorted \
+  --output_dir $workdir \
+  --snp_dir $contigdir \
+  $inputbam
 fi
 
 
 ################SCRNA SPECIFIC WORKFLOW################
 # create a STAR index if not specified
 if [ $modality == "rna" ]; then
-if [ ! -f $stargdir/genomeParameters.txt ]; then
-echo "Generating STAR index and putting in $stargdir directory"
-STAR \
---runMode genomeGenerate \
---runThreadN $threads \
---genomeDir $stargdir \
---genomeFastaFiles rna_ref/fasta/genome.fa \
---sjdbGTFfile rna_ref/genes/genes.gtf
-fi
-### use STAR to remap single end reads 
-if [ $r2only == "TRUE" ]; then
-echo "Running STAR with single end reads"
-STAR \
---genomeDir $stargdir \
---runThreadN $threads \
---readFilesIn <(gunzip -c $workdir/$bn.remap.fq.gz) \
---outSAMtype BAM SortedByCoordinate \
---outFileNamePrefix $workdir/$bn.
-mv $workdir/$bn.Aligned.sortedByCoord.out.bam $workdir/$bn.sorted.realigned.bam
-samtools index -@ $threads $workdir/$bn.sorted.realigned.bam
-elif [ $r2only == "FALSE" ]; then
-echo "Running STAR with paired end reads"
-### use STAR to remap paired end reads 
-STAR \
---genomeDir $stargdir \
---runThreadN $threads \
---readFilesIn <(gunzip -c $workdir/$bn.remap.fq1.gz) <(gunzip -c $workdir/$bn.remap.fq2.gz) \
---outSAMtype BAM SortedByCoordinate \
---outFileNamePrefix $workdir/$bn.
-mv $workdir/$bn.Aligned.sortedByCoord.out.bam $workdir/$bn.sorted.realigned.bam
-samtools index -@ $threads $workdir/$bn.sorted.realigned.bam
-fi
+  if [ ! -f $stargdir/genomeParameters.txt ]; then
+    echo "Generating STAR index and putting in $stargdir directory"
+    STAR \
+    --runMode genomeGenerate \
+    --runThreadN $threads \
+    --genomeDir $stargdir \
+    --genomeFastaFiles rna_ref/fasta/genome.fa \
+    --sjdbGTFfile rna_ref/genes/genes.gtf
+  fi
+  ### use STAR to remap single end reads 
+  if [ $r2only == "true" ]; then
+    echo "Running STAR with single end reads"
+    STAR \
+    --genomeDir $stargdir \
+    --runThreadN $threads \
+    --readFilesIn <(gunzip -c $workdir/$bn.remap.fq.gz) \
+    --outSAMtype BAM SortedByCoordinate \
+    --outFileNamePrefix $workdir/$bn.
+    mv $workdir/$bn.Aligned.sortedByCoord.out.bam $workdir/$bn.sorted.realigned.bam
+    samtools index -@ $threads $workdir/$bn.sorted.realigned.bam
+  elif [ $r2only == "false" ]; then
+    echo "Running STAR with paired end reads"
+    ### use STAR to remap paired end reads 
+    STAR \
+    --genomeDir $stargdir \
+    --runThreadN $threads \
+    --readFilesIn <(gunzip -c $workdir/$bn.remap.fq1.gz) <(gunzip -c $workdir/$bn.remap.fq2.gz) \
+    --outSAMtype BAM SortedByCoordinate \
+    --outFileNamePrefix $workdir/$bn.
+    mv $workdir/$bn.Aligned.sortedByCoord.out.bam $workdir/$bn.sorted.realigned.bam
+    samtools index -@ $threads $workdir/$bn.sorted.realigned.bam
+  fi
 fi
 
 
 ###########SNATAC SPECIFIC WORKFLOW###########
 if [ $modality == "atac" ]; then
-# check for bwa mem index
-if [ ! -f ${modality}_ref/fasta/genome.dict ]; then
-echo "Generating BWA index and putting in atac_ref directory"
-bwa index atac_ref/fasta/genome.fa 
-fi  
-# use bwa to remap reads
-echo "Realigning reads with BWA" 
-bwa mem -t $threads ${modality}_ref/fasta/genome.fa $workdir/$bn.remap.fq1.gz $workdir/$bn.remap.fq2.gz > $workdir/$bn.realigned.sam
-# sort the realigned bam file
-samtools view -bS $workdir/$bn.realigned.sam > $workdir/$bn.realigned.bam
-samtools sort -@ $threads -o $workdir/$bn.sorted.realigned.bam $workdir/$bn.realigned.bam
-samtools index -@ $threads $workdir/$bn.sorted.realigned.bam
+  # check for bwa mem index
+  if [ ! -f ${modality}_ref/fasta/genome.dict ]; then
+  echo "Generating BWA index and putting in atac_ref directory"
+  bwa index atac_ref/fasta/genome.fa 
+  fi  
+  # use bwa to remap reads
+  echo "Realigning reads with BWA" 
+  bwa mem -t $threads ${modality}_ref/fasta/genome.fa $workdir/$bn.remap.fq1.gz $workdir/$bn.remap.fq2.gz > $workdir/$bn.realigned.sam
+  # sort the realigned bam file
+  samtools view -bS $workdir/$bn.realigned.sam > $workdir/$bn.realigned.bam
+  samtools sort -@ $threads -o $workdir/$bn.sorted.realigned.bam $workdir/$bn.realigned.bam
+  samtools index -@ $threads $workdir/$bn.sorted.realigned.bam
 fi
 
 

@@ -7,27 +7,48 @@ interval=""
 validate=false
 
 function usage {
-        echo "Usage: $(basename $0) [-nidolmbeth]" 2>&1
-        echo '   -n  | --library_id         STR   library_id: eg. [Control_1]'
-        echo '   -i  | --inputbam           STR   path/to/input.bam eg. [rna_counts/Control_1/outs/possorted_genome_bam.bam]'
-        echo '   -d  | --outputdir          STR   output directory eg. [project/wasp_rna]'
-        echo '   -o  | --outputbam          STR   filtered output bam eg. [Control_1.bcfilter.bam]'
-        echo '   -l  | --interval           STR   optional: filter a single chromosome eg. [chr22]'
-        echo '   -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]'
-        echo '   -b  | --barcodes           STR   path/to/barcodes.csv with headers and two columns. First column is named "barcodes" 
-                                    and second column is group "orig.ident" eg. [barcodes/rna_barcodes.csv]'
-        echo '   -e  | --validate                 validate the barcode-filtered bam file. Default=[false]'
-        echo '   -t  | --threads            INT   number of threads. Default=[1]'
-        echo '   -h  | --help                     show usage'
-        exit 1
+cat << "EOF"
+
+
+        /|      (                (      (              
+     .-((--.     )\ )     (       )\ )   )\ )     (    
+    ( '`^'; )   (()/(     )\     (()/(  (()/(     )\   
+    `;#    |     /(_)) ((((_)(    /(_))  /(_)) ((((_)( 
+     \#    |    (_))    )\ _ )\  (_))   (_))    )\ _ )\ 
+      \#   \    / __|   (_)_\(_) | |    / __|   (_)_\(_) 
+       '-.  )   \__ \    / _ \   | |__  \__ \    / _ \   
+          \(    |___/   /_/ \_\  |____| |___/   /_/ \_\ 
+           `
+
+Single Cell Allele Specific Analysis
+Author: Parker C. Wilson MD, PhD
+Contact: parkerw@wustl.edu
+Version: 1.0
+
+Usage: step5_filterbam.sh [-nidolmbeth]
+-n  | --library_id         STR   library_id: eg. [sample_1]
+-i  | --inputbam           STR   path/to/input.bam eg. [project/sample_1/outs/possorted_genome_bam.bam]
+-d  | --outputdir          STR   output directory eg. [project/wasp_rna]
+-o  | --outputbam          STR   filtered output bam eg. [sample_1.bcfilter.bam]
+-l  | --interval           STR   optional: filter a single chromosome eg. [chr22]
+-m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
+-b  | --barcodes           STR   path/to/barcodes.csv with headers and two columns. First column is named "barcodes"
+                                 second column is group "orig.ident" and third column is cell type eg. [project/barcodes/rna_barcodes.csv]
+-e  | --validate                 validate the barcode-filtered bam file. Default=[false]
+-t  | --threads            INT   number of threads. Default=[1]
+-h  | --help                     show usage
+
+EOF
+exit 1
 }
 
 if [[ ${#} -eq 0 ]]; then
    usage
 fi
 
-PARSED_ARGUMENTS=$(getopt -a -n step5_filterbam.sh -o n:i:d:o:l:m:b:e:t:h --long library_id:,inputbam:,outputdir:,outputbam:,interval:,\
-modality:,barcodes:,validate,threads:,help -- "$@")
+PARSED_ARGUMENTS=$(getopt -a -n step5_filterbam.sh \
+-o n:i:d:o:l:m:b:e:t:h \
+--long library_id:,inputbam:,outputdir:,outputbam:,interval:,modality:,barcodes:,validate,threads:,help -- "$@")
 
 echo "PARSED_ARGUMENTS are $PARSED_ARGUMENTS"
 eval set -- "$PARSED_ARGUMENTS"

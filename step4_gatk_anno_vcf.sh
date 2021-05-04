@@ -5,25 +5,48 @@
 threads=1
 
 function usage {
-        echo "Usage: $(basename $0) [-nvdoamfth]" 2>&1
-        echo '   -n  | --library_id         STR   library_id: eg. [Control_1]'
-        echo '   -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [vcfdir/phasing/Control_1.pass.joint.hcphase.vcf.gz]'
-        echo '   -d  | --outputdir          STR   output directory name eg. [vcfdir/funcotation]'
-        echo '   -o  | --outputvcf          STR   name of output vcf eg. [Control_1.pass.joint.hcphase.funco.vcf.gz]'
-        echo '   -a  | --output_table       STR   name of output funcotation csv eg. [Control_1.pass.joint.hchpase.formatted.csv]'
-        echo '   -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]'
-        echo '   -f  | --funcotation        STR   path/to/funcotation directory eg. [reference/funcotator_dataSources.v1.6.20190124g]'
-        echo '   -t  | --threads            INT   number of threads. Default=[1]'
-        echo '   -h  | --help                     show usage'
-        exit 1
+cat << "EOF"
+
+
+        /|      (                (      (              
+     .-((--.     )\ )     (       )\ )   )\ )     (    
+    ( '`^'; )   (()/(     )\     (()/(  (()/(     )\   
+    `;#    |     /(_)) ((((_)(    /(_))  /(_)) ((((_)( 
+     \#    |    (_))    )\ _ )\  (_))   (_))    )\ _ )\ 
+      \#   \    / __|   (_)_\(_) | |    / __|   (_)_\(_) 
+       '-.  )   \__ \    / _ \   | |__  \__ \    / _ \   
+          \(    |___/   /_/ \_\  |____| |___/   /_/ \_\ 
+           `
+
+Single Cell Allele Specific Analysis
+Author: Parker C. Wilson MD, PhD
+Contact: parkerw@wustl.edu
+Version: 1.0
+
+Usage: step4_gatk_anno_vcf.sh [-nvdoramfth]
+  -n  | --library_id         STR   library_id: eg. [sample_1]
+  -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [project/phasing/sample_1.pass.joint.hcphase.vcf.gz]
+  -d  | --outputdir          STR   output directory name eg. [project/funcotation]
+  -o  | --outputvcf          STR   name of output vcf eg. [sample_1.pass.joint.hcphase.funco.vcf.gz]
+  -r  | --reference          STR   path/to/cellranger_ref eg. [reference/refdata-gex-GRCh38-2020-A]
+  -a  | --output_table       STR   name of output funcotation csv eg. [sample_1.pass.joint.hcphase.formatted.csv]
+  -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
+  -f  | --funcotation        STR   path/to/funcotation directory eg. [reference/funcotator_dataSources.v1.6.20190124g]
+  -t  | --threads            INT   number of threads. Default=[1]
+  -h  | --help                     show usage
+
+EOF
+exit 1
 }
+
 
 if [[ ${#} -eq 0 ]]; then
    usage
 fi
 
-PARSED_ARGUMENTS=$(getopt -a -n step2_merge_genh.sh -o n:v:d:o:sirt:h --long library_id:,inputvcf:,outputdir:,outputvcf:,output_table:,\
-modality:,funcotation:,threads:,help -- "$@")
+PARSED_ARGUMENTS=$(getopt -a -n step4_gatk_anno_vcf.sh \
+-o n:v:d:o:r:sirt:h \
+--long library_id:,inputvcf:,outputdir:,outputvcf:,reference:,output_table:,modality:,funcotation:,threads:,help -- "$@")
 
 echo "PARSED_ARGUMENTS are $PARSED_ARGUMENTS"
 eval set -- "$PARSED_ARGUMENTS"
@@ -34,6 +57,7 @@ do
     -v | --inputvcf)          inputvcf=$2          ; shift 2 ;;
     -d | --outputdir)         outputdir=$2         ; shift 2 ;;
     -o | --outputvcf)         outputvcf=$2         ; shift 2 ;;
+    -r | --reference)         reference=$2         ; shift 2 ;;
     -a | --output_table)      output_table=$2      ; shift 2 ;;
     -m | --modality)          modality=$2          ; shift 2 ;;
     -f | --funcotation)       funcotation=$2       ; shift 2 ;;
@@ -49,6 +73,7 @@ echo "library_id                : $library_id"
 echo "inputvcf                  : $inputvcf"
 echo "outputdir                 : $outputdir"
 echo "outputvcf                 : $outputvcf"
+echo "reference                 : $reference"
 echo "output_table              : $output_table"
 echo "modality                  : $modality"
 echo "funcotation               : $funcotation"
@@ -70,7 +95,7 @@ if [ -d $funcotation ]; then
 else
   echo "Downloading funcotator resources"
   gatk FuncotatorDataSourceDownloader --germline --validate-integrity --extract-after-download --overwrite-output-file \
-  -O reference/funcotator    
+  -O $reference/funcotator    
 fi
 
 # update output vcf file names
@@ -86,13 +111,13 @@ gatk IndexFeatureFile -I $inputvcf
 
 # create scatter gather intervals across no. threads
 gatk SplitIntervals \
--R ${modality}_ref/fasta/genome.fa \
+-R $reference/fasta/genome.fa \
 -O /tmp/interval_files_folder \
 -L $inputvcf \
 --scatter-count $threads
 
 # # create array of scatter gather intervals  
-intervals=$(ls /tmp/interval_files_folder)
+scatter_intervals=$(ls /tmp/interval_files_folder)
 
 # remove vcf list if session has been used multiple times
 if [ -f /tmp/vcf.list ]; then
@@ -100,19 +125,20 @@ if [ -f /tmp/vcf.list ]; then
 fi
 
 echo "Annotating contigs with funcotator"
-for interval in ${intervals[@]}; do
-echo "$workdir/$library_id.$modality.$interval.funcotated.vcf.gz" >> /tmp/vcf.list
+for scatter_interval in ${scatter_intervals[@]}; do
+echo "$workdir/$library_id.$modality.$scatter_interval.funcotated.vcf.gz" >> /tmp/vcf.list
 # annotate variants
 gatk --java-options "-Xmx4G -XX:+UseParallelGC -XX:ParallelGCThreads=1" Funcotator \
   --variant $inputvcf \
-  --reference ${modality}_ref/fasta/genome.fa \
+  --reference $reference/fasta/genome.fa \
   --ref-version hg38 \
   --data-sources-path $funcotation  \
-  --output $workdir/$library_id.$modality.$interval.funcotated.vcf.gz \
+  --output $workdir/$library_id.$modality.$scatter_interval.funcotated.vcf.gz \
   --output-file-format VCF \
-  -L /tmp/interval_files_folder/$interval \
+  -L /tmp/interval_files_folder/$scatter_interval \
   --disable-sequence-dictionary-validation true \
-  --verbosity $verbosity > /dev/null &2>1 &
+  --verbosity $verbosity > log.out 2>&1 \
+  || exit "Funcotator failed on $scatter_interval. Check log.out for additional info" &
 done
 wait
 

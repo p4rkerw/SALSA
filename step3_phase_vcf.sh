@@ -9,27 +9,49 @@ snvindel=false
 reproduce=false
 
 function usage {
-        echo "Usage: $(basename $0) [-nvdolpsitrh]" 2>&1
-        echo '   -n  | --library_id         STR   library_id: eg. [Control_1]'
-        echo '   -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [vcfdir/joint_genotype/Control_1.pass.joint.vcf.gz]'
-        echo '   -d  | --outputdir          STR   output directory name eg. [vcfdir/phasing]'
-        echo '   -o  | --outputvcf          STR   name of output vcf eg. [Control_1.pass.joint.phase.vcf.gz]'
-        echo '   -l  | --interval           STR   optional: phase a single chromosome eg. [chr22]'
-        echo '   -p  | --hcphase                  optional: recover haplotypecaller physical phasing variants that are not in shapeit reference. Default=[false]'
-        echo '   -s  | --snvonly            STR   use the biallelic_SNV reference for phasing'
-        echo '   -i  | --snvindel           STR   use the biallelic_SNV_and_INDEL reference for phasing'
-        echo '   -r  | --reproduce                optional: run shapeit with a single thread for reproducibility. Default=[false]'
-        echo '   -t  | --threads            INT   number of threads. Default=[1]'
-        echo '   -h  | --help                     show usage'
-        exit 1
+cat << "EOF"
+
+
+        /|      (                (      (              
+     .-((--.     )\ )     (       )\ )   )\ )     (    
+    ( '`^'; )   (()/(     )\     (()/(  (()/(     )\   
+    `;#    |     /(_)) ((((_)(    /(_))  /(_)) ((((_)( 
+     \#    |    (_))    )\ _ )\  (_))   (_))    )\ _ )\ 
+      \#   \    / __|   (_)_\(_) | |    / __|   (_)_\(_) 
+       '-.  )   \__ \    / _ \   | |__  \__ \    / _ \   
+          \(    |___/   /_/ \_\  |____| |___/   /_/ \_\ 
+           `
+
+Single Cell Allele Specific Analysis
+Author: Parker C. Wilson MD, PhD
+Contact: parkerw@wustl.edu
+Version: 1.0
+
+Usage: step3_phase_vcf.sh [-nvdorlpsitrh]
+  -n  | --library_id         STR   library_id: eg. [sample_1]
+  -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [project/joint_genotype/sample_1.pass.joint.vcf.gz]
+  -d  | --outputdir          STR   output directory name eg. [project/phasing]
+  -o  | --outputvcf          STR   name of output vcf eg. [sample_1.pass.joint.phase.vcf.gz]
+  -r  | --phasingref         STR   path/to/1000G reference eg. [reference/phasing/biallelic_SNV]
+  -l  | --interval           STR   optional: phase a single chromosome eg. [chr22]
+  -p  | --hcphase                  optional: recover haplotypecaller physical phasing variants that are not in shapeit reference. Default=[false]
+  -s  | --snvonly            STR   use the biallelic_SNV reference for phasing
+  -i  | --snvindel           STR   use the biallelic_SNV_and_INDEL reference for phasing
+  -r  | --reproduce                optional: run shapeit with a single thread for reproducibility. Default=[false]
+  -t  | --threads            INT   number of threads. Default=[1]
+  -h  | --help                     show usage
+
+EOF
+exit 1
 }
 
 if [[ ${#} -eq 0 ]]; then
    usage
 fi
 
-PARSED_ARGUMENTS=$(getopt -a -n step2_merge_genh.sh -o n:v:d:o:l:psirt:h --long library_id:,inputvcf:,outputdir:,outputvcf:,interval:,hcphase,snvonly,\
-snvindel,reproduce,threads:,help -- "$@")
+PARSED_ARGUMENTS=$(getopt -a -n step3_phase_vcf.sh \
+-o n:v:d:o:r:l:psirt:h \
+--long library_id:,inputvcf:,outputdir:,outputvcf:,phasingref:,interval:,hcphase,snvonly,snvindel,reproduce,threads:,help -- "$@")
 
 echo "PARSED_ARGUMENTS are $PARSED_ARGUMENTS"
 eval set -- "$PARSED_ARGUMENTS"
@@ -40,6 +62,7 @@ do
     -v | --inputvcf)          inputvcf=$2          ; shift 2 ;;
     -d | --outputdir)         outputdir=$2         ; shift 2 ;;
     -o | --outputvcf)         outputvcf=$2         ; shift 2 ;;
+    -r | --phasingref)        phasingref=$2        ; shift 2 ;;
     -l | --interval)          interval=$2          ; shift 2 ;;
     -p | --hcphase)           hcphase=true         ; shift 1 ;;
     -s | --snvonly)           snvonly=true         ; shift 1 ;;
@@ -57,6 +80,7 @@ echo "library_id                : $library_id"
 echo "inputvcf                  : $inputvcf"
 echo "outputdir                 : $outputdir"
 echo "outputvcf                 : $outputvcf"
+echo "phasingref                : $phasingref"
 echo "interval                  : $interval"
 echo "hcphase                   : $hcphase"
 echo "snvonly                   : $snvonly"
@@ -87,7 +111,7 @@ else
 fi
 
 if [ ! -f $inputvcf.tbi ]; then
-bcftools index --threads $threads --tbi $inputvcf
+  bcftools index --threads $threads --tbi $inputvcf
 fi
 
 # use a reference with both snv and indels for phasing
@@ -101,7 +125,7 @@ if [ $snvindel == "true" ] && [ $reproduce == "false" ]; then
   --map $workdir/phasing/shapeit4/maps/$interval.b38.gmap.gz \
   --region $interval \
   --seed 123456 \
-  --reference phasing/ALL.$interval.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz \
+  --reference $phasingref/ALL.$interval.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz \
   --sequencing \
   --output $workdir/phased.$interval.vcf.gz
   done
@@ -118,9 +142,12 @@ if [ $snvindel == "true" ] && [ $reproduce == "true" ]; then
   --map $workdir/phasing/shapeit4/maps/$interval.b38.gmap.gz \
   --region $interval \
   --seed 123456 \
-  --reference phasing/ALL.$interval.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz \
+  --reference $phasingref/ALL.$interval.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz \
   --sequencing \
-  --output $workdir/phased.$interval.vcf.gz &
+  --output $workdir/phased.$interval.vcf.gz & \
+    while (( $(jobs |wc -l) >= (( ${threads} + 1 )) )); do
+      sleep 0.1
+    done
   done
 wait
 fi
@@ -136,7 +163,7 @@ if [ $snvonly = "true" ] && [ $reproduce == "false" ]; then
   --map $workdir/phasing/shapeit4/maps/$interval.b38.gmap.gz \
   --region $interval \
   --seed 123456 \
-  --reference phasing/ALL.$interval.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz \
+  --reference $phasingref/ALL.$interval.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz \
   --sequencing \
   --output $workdir/phased.$interval.vcf.gz
   done
@@ -152,9 +179,12 @@ if [ $snvonly = "true" ] && [ $reproduce == "true" ]; then
   --map $workdir/phasing/shapeit4/maps/$interval.b38.gmap.gz \
   --region $interval \
   --seed 123456 \
-  --reference phasing/ALL.$interval.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz \
+  --reference $phasingref/ALL.$interval.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz \
   --sequencing \
-  --output $workdir/phased.$interval.vcf.gz &
+  --output $workdir/phased.$interval.vcf.gz & \
+    while (( $(jobs |wc -l) >= (( ${threads} + 1 )) )); do
+      sleep 0.1
+    done
   done
   wait
 fi
