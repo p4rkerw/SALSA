@@ -218,8 +218,8 @@ bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT\n]' project/phasing/pbmc.pass.rna.
 ```
 Usage: step4_gatk_anno_vcf.sh [-nvdoamfth]
   -n  | --library_id         STR   library_id: eg. [sample_1]
-  -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [vcfdir/phasing/sample_1.pass.joint.hcphase.vcf.gz]
-  -d  | --outputdir          STR   output directory name eg. [vcfdir/funcotation]
+  -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [project/phasing/sample_1.pass.joint.hcphase.vcf.gz]
+  -d  | --outputdir          STR   output directory name eg. [project/funcotation]
   -o  | --outputvcf          STR   name of output vcf eg. [sample_1.pass.joint.hcphase.funco.vcf.gz]
   -a  | --output_table       STR   name of output funcotation csv eg. [sample_1.pass.joint.hcphase.formatted.csv]
   -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
@@ -300,17 +300,17 @@ bash SALSA/step5_filterbam.sh \
 **Step 6: Perform variant-aware realignment with WASP** This step takes a genotyped vcf and performs variant-aware realignment on a coordinate-sorted and indexed bam file with WASP. WASP is a tool to perform unbiased allele-specific read mapping and you can read more about it here: https://github.com/bmvdgeijn/WASP . For the purposes of the tutorial, we will only analyze chromosome 22. For RNA analysis, this step requires a STAR index of the cellranger reference. A STAR index can be built ahead of time using the command below. Building a new index takes awhile, but it only needs to be done once.
 ```
 Usage: step6_wasp.sh [-vbdoginlmpt]
-  -v  | --inputvcf          STR   vcfdir/funcotation/sample_1.pass.joint.hcphase.funco.vcf.gz
+  -v  | --inputvcf          STR   project/funcotation/sample_1.pass.joint.hcphase.funco.vcf.gz
   -b  | --inputbam          STR   path/to/input.bam eg. [project/wasp_rna/sample_1.bcfilter.bam]
   -d  | --outputdir         STR   name of output directory eg. [project/wasp_rna]
   -o  | --outputbam         STR   name of output wasp bam eg. [sample_1.phase.wasp.bam]
   -g  | --genotype          STR   genotype: [rna] [atac] [joint]
-  -i  | --stargenome        STR   path/to/star genomeDir made with genomeGenerate eg. [reference/refdata-gex-GRCh38-2020-A/star]
+  -i  | --stargenome        STR   path/to/star genomeDir eg. [reference/refdata-gex-GRCh38-2020-A/star]
   -n  | --library_id        STR   library_id: eg. [sample_1]
   -m  | --modality          STR   modality: [rna] [atac]
   -l  | --interval          STR   optional: analyze a single chromosome eg. [chr22]
   -p  | --isphased                input vcf is phased. Default=[FALSE]
-  -t  | --threads           INT   number of THREADS. Default=[1]
+  -t  | --threads           INT   number of threads. Default=[1]
   -h  | --help                    show usage
 ```
 
