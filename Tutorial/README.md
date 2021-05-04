@@ -255,13 +255,13 @@ head -n3 project/funcotation/pbmc.pass.rna.chr22hcphase.formatted.csv
 ```
 Usage: step5_filterbam.sh [-nidolmbeth]
 -n  | --library_id         STR   library_id: eg. [sample_1]
--i  | --inputbam           STR   path/to/input.bam eg. [rna_counts/sample_1/outs/possorted_genome_bam.bam]
+-i  | --inputbam           STR   path/to/input.bam eg. [project/sample_1/outs/possorted_genome_bam.bam]
 -d  | --outputdir          STR   output directory eg. [project/wasp_rna]
 -o  | --outputbam          STR   filtered output bam eg. [sample_1.bcfilter.bam]
 -l  | --interval           STR   optional: filter a single chromosome eg. [chr22]
 -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
 -b  | --barcodes           STR   path/to/barcodes.csv with headers and two columns. First column is named "barcodes"
-                                 second column is group "orig.ident" and third column is cell type eg. [barcodes/rna_barcodes.csv]
+                                 second column is group "orig.ident" and third column is cell type eg. [project/barcodes/rna_barcodes.csv]
 -e  | --validate                 validate the barcode-filtered bam file. Default=[false]
 -t  | --threads            INT   number of threads. Default=[1]
 -h  | --help                     show usage
@@ -347,7 +347,7 @@ bash SALSA/step6_wasp.sh \
 Usage: step7_gatk_alleleCount.sh [-viognmlCcspt]
   -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [project/funcotation/sample_1.pass.joint.hcphase.funco.vcf.gz]
   -i  | --inputbam           STR   path/to/wasp.bam eg. [project/wasp_rna/sample_1.phase.wasp.bam]
-  -b  | --barcodes           STR   path/to/barcodes.csv eg. [barcodes/rna_barcodes.csv]
+  -b  | --barcodes           STR   path/to/barcodes.csv eg. [project/barcodes/rna_barcodes.csv]
   -g  | --genotype           STR   genotype: [rna] [atac] [joint]
   -n  | --library_id         STR   library_id: eg. [sample_1]
   -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
