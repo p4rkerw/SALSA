@@ -265,21 +265,6 @@ Usage: step5_filterbam.sh [-nidolmbeth]
 -t  | --threads            INT   number of threads. Default=[1]
 -h  | --help                     show usage
 ```
-**Launch 🌶️SALSA container**
-```
-SCRATCH1=/mnt/g/scratch
-project=/mnt/g/salsa
-docker run \
---workdir $HOME \
--v $HOME:$HOME \
--v $project/pbmc_1k:$HOME/rna_counts \
--v $project/SALSA:$HOME/SALSA \
--v $project/barcodes:$HOME/barcodes \
--v $project:$HOME/project \
--v $SCRATCH1:$SCRATCH1 \
--e SCRATCH1="/mnt/g/scratch" \
---rm -it p4rkerw/salsa:latest
-```
 **Download clustering analysis for tutorial dataset and create a barcode csv**
 ```
 # download the barcode cluster annotation file from 10X Genomics
@@ -288,11 +273,12 @@ tar -C project/pbmc_1k -xvzf project/pbmc_1k/1k_PBMCs_TotalSeq_B_3p_LT_analysis.
 
 # use the cluster number as celltype and assign pbmc_1k as the library_id in final csv
 cluster=project/pbmc_1k/analysis/clustering/graphclust/clusters.csv
-(echo "barcode,orig.ident,celltype"; awk 'BEGIN{FS=OFS=","} {if (NR!=1) print $1,"pbmc_1k",$2}' $cluster) |sed 's/-1//g'> barcodes/rna_barcodes.csv
+mkdir project/barcodes
+(echo "barcode,orig.ident,celltype"; awk 'BEGIN{FS=OFS=","} {if (NR!=1) print $1,"pbmc_1k",$2}' $cluster) |sed 's/-1//g'> project/barcodes/rna_barcodes.csv
 ```
 **Inspect the barcode csv**
 ```
-head -n3 barcodes/rna_barcodes.csv
+head -n3 project/barcodes/rna_barcodes.csv
 # barcode,orig.ident,celltype
 # AATCACGAGCAGCCCT,pbmc_1k,1
 # AATCACGAGGAACTCG,pbmc_1k,1
@@ -303,10 +289,10 @@ head -n3 barcodes/rna_barcodes.csv
 bash SALSA/step5_filterbam.sh \
 --library_id pbmc_1k \
 --validate \
---inputbam rna_counts/outs/possorted_genome_bam.bam \
+--inputbam project/pbmc_1k/outs/possorted_genome_bam.bam \
 --modality rna \
 --interval chr22 \
---barcodes barcodes/rna_barcodes.csv \
+--barcodes project/barcodes/rna_barcodes.csv \
 --outputdir project/wasp_rna \
 --outputbam pbmc.bcfilter.chr22.bam \
 --threads 10
@@ -319,7 +305,7 @@ Usage: step6_wasp.sh [-vbdoginlmpt]
   -d  | --outputdir         STR   name of output directory eg. [project/wasp_rna]
   -o  | --outputbam         STR   name of output wasp bam eg. [sample_1.phase.wasp.bam]
   -g  | --genotype          STR   genotype: [rna] [atac] [joint]
-  -i  | --stargenome        STR   path/to/star genomeDir made with genomeGenerate eg. [rna_ref/star]. If absent create new STAR index in $SCRATCH1/rna_ref
+  -i  | --stargenome        STR   path/to/star genomeDir made with genomeGenerate eg. [reference/refdata-gex-GRCh38-2020-A/star]
   -n  | --library_id        STR   library_id: eg. [sample_1]
   -m  | --modality          STR   modality: [rna] [atac]
   -l  | --interval          STR   optional: analyze a single chromosome eg. [chr22]
@@ -327,31 +313,14 @@ Usage: step6_wasp.sh [-vbdoginlmpt]
   -t  | --threads           INT   number of THREADS. Default=[1]
   -h  | --help                    show usage
 ```
-**Launch 🌶️SALSA container**
-```
-SCRATCH1=/mnt/g/scratch
-project=/mnt/g/salsa
-reference=/mnt/g/reference
-docker run \
---workdir $HOME \
--v $HOME:$HOME \
--v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
--v $reference:$HOME/reference \
--v $project/vcf_output:$HOME/vcfdir \
--v $project/SALSA:$HOME/SALSA \
--v $project:$HOME/project \
--v $SCRATCH1:$SCRATCH1 \
--e SCRATCH1="/mnt/g/scratch" \
---rm -it p4rkerw/salsa:latest
-```
 
 **(Not required for tutorial) Build a STAR index for 🌶️SALSA** The refdata-gex-GRCh38-2020-A reference comes with a pre-packaged STAR reference built with STAR-2.5.1b. If you want to use a more recent version of STAR or a different index you will need to build a new one. 
 ```
 # STAR \
 # --runMode genomeGenerate \
-# --genomeDir rna_ref/salsa_star \
-# --genomeFastaFiles rna_ref/fasta/genome.fa \
-# --sjdbGTFfile rna_ref/genes/genes.gtf \
+# --genomeDir reference/refdata-gex-GRCh38-2020-A/salsa_star \
+# --genomeFastaFiles reference/refdata-gex-GRCh38-2020-A/fasta/genome.fa \
+# --sjdbGTFfile reference/refdata-gex-GRCh38-2020-A/genes/genes.gtf \
 # --genomeSAsparseD 3 \
 # --runThreadN 10
 ```
@@ -360,12 +329,12 @@ docker run \
 ```
 # runtime ~2min
 bash SALSA/step6_wasp.sh \
---inputvcf vcfdir/funcotation/pbmc.pass.rna.chr22hcphase.funco.vcf.gz \
+--inputvcf project/funcotation/pbmc.pass.rna.chr22hcphase.funco.vcf.gz \
 --inputbam project/wasp_rna/pbmc.bcfilter.chr22.bam \
 --outputdir project/wasp_rna \
 --outputbam pbmc.hcphase.chr22wasp.bam \
---genotype joint \
---stargenome rna_ref/star \
+--genotype rna \
+--stargenome reference/refdata-gex-GRCh38-2020-A/star \
 --library_id pbmc_1k \
 --modality rna \
 --isphased \
@@ -389,34 +358,18 @@ Usage: step7_gatk_alleleCount.sh [-viognmlCcspt]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
 ```
-**Launch 🌶️SALSA container**
-```
-SCRATCH1=/mnt/g/scratch
-project=/mnt/g/salsa
-reference=/mnt/g/reference
-docker run \
---workdir $HOME \
--v $HOME:$HOME \
--v $reference/refdata-gex-GRCh38-2020-A:$HOME/rna_ref \
--v $project/vcf_output:$HOME/vcfdir \
--v $project/SALSA:$HOME/SALSA \
--v $project/barcodes:$HOME/barcodes \
--v $project:$HOME/project \
--v $SCRATCH1:$SCRATCH1 \
--e SCRATCH1="/mnt/g/scratch" \
---rm -it p4rkerw/salsa:latest
-```
 **Get phased allele-specific counts**
 ```
 # runtime ~8min
 bash SALSA/step7_gatk_alleleCount.sh \
---inputvcf vcfdir/funcotation/pbmc.pass.rna.chr22hcphase.funco.vcf.gz \
+--inputvcf project/funcotation/pbmc.pass.rna.chr22hcphase.funco.vcf.gz \
 --inputbam project/wasp_rna/pbmc.hcphase.chr22wasp.bam \
 --outputdir project/wasp_rna/counts \
---barcodes barcodes/rna_barcodes.csv \
+--barcodes project/barcodes/rna_barcodes.csv \
 --genotype rna_genotype \
 --library_id pbmc_1k \
 --modality rna \
+--reference reference/refdata-gex-GRCh38-2020-A \
 --pseudobulk_counts \
 --single_cell_counts \
 --celltype_counts \
