@@ -12,7 +12,7 @@ md5sum $reference/refdata-gex-GRCh38-2020-A.tar.gz #dfd654de39bff23917471e7fcc7a
 tar -xvzf $reference/refdata-gex-GRCh38-2020-A.tar.gz
 ```
 
-**Step 0: Download tutorial dataset and align to your chosen reference with cellranger** We will download a a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor and align it to our reference. This dataset uses the single cell gene expression v3 chemistry. If you want to skip ahead to the 🌶️SALSA workflow, you can download the coordinate-sorted bam and index from the 10X Genomics website (see below).
+**(Optional) Step 0: Download tutorial fastq files** We will download a a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor. This dataset uses the single cell gene expression v3 chemistry. If you want to skip ahead to the 🌶️SALSA workflow, you can download the coordinate-sorted bam and index from the 10X Genomics website. See Step 1 for details. 
 ```
 # URL to the dataset: https://support.10xgenomics.com/single-cell-gene-expression/datasets/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT
 # create your salsa tutorial directory and download the fastq
@@ -24,7 +24,9 @@ md5sum $project/tar/1k_PBMCs_TotalSeq_B_3p_LT_fastqs.tar #ac98de1046df421ff3d8dc
 
 # unpack
 tar -C $project -xvf $project/tar/1k_PBMCs_TotalSeq_B_3p_LT_fastqs.tar
-
+```
+**(Optional) Step 0: Align the tutorial dataset to the cellranger reference** If you want to skip ahead to the 🌶️SALSA workflow, you can download the coordinate-sorted bam and index from the 10X Genomics website. See Step 1 for details. 
+```
 # align and count with cellranger (version 6.0.1)
 # the output will appear in the working directory which should be $project
 # runtime ~40min
@@ -38,7 +40,6 @@ cellranger count \
 --expect-cells 1000 \
 --localcores 10
 ```
-
 **Step 0: Download GATK resource bundle** The following files are required for genotyping with GATK using GRCh38 and can be found in the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false) . Download these files to a folder called gatk in your reference directory. For additional information on GATK germline and RNA-seq short variant discovery check out their [website](https://gatk.broadinstitute.org/hc/en-us/sections/360007226651-Best-Practices-Workflows)
 ```
 # download to /mnt/g/reference/gatk
