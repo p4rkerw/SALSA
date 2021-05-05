@@ -113,6 +113,7 @@ function gatk_germline_short_variant_scatter_gather {
     -I $1 \
     -R $reference/fasta/genome.fa \
     --bqsr-recal-file $workdir/recal_data.$scatter_interval.table \
+    --create-output-bam-index true \
     -L /tmp/interval_files_folder/$scatter_interval \
     -O $workdir/bqsr.$scatter_interval.bam \
     --verbosity INFO >> $SCRATCH1/log.out 2>&1 \
