@@ -102,7 +102,7 @@ function gatk_germline_short_variant_scatter_gather {
     -L /tmp/interval_files_folder/$scatter_interval \
     -O $workdir/recal_data.$scatter_interval.table \
     --verbosity INFO >> $SCRATCH1/log.out 2>&1 \
-      || { echo "BaseRecalibrator failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; break; } &
+      || { echo "BaseRecalibrator failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; exit 1; } &
   done
   if [ $exit_status -eq 1 ]; then exit 1; else wait; fi
 
@@ -113,11 +113,10 @@ function gatk_germline_short_variant_scatter_gather {
     -I $1 \
     -R $reference/fasta/genome.fa \
     --bqsr-recal-file $workdir/recal_data.$scatter_interval.table \
-    --create-output-bam-index true \
     -L /tmp/interval_files_folder/$scatter_interval \
     -O $workdir/bqsr.$scatter_interval.bam \
     --verbosity INFO >> $SCRATCH1/log.out 2>&1 \
-      || { echo "ApplyBQSR failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; break; } &
+      || { echo "ApplyBQSR failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; exit 1; } &
   done
   if [ $exit_status -eq 1 ]; then exit 1; else wait; fi
 
@@ -136,7 +135,7 @@ function gatk_germline_short_variant_scatter_gather {
     -L /tmp/interval_files_folder/$scatter_interval \
     --verbosity INFO \
     --tmp-dir $tmpdir >> $SCRATCH1/log.out 2>&1 \
-      || { echo "HaplotypeCaller failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; break; } &
+      || { echo "HaplotypeCaller failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; exit 1; } &
   done
   if [ $exit_status -eq 1 ]; then exit 1; else wait; fi
 
@@ -157,7 +156,7 @@ function gatk_germline_short_variant_scatter_gather {
     -R $reference/fasta/genome.fa \
     -L /tmp/interval_files_folder/$scatter_interval \
     -O $workdir/output.$scatter_interval.vcf.gz >> $SCRATCH1/log.out 2>&1 \
-      || { echo "GenotypeGVCFs failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; break; } &
+      || { echo "GenotypeGVCFs failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; exit 1; } &
   done
   if [ $exit_status -eq 1 ]; then exit 1; else wait; fi
 
@@ -190,7 +189,7 @@ function interval_rna_germline_workflow {
     --tmp-dir $tmpdir \
     -L /tmp/interval_files_folder/$scatter_interval \
     -O $workdir/cigar_marked_duplicates.$scatter_interval.bam >> $SCRATCH1/log.out 2>&1 \
-      || { echo "SplitNCigarReads failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; break; } &
+      || { echo "SplitNCigarReads failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; exit 1; } &
   done
   if [ $exit_status -eq 1 ]; then exit 1; else wait; fi
 
@@ -228,7 +227,7 @@ function interval_rna_germline_workflow {
     --filter-name "QD" \
     --filter "QD < 2.0" \
     -O $workdir/$library_id.$scatter_interval.vcf.gz >> $SCRATCH1/log.out 2>&1 \
-      || { echo "VariantFiltration failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; break; } &
+      || { echo "VariantFiltration failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; exit 1; } &
   done
   if [ $exit_status -eq 1 ]; then exit 1; else wait; fi
 
@@ -250,7 +249,12 @@ function interval_atac_germline_workflow {
   # workflow from here: https://gatk.broadinstitute.org/hc/en-us/articles/360035535932-Germline-short-variant-discovery-SNPs-Indels-
   # for single sample calling exclude joint-call cohort step
   # run variant pipeline using cellranger input bam
-  gatk_germline_short_variant_scatter_gather $inputbam
+
+  # TODO sort the interval before running pipeline
+  samtools sort -@ $threads $inputbam > $workdir/sorted.$interval.bam
+  samtools index -@ $threads $workdir/sorted.$interval.bam
+
+  gatk_germline_short_variant_scatter_gather $workdir/sorted.$interval.bam
 
   # score the variants prior to filtering
   # cnnscorevariants may have better performance than vqsr for single sample genotyping. VQSR recommends >30 exomes
@@ -264,7 +268,7 @@ function interval_atac_germline_workflow {
     -R $reference/fasta/genome.fa \
     -L /tmp/interval_files_folder/$scatter_interval \
     -O $workdir/annotated.$scatter_interval.vcf.gz >> $SCRATCH1/log.out 2>&1 \
-      || { echo "CNNScoreVariants failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; break; } &
+      || { echo "CNNScoreVariants failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; exit 1; } &
   done
   if [ $exit_status -eq 1 ]; then exit 1; else wait; fi
 
@@ -399,7 +403,7 @@ for interval in ${intervals[@]}; do
   --interval-set-rule INTERSECTION \
   -L /tmp/calling_intervals_sel.bed \
   -L /tmp/scatter_by_Ns.interval_list >> $SCRATCH1/log.out 2>&1 \
-    || { echo "SplitIntervals failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; break; }
+    || { echo "SplitIntervals failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; exit 1; }
 
   # create array of scatter gather intervals  
   scatter_intervals=$(ls /tmp/interval_files_folder/)
