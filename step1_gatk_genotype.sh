@@ -381,8 +381,7 @@ rm -rf /tmp/scatter_by_Ns.interval_list 2>> log.out
 echo "Scattering intervals across reference"
 gatk ScatterIntervalsByNs \
 -R $reference/fasta/genome.fa \
--O /tmp/scatter_by_Ns.interval_list \
-|| { echo "ScatterIntervalsByNs failed on $interval"; exit 1; }
+-O /tmp/scatter_by_Ns.interval_list 
 
 # limit to specified interval
 if [ $interval ]; then
@@ -393,9 +392,14 @@ else
   intervals=(chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX)
 fi
 
+# remove vcf list if session has been used multiple times
+if [ -f /tmp/final_vcf.list ]; then
+  rm /tmp/final_vcf.list
+fi
+
 # genotype each chromosome in series
-rm /tmp/final_vcf.list 2> /dev/null
 for interval in ${intervals[@]}; do
+
   # filter calling intervals by selected interval
   awk -v var=$interval -F'\t' 'BEGIN { OFS="\t" } $1==var {print $1,$2,$3}' /tmp/calling_intervals.bed > /tmp/calling_intervals_sel.bed
 
@@ -427,7 +431,7 @@ done | pv -t
 # gather the genotyped vcf intervals
 echo "Saving $outputvcf to $outputdir"
 gatk GatherVcfs -I /tmp/final_vcf.list -O $outputdir/$outputvcf >> log.out 2>&1 ||\
- echo { "GatherVcfs failed on $interval. Check log.out for additional info"; exit 1; }
+ { echo "GatherVcfs failed on $interval. Check log.out for additional info"; exit 1; }
 
 #cleanup
 rm -rf $workdir
