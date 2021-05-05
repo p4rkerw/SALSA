@@ -175,7 +175,7 @@ function gatk_germline_short_variant_scatter_gather {
 function interval_rna_germline_workflow {
   # workflow from here: https://gatk.broadinstitute.org/hc/en-us/articles/360035531192-RNAseq-short-variant-discovery-SNPs-Indels-
   inputbam=$1
-  echo "Starting rna germline workflow for $interval"
+  echo "Starting RNA germline workflow for $interval"
 
   # splitcigar for selected intervals o/w alt contigs and unmapped reads are also processed
   # if this step fails (and you are running docker in wsl) make sure there is enough disk space where docker is installed (usually C:/) and in $tmpdir
@@ -249,6 +249,8 @@ function interval_rna_germline_workflow {
 #####################################################################################################
 # ATAC specific workflow
 function interval_atac_germline_workflow {
+  echo "Starting ATAC germline workflow for $interval"
+
   inputbam=$1
   # workflow from here: https://gatk.broadinstitute.org/hc/en-us/articles/360035535932-Germline-short-variant-discovery-SNPs-Indels-
   # for single sample calling exclude joint-call cohort step
@@ -392,11 +394,6 @@ else
   intervals=(chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX)
 fi
 
-# remove vcf list if session has been used multiple times
-if [ -f /tmp/final_vcf.list ]; then
-  rm /tmp/final_vcf.list
-fi
-
 # genotype each chromosome in series
 for interval in ${intervals[@]}; do
 
@@ -423,15 +420,15 @@ for interval in ${intervals[@]}; do
     interval_atac_germline_workflow $inputbam
   fi
 
-  echo "$workdir/genotype.$interval.vcf.gz" >> /tmp/final_vcf.list
   echo -e "\e[92mWriting genotyped vcf for $interval to $workdir \033[0m"
 
 done | pv -t
 
 # gather the genotyped vcf intervals
 echo "Saving $outputvcf to $outputdir"
-gatk GatherVcfs -I /tmp/final_vcf.list -O $outputdir/$outputvcf >> log.out 2>&1 ||\
- { echo "GatherVcfs failed on $interval. Check log.out for additional info"; exit 1; }
+ls -1 $workdir/genotype.chr*.vcf.gz > /tmp/final_vcf.list
+gatk MergeVcfs -I /tmp/final_vcf.list -O $outputdir/$outputvcf >> log.out 2>&1 ||\
+ { echo "GatherVcfs failed. Check log.out for additional info"; exit 1; }
 
 #cleanup
 rm -rf $workdir
