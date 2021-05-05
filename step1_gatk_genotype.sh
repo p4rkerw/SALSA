@@ -102,8 +102,8 @@ function gatk_germline_short_variant_scatter_gather {
     --known-sites $gatk_bundle/resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz \
     -L /tmp/interval_files_folder/$scatter_interval \
     -O $workdir/recal_data.$scatter_interval.table \
-    --verbosity INFO > log.out 2>&1 \
-    || exit "BaseRecalibrator failed on $interval. Check log.out for additional info" &
+    --verbosity INFO >> log.out 2>&1 \
+    || exit 1 "BaseRecalibrator failed on $interval. Check log.out for additional info" &
   done
   wait
 
@@ -116,8 +116,8 @@ function gatk_germline_short_variant_scatter_gather {
     --bqsr-recal-file $workdir/recal_data.$scatter_interval.table \
     -L /tmp/interval_files_folder/$scatter_interval \
     -O $workdir/bqsr.$scatter_interval.bam \
-    --verbosity INFO > log.out 2>&1 \
-    || exit "ApplyBQSR failed on $interval. Check log.out for additional info" &
+    --verbosity INFO >> log.out 2>&1 \
+    || exit 1 "ApplyBQSR failed on $interval. Check log.out for additional info" &
   done
   wait
 
@@ -137,14 +137,14 @@ function gatk_germline_short_variant_scatter_gather {
     -D $gatk_bundle/resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz \
     -L /tmp/interval_files_folder/$scatter_interval \
     --verbosity INFO \
-    --tmp-dir $tmpdir > log.out 2>&1 \
-    || exit "HaplotypeCaller failed on $interval. Check log.out for additional info" & 
+    --tmp-dir $tmpdir >> log.out 2>&1 \
+    || exit 1 "HaplotypeCaller failed on $interval. Check log.out for additional info" & 
   done
   wait
 
   # merge and index vcfs
-  gatk GatherVcfs -I /tmp/gvcf.list -O $workdir/output.g.vcf.gz > log.out 2>&1
-  gatk IndexFeatureFile -I $workdir/output.g.vcf.gz > log.out 2>&1
+  gatk GatherVcfs -I /tmp/gvcf.list -O $workdir/output.g.vcf.gz >> log.out 2>&1
+  gatk IndexFeatureFile -I $workdir/output.g.vcf.gz >> log.out 2>&1
 
   # single sample genotyping in parallel
   if [ -f /tmp/vcf.list ]; then
@@ -158,15 +158,15 @@ function gatk_germline_short_variant_scatter_gather {
     -V $workdir/output.g.vcf.gz \
     -R $reference/fasta/genome.fa \
     -L /tmp/interval_files_folder/$scatter_interval \
-    -O $workdir/output.$scatter_interval.vcf.gz > log.out 2>&1 \
-    || exit "GenotypeGVCFs failed on $interval. Check log.out for additional info" &
+    -O $workdir/output.$scatter_interval.vcf.gz >> log.out 2>&1 \
+    || exit 1 "GenotypeGVCFs failed on $interval. Check log.out for additional info" &
   done
   wait
 
   # gather genotyped vcfs
   echo "Gathering genotyped intervals for $interval"
-  gatk GatherVcfs -I /tmp/vcf.list -O $workdir/output.vcf.gz > log.out 2>&1 || exit "GatherVcfs failed on $interval. Check log.out for additional info"
-  gatk IndexFeatureFile -I $workdir/output.vcf.gz > log.out 2>&1 || exit "IndexFeatureFile failed on $interval. Check log.out for additional info"
+  gatk GatherVcfs -I /tmp/vcf.list -O $workdir/output.vcf.gz >> log.out 2>&1 || exit 1 "GatherVcfs failed on $interval. Check log.out for additional info"
+  gatk IndexFeatureFile -I $workdir/output.vcf.gz >> log.out 2>&1 || exit 1 "IndexFeatureFile failed on $interval. Check log.out for additional info"
 }
 
 #####################################################################################################
@@ -192,8 +192,8 @@ function interval_rna_germline_workflow {
     -R $reference/fasta/genome.fa \
     --tmp-dir $tmpdir \
     -L /tmp/interval_files_folder/$scatter_interval \
-    -O $workdir/cigar_marked_duplicates.$scatter_interval.bam > log.out 2>&1 \
-    || exit "SplitNCigarReads failed on $interval. Check log.out for additional info" & 
+    -O $workdir/cigar_marked_duplicates.$scatter_interval.bam >> log.out 2>&1 \
+    || exit 1 "SplitNCigarReads failed on $interval. Check log.out for additional info" & 
   done
   wait
 
@@ -201,11 +201,11 @@ function interval_rna_germline_workflow {
   echo "Gathering scattered bams for $interval"
   gatk GatherBamFiles \
   -I /tmp/cigarbam.list \
-  -O $workdir/cigar_marked_duplicates.bam > log.out 2>&1 || exit "GatherBamFiles failed on $interval. Check log.out for additional info"
+  -O $workdir/cigar_marked_duplicates.bam >> log.out 2>&1 || exit 1 "GatherBamFiles failed on $interval. Check log.out for additional info"
   echo "Sorting gathered bam file"
-  samtools sort -@ $threads $workdir/cigar_marked_duplicates.bam -o $workdir/sorted.cigar_marked_duplicates.bam > log.out 2>&1 \
-  || exit "samtools sort failed on $interval. Check log.out file for additional info"
-  samtools index -@ $threads $workdir/sorted.cigar_marked_duplicates.bam > log.out 2>&1 || exit "samtools index failed on $interval. Check log.out for additional info"
+  samtools sort -@ $threads $workdir/cigar_marked_duplicates.bam -o $workdir/sorted.cigar_marked_duplicates.bam >> log.out 2>&1 \
+  || exit 1 "samtools sort failed on $interval. Check log.out file for additional info"
+  samtools index -@ $threads $workdir/sorted.cigar_marked_duplicates.bam >> log.out 2>&1 || exit 1 "samtools index failed on $interval. Check log.out for additional info"
 
   # run gatk short variant pipeline using cigar split bam
   gatk_germline_short_variant_scatter_gather $workdir/sorted.cigar_marked_duplicates.bam
@@ -230,15 +230,15 @@ function interval_rna_germline_workflow {
     --filter "FS > 30.0" \
     --filter-name "QD" \
     --filter "QD < 2.0" \
-    -O $workdir/$library_id.$scatter_interval.vcf.gz > log.out 2>&1 \
-    || exit "VariantFiltration failed on $interval. Check log.out for additional info" & 
+    -O $workdir/$library_id.$scatter_interval.vcf.gz >> log.out 2>&1 \
+    || exit 1 "VariantFiltration failed on $interval. Check log.out for additional info" & 
   done
   wait
 
   # merge and index filtered vcfs
   echo "Gathering filtered intervals for $interval"
-  gatk GatherVcfs -I /tmp/fvcf.list -O $workdir/genotype.$interval.vcf.gz > log.out 2>&1 || exit "GatherVcfs failed on $interval. Check log.out for additional info"
-  gatk IndexFeatureFile -I $workdir/genotype.$interval.vcf.gz > log.out 2>&1 || exit "IndexFeatureFile failed on $interval. Check log.out for additional info"
+  gatk GatherVcfs -I /tmp/fvcf.list -O $workdir/genotype.$interval.vcf.gz >> log.out 2>&1 || exit 1 "GatherVcfs failed on $interval. Check log.out for additional info"
+  gatk IndexFeatureFile -I $workdir/genotype.$interval.vcf.gz >> log.out 2>&1 || exit 1 "IndexFeatureFile failed on $interval. Check log.out for additional info"
 } 
 
 #####################################################################################################
@@ -264,15 +264,15 @@ function interval_atac_germline_workflow {
     -V $workdir/output.vcf.gz \
     -R $reference/fasta/genome.fa \
     -L /tmp/interval_files_folder/$scatter_interval \
-    -O $workdir/annotated.$scatter_interval.vcf.gz > log.out 2>&1 \
-    || exit "CNNScoreVariants failed on $interval. Check log.out for additional info" &
+    -O $workdir/annotated.$scatter_interval.vcf.gz >> log.out 2>&1 \
+    || exit 1 "CNNScoreVariants failed on $interval. Check log.out for additional info" &
   done
   wait
 
   # gather cnn vcfs
   echo "Gathering CNNScoreVariants vcfs"
-  gatk GatherVcfs -I /tmp/cnnvcf.list -O $workdir/annotated.vcf.gz > log.out 2>&1 || exit "GatherVcfs failed on $interval. Check log.out for additional info"
-  gatk IndexFeatureFile -I $workdir/annotated.vcf.gz > log.out 2>&1 || exit "IndexFeatureFile failed on $interval. Check log.out for additional info"
+  gatk GatherVcfs -I /tmp/cnnvcf.list -O $workdir/annotated.vcf.gz >> log.out 2>&1 || exit 1 "GatherVcfs failed on $interval. Check log.out for additional info"
+  gatk IndexFeatureFile -I $workdir/annotated.vcf.gz >> log.out 2>&1 || exit 1 "IndexFeatureFile failed on $interval. Check log.out for additional info"
 
   # filter variants with default tranches from gatk
   echo "Filtering gathered vcf using CNNScoreVariants tranches"
@@ -283,11 +283,11 @@ function interval_atac_germline_workflow {
   --info-key CNN_1D \
   --snp-tranche 99.95 \
   --indel-tranche 99.4 \
-  -O $workdir/genotype.$interval.vcf.gz > log.out 2>&1 \
-  || exit "FilterVariantTranches failed on $interval. Check log.out for additional info"
+  -O $workdir/genotype.$interval.vcf.gz >> log.out 2>&1 \
+  || exit 1 "FilterVariantTranches failed on $interval. Check log.out for additional info"
 
   # index the interval vcf
-  gatk IndexFeatureFile -I $workdir/genotype.$interval.vcf.gz > log.out 2>&1 || exit "IndexFeatureFile failed on $interval. Check log.out for additional info"
+  gatk IndexFeatureFile -I $workdir/genotype.$interval.vcf.gz >> log.out 2>&1 || exit 1 "IndexFeatureFile failed on $interval. Check log.out for additional info"
 }
 
 # check input files
@@ -363,19 +363,19 @@ fi
 # create a output and work directories
 mkdir -p $outputdir
 workdir=$SCRATCH1/gatk_genotype/$modality/$library_id
-rm -rf $workdir; mkdir $workdir 2> log.out
+rm -rf $workdir; mkdir $workdir 2>> log.out
 
 # specify a temporary file directory for SplitNCigarReads and HaplotypeCaller
 tmpdir=$workdir/Temp
 mkdir -p $tmpdir
 
 # create scatter gather intervals to break up alternating ACGT and N blocks
-rm -rf /tmp/scatter_by_Ns.interval_list 2> log.out
+rm -rf /tmp/scatter_by_Ns.interval_list 2>> log.out
 echo "Scattering intervals across reference"
 gatk ScatterIntervalsByNs \
 -R $reference/fasta/genome.fa \
 -O /tmp/scatter_by_Ns.interval_list \
-|| exit "ScatterIntervalsByNs failed on $interval"
+|| exit 1 "ScatterIntervalsByNs failed on $interval"
 
 # limit to specified interval
 if [ $interval ]; then
@@ -387,20 +387,21 @@ else
 fi
 
 # genotype each chromosome in series
+rm /tmp/final_vcf.list 2> /dev/null
 for interval in ${intervals[@]}; do
   # filter calling intervals by selected interval
   awk -v var=$interval -F'\t' 'BEGIN { OFS="\t" } $1==var {print $1,$2,$3}' /tmp/calling_intervals.bed > /tmp/calling_intervals_sel.bed
 
   # intersect scatter gather intervals with calling bed and divide across available no. threads
-  rm -rf /tmp/interval_files_folder/ 2> log.out
+  rm -rf /tmp/interval_files_folder/ 2>> log.out
   gatk SplitIntervals \
   -R $reference/fasta/genome.fa \
   -O /tmp/interval_files_folder/ \
   --scatter-count $threads \
   --interval-set-rule INTERSECTION \
   -L /tmp/calling_intervals_sel.bed \
-  -L /tmp/scatter_by_Ns.interval_list > log.out 2>&1 \
-  || exit "SplitIntervals failed on $interval. Check log.out for additional info"
+  -L /tmp/scatter_by_Ns.interval_list >> log.out 2>&1 \
+  || exit 1 "SplitIntervals failed on $interval. Check log.out for additional info"
 
   # create array of scatter gather intervals  
   scatter_intervals=$(ls /tmp/interval_files_folder/)
@@ -411,6 +412,7 @@ for interval in ${intervals[@]}; do
     interval_atac_germline_workflow $inputbam
   fi
 
+  echo "$workdir/genotype.$interval.vcf.gz" >> /tmp/final_vcf.list
   echo -e "\e[92mWriting genotyped vcf for $interval to $workdir \033[0m"
 
 done | pv -t
@@ -418,7 +420,7 @@ done | pv -t
 # gather the genotyped vcf intervals
 echo "Saving $outputvcf to $outputdir"
 ls -1 -d $workdir/genotype.chr*.vcf.gz > /tmp/final_vcf.list
-gatk GatherVcfs -I /tmp/final_vcf.list -O $outputdir/$outputvcf > log.out 2>&1 || exit "GatherVcfs failed on $interval. Check log.out for additional info"
+gatk GatherVcfs -I /tmp/final_vcf.list -O $outputdir/$outputvcf >> log.out 2>&1 || exit 1 "GatherVcfs failed on $interval. Check log.out for additional info"
 
 #cleanup
 rm -rf $workdir
