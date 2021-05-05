@@ -419,7 +419,6 @@ done | pv -t
 
 # gather the genotyped vcf intervals
 echo "Saving $outputvcf to $outputdir"
-ls -1 -d $workdir/genotype.chr*.vcf.gz > /tmp/final_vcf.list
 gatk GatherVcfs -I /tmp/final_vcf.list -O $outputdir/$outputvcf >> log.out 2>&1 || exit 1 "GatherVcfs failed on $interval. Check log.out for additional info"
 
 #cleanup
