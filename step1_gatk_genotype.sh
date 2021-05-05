@@ -251,7 +251,7 @@ function interval_atac_germline_workflow {
   # run variant pipeline using cellranger input bam
 
   # before running pipeline ensure interval is coordinate-sorted and @HD tag is properly formatted
-  samtools sort -T $workdir -@ $threads $inputbam > $workdir/sorted.$interval.bam
+  samtools view $inputbam $interval| samtools sort -T $workdir -@ $threads > $workdir/sorted.$interval.bam
   samtools index -@ $threads $workdir/sorted.$interval.bam
 
   gatk_germline_short_variant_scatter_gather $workdir/sorted.$interval.bam
