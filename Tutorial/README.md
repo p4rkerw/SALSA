@@ -122,8 +122,11 @@ bash SALSA/step1_gatk_genotype.sh \
 --threads 10
 
 # Option 2: if you skipped the cellranger alignment step...
+# download coordinate-sorted bam and index
 wget -P project/pbmc_1k/outs https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_possorted_genome_bam.bam
 wget -P project/pbmc_1k/outs https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_possorted_genome_bam.bam.bai
+
+# genotype the downloaded bam
 bash SALSA/step1_gatk_genotype.sh \
 --inputbam project/pbmc_1k/outs/1k_PBMCs_TotalSeq_B_3p_LT_possorted_genome_bam.bam \
 --library_id pbmc_1k \
