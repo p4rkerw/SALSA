@@ -8,6 +8,7 @@ set -e
 # Set some default values:
 interval=""
 threads=1
+exit_status=0
 
 function usage {
 cat << "EOF"
@@ -44,9 +45,7 @@ EOF
 exit 1
 }
 
-if [[ ${#} -eq 0 ]]; then
-   usage
-fi
+if [[ ${#} -eq 0 ]]; then usage; fi
 
 PARSED_ARGUMENTS=$(getopt -a -n step1_gatk_genotype.sh \
 -o i:n:r:g:d:o:m:l:t:h \
@@ -103,9 +102,9 @@ function gatk_germline_short_variant_scatter_gather {
     -L /tmp/interval_files_folder/$scatter_interval \
     -O $workdir/recal_data.$scatter_interval.table \
     --verbosity INFO >> $SCRATCH1/log.out 2>&1 \
-    || { echo "BaseRecalibrator failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; } &
+      || { echo "BaseRecalibrator failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; break; } &
   done
-  wait
+  if [ $exit_status -eq 1 ]; then exit 1; else wait; fi
 
   # apply base quality score recalibration
   echo "Running ApplyBQSR on scattered intervals for $interval"
@@ -117,14 +116,12 @@ function gatk_germline_short_variant_scatter_gather {
     -L /tmp/interval_files_folder/$scatter_interval \
     -O $workdir/bqsr.$scatter_interval.bam \
     --verbosity INFO >> $SCRATCH1/log.out 2>&1 \
-    || { echo "ApplyBQSR failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; } &
+      || { echo "ApplyBQSR failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; break; } &
   done
-  wait
+  if [ $exit_status -eq 1 ]; then exit 1; else wait; fi
 
   # remove vcf list if session has been used multiple times
-  if [ -f /tmp/gvcf.list ]; then
-    rm /tmp/gvcf.list
-  fi
+  if [ -f /tmp/gvcf.list ]; then rm /tmp/gvcf.list; fi
   # call variants with haplotypecaller
   echo "Running HaplotypeCaller on scattered intervals for $interval"
   for scatter_interval in ${scatter_intervals[@]}; do
@@ -138,18 +135,18 @@ function gatk_germline_short_variant_scatter_gather {
     -L /tmp/interval_files_folder/$scatter_interval \
     --verbosity INFO \
     --tmp-dir $tmpdir >> $SCRATCH1/log.out 2>&1 \
-    || { echo "HaplotypeCaller failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; } & 
+      || { echo "HaplotypeCaller failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; break; } &
   done
-  wait
+  if [ $exit_status -eq 1 ]; then exit 1; else wait; fi
 
   # merge and index vcfs
-  gatk GatherVcfs -I /tmp/gvcf.list -O $workdir/output.g.vcf.gz >> $SCRATCH1/log.out 2>&1
-  gatk IndexFeatureFile -I $workdir/output.g.vcf.gz >> $SCRATCH1/log.out 2>&1
+  gatk GatherVcfs -I /tmp/gvcf.list -O $workdir/output.g.vcf.gz >> $SCRATCH1/log.out 2>&1 \
+    || { echo "GatherVcfs failed. Check $SCRATCH1/log.out for additional info"; exit 1; }
+  gatk IndexFeatureFile -I $workdir/output.g.vcf.gz >> $SCRATCH1/log.out 2>&1 \
+    || { echo "IndexFeatureFile failed. Check $SCRATCH1/log.out for additional info"; exit 1; }
 
   # single sample genotyping in parallel
-  if [ -f /tmp/vcf.list ]; then
-    rm /tmp/vcf.list
-  fi
+  if [ -f /tmp/vcf.list ]; then rm /tmp/vcf.list; fi
   # genotype vcf
   echo "Genotyping scattered intervals for $interval"
   for scatter_interval in ${scatter_intervals[@]}; do
@@ -159,14 +156,16 @@ function gatk_germline_short_variant_scatter_gather {
     -R $reference/fasta/genome.fa \
     -L /tmp/interval_files_folder/$scatter_interval \
     -O $workdir/output.$scatter_interval.vcf.gz >> $SCRATCH1/log.out 2>&1 \
-    || { echo "GenotypeGVCFs failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; } &
+      || { echo "GenotypeGVCFs failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; break; } &
   done
-  wait
+  if [ $exit_status -eq 1 ]; then exit 1; else wait; fi
 
   # gather genotyped vcfs
   echo "Gathering genotyped intervals for $interval"
-  gatk GatherVcfs -I /tmp/vcf.list -O $workdir/output.vcf.gz >> $SCRATCH1/log.out 2>&1 || { echo "GatherVcfs failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
-  gatk IndexFeatureFile -I $workdir/output.vcf.gz >> $SCRATCH1/log.out 2>&1 || { echo "IndexFeatureFile failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
+  gatk GatherVcfs -I /tmp/vcf.list -O $workdir/output.vcf.gz >> $SCRATCH1/log.out 2>&1 \
+    || { echo "GatherVcfs failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
+  gatk IndexFeatureFile -I $workdir/output.vcf.gz >> $SCRATCH1/log.out 2>&1 \
+    || { echo "IndexFeatureFile failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
 }
 
 #####################################################################################################
@@ -177,13 +176,10 @@ function interval_rna_germline_workflow {
   inputbam=$1
   echo "Starting RNA germline workflow for $interval"
 
-  # splitcigar for selected intervals o/w alt contigs and unmapped reads are also processed
   # if this step fails (and you are running docker in wsl) make sure there is enough disk space where docker is installed (usually C:/) and in $tmpdir
   # o/w you may see a cryptic jvm sigsegv samtools htslib error that results from generation of temp files in C:/users/$USER/AppData/Local/Docker/wsl
   # this may occur when the number of threads is increased (resulting in the generation of more temp files)
-  if [ -f /tmp/cigarbam.list ]; then
-    rm /tmp/cigarbam.list
-  fi
+  if [ -f /tmp/cigarbam.list ]; then rm /tmp/cigarbam.list; fi
   echo "Running SplitNCigarReads on scattered intervals"
   for scatter_interval in ${scatter_intervals[@]}; do
     echo "$workdir/cigar_marked_duplicates.$scatter_interval.bam" >> /tmp/cigarbam.list
@@ -193,21 +189,21 @@ function interval_rna_germline_workflow {
     --tmp-dir $tmpdir \
     -L /tmp/interval_files_folder/$scatter_interval \
     -O $workdir/cigar_marked_duplicates.$scatter_interval.bam >> $SCRATCH1/log.out 2>&1 \
-    || { echo "SplitNCigarReads failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; } & 
+      || { echo "SplitNCigarReads failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; break; } &
   done
-  wait
+  if [ $exit_status -eq 1 ]; then exit 1; else wait; fi
 
   # gather the split cigar bam files and index
   echo "Gathering scattered bams for $interval"
   gatk GatherBamFiles \
   -I /tmp/cigarbam.list \
   -O $workdir/cigar_marked_duplicates.bam >> $SCRATCH1/log.out 2>&1 \
-  || { echo "GatherBamFiles failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
+    || { echo "GatherBamFiles failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
   echo "Sorting gathered bam file"
   samtools sort -@ $threads $workdir/cigar_marked_duplicates.bam -o $workdir/sorted.cigar_marked_duplicates.bam >> $SCRATCH1/log.out 2>&1 \
-  || { echo "samtools sort failed on $interval. Check $SCRATCH1/log.out file for additional info"; exit 1; }
+    || { echo "samtools sort failed on $interval. Check $SCRATCH1/log.out file for additional info"; exit 1; }
   samtools index -@ $threads $workdir/sorted.cigar_marked_duplicates.bam >> $SCRATCH1/log.out 2>&1 \
-  || { echo "samtools index failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
+    || { echo "samtools index failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
 
   # run gatk short variant pipeline using cigar split bam
   gatk_germline_short_variant_scatter_gather $workdir/sorted.cigar_marked_duplicates.bam
@@ -215,9 +211,7 @@ function interval_rna_germline_workflow {
   # perform hard filtering using the qual-by-depth QD score and window for snp clustering
   # vqsr and cnnscorevariants is not recommended for rna-based genotyping
   # filter thresholds taken from https://github.com/gatk-workflows/gatk4-rnaseq-germline-snps-indels/blob/master/gatk4-rna-best-practices.wdl
-  if [ -f /tmp/fvcf.list ]; then
-    rm /tmp/fvcf.list
-  fi
+  if [ -f /tmp/fvcf.list ]; then rm /tmp/fvcf.list; fi
   echo "Applying hard filters"
   for scatter_interval in ${scatter_intervals[@]}; do
     echo $workdir/$library_id.$scatter_interval.vcf.gz >> /tmp/fvcf.list
@@ -233,16 +227,16 @@ function interval_rna_germline_workflow {
     --filter-name "QD" \
     --filter "QD < 2.0" \
     -O $workdir/$library_id.$scatter_interval.vcf.gz >> $SCRATCH1/log.out 2>&1 \
-    || { echo "VariantFiltration failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; } & 
+      || { echo "VariantFiltration failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; break; } &
   done
-  wait
+  if [ $exit_status -eq 1 ]; then exit 1; else wait; fi
 
   # merge and index filtered vcfs
   echo "Gathering filtered intervals for $interval"
-  gatk GatherVcfs -I /tmp/fvcf.list -O $workdir/genotype.$interval.vcf.gz >> $SCRATCH1/log.out 2>&1 ||\
-   { echo "GatherVcfs failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
-  gatk IndexFeatureFile -I $workdir/genotype.$interval.vcf.gz >> $SCRATCH1/log.out 2>&1 ||\
-   { echo "IndexFeatureFile failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
+  gatk GatherVcfs -I /tmp/fvcf.list -O $workdir/genotype.$interval.vcf.gz >> $SCRATCH1/log.out 2>&1 \
+    || { echo "GatherVcfs failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
+  gatk IndexFeatureFile -I $workdir/genotype.$interval.vcf.gz >> $SCRATCH1/log.out 2>&1 \
+    || { echo "IndexFeatureFile failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
 } 
 
 #####################################################################################################
@@ -260,9 +254,7 @@ function interval_atac_germline_workflow {
   # score the variants prior to filtering
   # cnnscorevariants may have better performance than vqsr for single sample genotyping. VQSR recommends >30 exomes
   # see discussion: https://gatk.broadinstitute.org/hc/en-us/community/posts/360056186812-Using-VQSR-for-small-scale-experiments
-  if [ -f /tmp/cnnvcf.list ]; then
-    rm /tmp/cnnvcf.list
-  fi
+  if [ -f /tmp/cnnvcf.list ]; then rm /tmp/cnnvcf.list; fi
   echo "Runnning CNNScoreVariants on $interval"
   for scatter_interval in ${scatter_intervals[@]}; do
     echo "$workdir/annotated.$scatter_interval.vcf.gz" >> /tmp/cnnvcf.list
@@ -271,16 +263,16 @@ function interval_atac_germline_workflow {
     -R $reference/fasta/genome.fa \
     -L /tmp/interval_files_folder/$scatter_interval \
     -O $workdir/annotated.$scatter_interval.vcf.gz >> $SCRATCH1/log.out 2>&1 \
-    || { echo "CNNScoreVariants failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; } &
+      || { echo "CNNScoreVariants failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; break; } &
   done
-  wait
+  if [ $exit_status -eq 1 ]; then exit 1; else wait; fi
 
   # gather cnn vcfs
   echo "Gathering CNNScoreVariants vcfs"
-  gatk GatherVcfs -I /tmp/cnnvcf.list -O $workdir/annotated.vcf.gz >> $SCRATCH1/log.out 2>&1 ||\
-   { echo "GatherVcfs failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
-  gatk IndexFeatureFile -I $workdir/annotated.vcf.gz >> $SCRATCH1/log.out 2>&1 ||\
-   { echo "IndexFeatureFile failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
+  gatk GatherVcfs -I /tmp/cnnvcf.list -O $workdir/annotated.vcf.gz >> $SCRATCH1/log.out 2>&1 \
+    || { echo "GatherVcfs failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
+  gatk IndexFeatureFile -I $workdir/annotated.vcf.gz >> $SCRATCH1/log.out 2>&1 \
+    || { echo "IndexFeatureFile failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
 
   # filter variants with default tranches from gatk
   echo "Filtering gathered vcf using CNNScoreVariants tranches"
@@ -292,21 +284,18 @@ function interval_atac_germline_workflow {
   --snp-tranche 99.95 \
   --indel-tranche 99.4 \
   -O $workdir/genotype.$interval.vcf.gz >> $SCRATCH1/log.out 2>&1 \
-  || { echo "FilterVariantTranches failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
+    || { echo "FilterVariantTranches failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
 
   # index the interval vcf
-  gatk IndexFeatureFile -I $workdir/genotype.$interval.vcf.gz >> $SCRATCH1/log.out 2>&1 ||\
-   { echo "IndexFeatureFile failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
+  gatk IndexFeatureFile -I $workdir/genotype.$interval.vcf.gz >> $SCRATCH1/log.out 2>&1 \
+    || { echo "IndexFeatureFile failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
 }
 
 # check input files
 ###########################################################
 ###########################################################
 # check for input bam file
-if [ ! -f $inputbam ]; then
-  echo "Input bam file not found"
-  exit 1
-fi
+if [ ! -f $inputbam ]; then echo "Input bam file not found"; exit 1; fi
 
 # check for ref
 if [ ! -f $reference/fasta/genome.fa ]; then
@@ -315,10 +304,10 @@ if [ ! -f $reference/fasta/genome.fa ]; then
 fi
 
 # check for rna and atac gatk resource files for haplotype caller
-if [ ! -f $gatk_bundle/resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz ] ||\
-   [ ! -f $gatk_bundle/resources_broad_hg38_v0_Homo_sapiens_assembly38.known_indels.vcf.gz ] ||\
-   [ ! -f $gatk_bundle/resources_broad_hg38_v0_1000G_phase1.snps.high_confidence.hg38.vcf.gz ] ||\
-   [ ! -f $gatk_bundle/resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz ]; then
+if [ ! -f $gatk_bundle/resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz ] \
+  || [ ! -f $gatk_bundle/resources_broad_hg38_v0_Homo_sapiens_assembly38.known_indels.vcf.gz ] \
+  || [ ! -f $gatk_bundle/resources_broad_hg38_v0_1000G_phase1.snps.high_confidence.hg38.vcf.gz ] \
+  || [ ! -f $gatk_bundle/resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz ]; then
   echo "One or more GATK resource files not found in gatk_bundle directory:"
   echo "resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz"
   echo "resources_broad_hg38_v0_Homo_sapiens_assembly38.known_indels.vcf.gz"
@@ -334,16 +323,16 @@ if [ $modality = rna ] && [ ! -f $reference/genes/genes.gtf ]; then
 fi
 
 # check for wgs calling regions and dna variant gatk resources
-if [ ! -f $gatk_bundle/resources_broad_hg38_v0_wgs_calling_regions.hg38 ] ||\
-   [ ! -f $gatk_bundle/resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz ] ||\
-   [ ! -f $gatk_bundle/resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz ]; then
-   if [ $modality = "atac" ]; then
-    echo "One or more GATK resource files not found in gatk_bundle directory:"
-    echo "resources_broad_hg38_v0_wgs_calling_regions.hg38"
-    echo "resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz"
-    echo "resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz"
-    exit 1
-   fi
+if [ ! -f $gatk_bundle/resources_broad_hg38_v0_wgs_calling_regions.hg38 ] \
+  || [ ! -f $gatk_bundle/resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz ] \
+  || [ ! -f $gatk_bundle/resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz ]; then
+  if [ $modality = "atac" ]; then
+  echo "One or more GATK resource files not found in gatk_bundle directory:"
+  echo "resources_broad_hg38_v0_wgs_calling_regions.hg38"
+  echo "resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz"
+  echo "resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz"
+  exit 1
+  fi
 fi
 
 ##################################################################
@@ -409,7 +398,7 @@ for interval in ${intervals[@]}; do
   --interval-set-rule INTERSECTION \
   -L /tmp/calling_intervals_sel.bed \
   -L /tmp/scatter_by_Ns.interval_list >> $SCRATCH1/log.out 2>&1 \
-  || { echo "SplitIntervals failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
+    || { echo "SplitIntervals failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; break; }
 
   # create array of scatter gather intervals  
   scatter_intervals=$(ls /tmp/interval_files_folder/)
@@ -424,11 +413,15 @@ for interval in ${intervals[@]}; do
 
 done | pv -t
 
+# check exit status
+if [ $exit_status -eq 1 ]; then exit 1; fi
+
 # gather the genotyped vcf intervals
 echo "Saving $outputvcf to $outputdir"
 ls -1 $workdir/genotype.chr*.vcf.gz > /tmp/final_vcf.list
-gatk MergeVcfs -I /tmp/final_vcf.list -O $outputdir/$outputvcf >> $SCRATCH1/log.out 2>&1 ||\
- { echo "GatherVcfs failed. Check $SCRATCH1/log.out for additional info"; exit 1; }
+gatk MergeVcfs -I /tmp/final_vcf.list -O $outputdir/$outputvcf >> $SCRATCH1/log.out 2>&1 \
+  || { echo "GatherVcfs failed. Check $SCRATCH1/log.out for additional info"; exit 1; }
+
 
 #cleanup
 rm -rf $workdir
