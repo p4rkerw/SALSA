@@ -372,7 +372,7 @@ fi
 # create a output and work directories
 mkdir -p $outputdir
 workdir=$SCRATCH1/gatk_genotype/$modality/$library_id
-rm -rf $workdir; mkdir $workdir 2>> $SCRATCH1/log.out
+rm -rf $workdir; mkdir -p $workdir 2>> $SCRATCH1/log.out
 
 # specify a temporary file directory for SplitNCigarReads and HaplotypeCaller
 tmpdir=$workdir/Temp
