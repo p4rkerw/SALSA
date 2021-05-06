@@ -264,7 +264,7 @@ function interval_atac_germline_workflow {
   inputbam=$1
 
   # before running pipeline ensure interval is coordinate-sorted and @HD tag is properly formatted
-  samtools view -h $inputbam $interval > $workdir/$interval.bam
+  samtools view -b -h $inputbam $interval > $workdir/$interval.bam
   # samtools sort -T $workdir -@ $threads $workdir/$interval.bam > $workdir/sorted.$interval.bam
   samtools index -@ $threads $workdir/$interval.bam
 
