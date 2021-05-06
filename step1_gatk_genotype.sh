@@ -189,7 +189,6 @@ function gatk_germline_short_variant_scatter_gather {
 # RNA specific workflow
 function interval_rna_germline_workflow {
   # workflow from here: https://gatk.broadinstitute.org/hc/en-us/articles/360035531192-RNAseq-short-variant-discovery-SNPs-Indels-
-  inputbam=$1
   echo "Starting RNA germline workflow for $interval"
 
   # if this step fails (and you are running docker in wsl) make sure there is enough disk space where docker is installed (usually C:/) and in $tmpdir
@@ -198,13 +197,13 @@ function interval_rna_germline_workflow {
   if [ -f /tmp/cigarbam.list ]; then rm /tmp/cigarbam.list; fi
   echo "Running SplitNCigarReads on scattered intervals"
   for scatter_interval in ${scatter_intervals[@]}; do
-    echo "$workdir/cigar_marked_duplicates.$scatter_interval.bam" >> /tmp/cigarbam.list
+    echo "$intervaldir/cigar_marked_duplicates.$scatter_interval.bam" >> /tmp/cigarbam.list
     gatk --java-options "-Xmx4G -XX:+UseParallelGC -XX:ParallelGCThreads=1" SplitNCigarReads \
-    -I $inputbam \
+    -I $1 \
     -R $reference/fasta/genome.fa \
     --tmp-dir $tmpdir \
     -L /tmp/interval_files_folder/$scatter_interval \
-    -O $workdir/cigar_marked_duplicates.$scatter_interval.bam >> ${verbosity} 2>&1 \
+    -O $intervaldir/cigar_marked_duplicates.$scatter_interval.bam >> ${verbosity} 2>&1 \
       || { echo "SplitNCigarReads failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; } &
   done
   wait
@@ -213,16 +212,16 @@ function interval_rna_germline_workflow {
   echo "Gathering scattered bams for $interval"
   gatk GatherBamFiles \
   -I /tmp/cigarbam.list \
-  -O $workdir/cigar_marked_duplicates.bam >> ${verbosity} 2>&1 \
+  -O $intervaldir/cigar_marked_duplicates.bam >> ${verbosity} 2>&1 \
     || { echo "GatherBamFiles failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
   echo "Sorting gathered bam file"
-  samtools sort -@ $threads $workdir/cigar_marked_duplicates.bam -o $workdir/sorted.cigar_marked_duplicates.bam >> ${verbosity} 2>&1 \
+  samtools sort -@ $threads $workdir/cigar_marked_duplicates.bam -o $intervaldir/sorted.cigar_marked_duplicates.bam >> ${verbosity} 2>&1 \
     || { echo "samtools sort failed on $interval. Check $SCRATCH1/log.out file for additional info"; exit 1; }
   samtools index -@ $threads $workdir/sorted.cigar_marked_duplicates.bam >> ${verbosity} 2>&1 \
     || { echo "samtools index failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
 
   # run gatk short variant pipeline using cigar split bam
-  gatk_germline_short_variant_scatter_gather $workdir/sorted.cigar_marked_duplicates.bam
+  gatk_germline_short_variant_scatter_gather $intervaldir/sorted.cigar_marked_duplicates.bam
 
   # perform hard filtering using the qual-by-depth QD score and window for snp clustering
   # vqsr and cnnscorevariants is not recommended for rna-based genotyping
@@ -230,9 +229,9 @@ function interval_rna_germline_workflow {
   if [ -f /tmp/fvcf.list ]; then rm /tmp/fvcf.list; fi
   echo "Applying hard filters"
   for scatter_interval in ${scatter_intervals[@]}; do
-    echo $workdir/$library_id.$scatter_interval.vcf.gz >> /tmp/fvcf.list
+    echo $intervaldir/$library_id.$scatter_interval.vcf.gz >> /tmp/fvcf.list
     gatk VariantFiltration \
-    --V $workdir/output.vcf.gz \
+    --V $intervaldir/output.vcf.gz \
     --R $reference/fasta/genome.fa \
     -L /tmp/interval_files_folder/$scatter_interval \
     --verbosity ERROR \
@@ -242,7 +241,7 @@ function interval_rna_germline_workflow {
     --filter "FS > 30.0" \
     --filter-name "QD" \
     --filter "QD < 2.0" \
-    -O $workdir/$library_id.$scatter_interval.vcf.gz >> ${verbosity} 2>&1 \
+    -O $intervaldir/$library_id.$scatter_interval.vcf.gz >> ${verbosity} 2>&1 \
       || { echo "VariantFiltration failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; } &
   done
   wait
@@ -261,17 +260,15 @@ function interval_rna_germline_workflow {
 function interval_atac_germline_workflow {
   echo "Starting ATAC germline workflow for $interval"
 
-  inputbam=$1
-
   # before running pipeline ensure interval is coordinate-sorted and @HD tag is properly formatted
-  samtools view -b -h $inputbam $interval > $workdir/$interval.bam
+  samtools view -b -h $1 $interval > $intervaldir/$interval.bam
   # samtools sort -T $workdir -@ $threads $workdir/$interval.bam > $workdir/sorted.$interval.bam
-  samtools index -@ $threads $workdir/$interval.bam
+  samtools index -@ $threads $intervaldir/$interval.bam
 
   # workflow from here: https://gatk.broadinstitute.org/hc/en-us/articles/360035535932-Germline-short-variant-discovery-SNPs-Indels-
   # for single sample calling exclude joint-call cohort step
   # run variant pipeline using cellranger input bam
-  gatk_germline_short_variant_scatter_gather $workdir/$interval.bam
+  gatk_germline_short_variant_scatter_gather $intervaldir/$interval.bam
 
   # score the variants prior to filtering
   # cnnscorevariants may have better performance than vqsr for single sample genotyping. VQSR recommends >30 exomes
@@ -279,27 +276,27 @@ function interval_atac_germline_workflow {
   if [ -f /tmp/cnnvcf.list ]; then rm /tmp/cnnvcf.list; fi
   echo "Runnning CNNScoreVariants on $interval"
   for scatter_interval in ${scatter_intervals[@]}; do
-    echo "$workdir/annotated.$scatter_interval.vcf.gz" >> /tmp/cnnvcf.list
+    echo "$intervaldir/annotated.$scatter_interval.vcf.gz" >> /tmp/cnnvcf.list
     gatk CNNScoreVariants \
-    -V $workdir/output.vcf.gz \
+    -V $intervaldir/output.vcf.gz \
     -R $reference/fasta/genome.fa \
     -L /tmp/interval_files_folder/$scatter_interval \
-    -O $workdir/annotated.$scatter_interval.vcf.gz >> ${verbosity} 2>&1 \
+    -O $intervaldir/annotated.$scatter_interval.vcf.gz >> ${verbosity} 2>&1 \
       || { echo "CNNScoreVariants failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; } &
   done
   wait
 
   # gather cnn vcfs
   echo "Gathering CNNScoreVariants vcfs"
-  gatk GatherVcfs -I /tmp/cnnvcf.list -O $workdir/annotated.vcf.gz >> ${verbosity} 2>&1 \
+  gatk GatherVcfs -I /tmp/cnnvcf.list -O $intervaldir/annotated.vcf.gz >> ${verbosity} 2>&1 \
     || { echo "GatherVcfs failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
-  gatk IndexFeatureFile -I $workdir/annotated.vcf.gz >> ${verbosity} 2>&1 \
+  gatk IndexFeatureFile -I $intervaldir/annotated.vcf.gz >> ${verbosity} 2>&1 \
     || { echo "IndexFeatureFile failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; }
 
   # filter variants with default tranches from gatk
   echo "Filtering gathered vcf using CNNScoreVariants tranches"
   gatk FilterVariantTranches \
-  -V $workdir/annotated.vcf.gz \
+  -V $intervaldir/annotated.vcf.gz \
   --resource $gatk_bundle/resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz \
   --resource $gatk_bundle/resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz \
   --info-key CNN_1D \
@@ -414,6 +411,8 @@ fi
 
 # genotype each chromosome in series
 for interval in ${intervals[@]}; do
+  intervaldir=$workdir/$interval
+  mkdir $intervaldir
 
   # filter calling intervals by selected interval
   awk -v var=$interval -F'\t' 'BEGIN { OFS="\t" } $1==var {print $1,$2,$3}' /tmp/calling_intervals.bed > /tmp/calling_intervals_sel.bed
