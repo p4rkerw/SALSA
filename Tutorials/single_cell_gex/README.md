@@ -76,7 +76,7 @@ project=/mnt/g/salsa
 git -C $project clone https://github.com/p4rkerw/SALSA
 ```
 
-**Step 1: Genotype a single cell gene expression dataset** The tutorial workflow is based on the GATK germline short variant discovery pipeline for RNAseq. Additional info can be found on the [GATK website](https://gatk.broadinstitute.org/hc/en-us/articles/360035531192-RNAseq-short-variant-discovery-SNPs-Indels-) . To explore additional GATK options type 'gatk --list' into the terminal. If you want to skip ahead move the [genotyped vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.rna.chr22.vcf.gz) and its index to the volume mounted to project/rna_genotype and proceed to the next step.
+**Step 1: Genotype a single cell gene expression dataset** The tutorial workflow is based on the GATK germline short variant discovery pipeline for RNAseq. Additional info can be found on the [GATK website](https://gatk.broadinstitute.org/hc/en-us/articles/360035531192-RNAseq-short-variant-discovery-SNPs-Indels-) . To explore additional GATK options type 'gatk --list' into the terminal. If you want to skip ahead move the [genotyped vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorials/single_cell_gex/pbmc_1k.rna.chr22.vcf.gz) and its index to the volume mounted to project/rna_genotype and proceed to the next step.
 ```
 Usage: step1_gatk_genotype.sh [-inrgdomlt]
   -i  | --inputbam           STR   path/to/input.bam eg. [rna_counts/sample_1/outs/possorted*.bam]
@@ -159,7 +159,7 @@ Usage: step2_merge_geno.sh [-nabdit]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
 ```
-**(Recommended) Step 3: Phase genotype with 🌶️SALSA** If you want to perform your analysis with phased genotypes you will need a phased reference. We will use [shapeit4](https://github.com/odelaneau/shapeit4) to phase our variants. To explore additional phasing options type 'shapeit4.2' into your terminal. Variant phasing increases the performance of the WASP variant-realignment and downstream analysis steps. Download the 1000G phased reference files for SNV only or SNV_and_INDEL from ftp.1000genomes.ebi.ac.uk . If you are analyzing the tutorial RNA dataset select the SNV reference. If you want to skip ahead download the [phased vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.pass.joint.chr22hcphase.vcf.gz) and its index to the volume mounted to project/phasing and proceed to the next step.
+**(Recommended) Step 3: Phase genotype with 🌶️SALSA** If you want to perform your analysis with phased genotypes you will need a phased reference. We will use [shapeit4](https://github.com/odelaneau/shapeit4) to phase our variants. To explore additional phasing options type 'shapeit4.2' into your terminal. Variant phasing increases the performance of the WASP variant-realignment and downstream analysis steps. Download the 1000G phased reference files for SNV only or SNV_and_INDEL from ftp.1000genomes.ebi.ac.uk . If you are analyzing the tutorial RNA dataset select the SNV reference. If you want to skip ahead download the [phased vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorials/single_cell_gex/pbmc.pass.joint.chr22hcphase.vcf.gz) and its index to the volume mounted to project/phasing and proceed to the next step.
 
 a) SNV only: [/vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV/) </br>
 b) SNV_and_INDEL: [/vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL/)
@@ -179,7 +179,7 @@ Usage: step3_phase_vcf.sh [-nvdorlpsitrh]
   -h  | --help                     show usage
 ```
 
-You will eventually need to download the vcf for every chromosome, but for the purposes of the tutorial just download the SNV reference for chr22. The reference may take awhile to download so feel free to move ahead to the next step using the [phased vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.pass.joint.chr22hcphase.vcf.gz) in the repository. You can come back to step 3 when the download finishes.
+You will eventually need to download the vcf for every chromosome, but for the purposes of the tutorial just download the SNV reference for chr22. The reference may take awhile to download so feel free to move ahead to the next step using the [phased vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorials/single_cell_gex/pbmc.pass.joint.chr22hcphase.vcf.gz) in the repository. You can come back to step 3 when the download finishes.
 ```
 # download chr22 SNV phasing reference
 url=http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV/ALL.chr22.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz
@@ -219,7 +219,7 @@ bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT\n]' project/phasing/pbmc.pass.rna.
 # chr22,17115288,T,C,1|0
 # chr22,17115498,G,C,1|0
 ```
-**(Optional) Step 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with GENCODE and gnomAD you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). GATK routinely updates its resources so you may need to change the name of the folder in the tutorial to match the one you downloaded. gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded, move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124]). If you want to skip ahead while these files are downloading move the [funcotated vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorial/pbmc.pass.joint.chr22hcphase.funco.vcf.gz) and its index to the volume mounted to project/funcotation and proceed to the next step.
+**(Optional) Step 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with GENCODE and gnomAD you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). GATK routinely updates its resources so you may need to change the name of the folder in the tutorial to match the one you downloaded. gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded, move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124]). If you want to skip ahead while these files are downloading move the [funcotated vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorials/single_cell_gex/pbmc.pass.joint.chr22hcphase.funco.vcf.gz) and its index to the volume mounted to project/funcotation and proceed to the next step.
 ```
 Usage: step4_gatk_anno_vcf.sh [-nvdoramfth]
   -n  | --library_id         STR   library_id: eg. [sample_1]

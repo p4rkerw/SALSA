@@ -1,6 +1,6 @@
 # **Welcome to 🌶️SALSA! Single Cell Allele Specific Analysis**
 
-Here you will find a workflow to analyze single cell allele-specific expression and chromatin accessibility obtained from 10X Genomics Single Cell Gene Expression and Single Cell ATAC datasets. To get started follow along with the [tutorial](https://github.com/p4rkerw/SALSA/tree/main/Tutorial/README.md). 
+Here you will find a workflow to analyze single cell allele-specific expression and chromatin accessibility obtained from 10X Genomics Single Cell Gene Expression and Single Cell ATAC datasets. To get started follow along with one of our [tutorials](https://github.com/p4rkerw/SALSA/tree/main/Tutorials). 
 
 If you use 🌶️SALSA please cite the following manuscript:
 ```
