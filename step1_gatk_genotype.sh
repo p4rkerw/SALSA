@@ -96,7 +96,7 @@ function gatk_germline_short_variant_scatter_gather {
   echo "Running BaseRecalibrator on scattered intervals for $interval"
   pids=()
   for scatter_interval in ${scatter_intervals[@]}; do
-    gatk --java-options "-Xmx8G -XX:+UseParallelGC -XX:ParallelGCThreads=4" BaseRecalibrator \
+    gatk --java-options "-Xmx64G -XX:+UseParallelGC -XX:ParallelGCThreads=4" BaseRecalibrator \
     -I $1 \
     -R $reference/fasta/genome.fa \
     --known-sites $gatk_bundle/resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz \
@@ -117,7 +117,7 @@ function gatk_germline_short_variant_scatter_gather {
   # apply base quality score recalibration
   echo "Running ApplyBQSR on scattered intervals for $interval"
   for scatter_interval in ${scatter_intervals[@]}; do
-    gatk --java-options "-Xmx4G -XX:+UseParallelGC -XX:ParallelGCThreads=4" ApplyBQSR \
+    gatk --java-options "-Xmx64G -XX:+UseParallelGC -XX:ParallelGCThreads=4" ApplyBQSR \
     -I $1 \
     -R $reference/fasta/genome.fa \
     --bqsr-recal-file $intervaldir/recal_data.$scatter_interval.table \
@@ -141,14 +141,13 @@ function gatk_germline_short_variant_scatter_gather {
   echo "Running HaplotypeCaller on scattered intervals for $interval"
   for scatter_interval in ${scatter_intervals[@]}; do
     echo "$intervaldir/output.g.$scatter_interval.vcf.gz" >> /tmp/gvcf.list
-    gatk --java-options "-Xmx8G -XX:+UseParallelGC -XX:ParallelGCThreads=1" HaplotypeCaller \
+    gatk --java-options "-Xmx64G -XX:+UseParallelGC -XX:ParallelGCThreads=1" HaplotypeCaller \
     -I $intervaldir/bqsr.$scatter_interval.bam \
     -R $reference/fasta/genome.fa \
     -O $intervaldir/output.g.$scatter_interval.vcf.gz \
     -ERC GVCF \
     -D $gatk_bundle/resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz \
     -L /tmp/interval_files_folder/$scatter_interval \
-    --smith-waterman JAVA \
     --verbosity INFO \
     --tmp-dir $tmpdir >> ${verbosity} 2>&1 \
       || { echo "HaplotypeCaller failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; } &
@@ -167,7 +166,7 @@ function gatk_germline_short_variant_scatter_gather {
   echo "Genotyping scattered intervals for $interval"
   for scatter_interval in ${scatter_intervals[@]}; do
     echo "$intervaldir/output.$scatter_interval.vcf.gz" >> /tmp/vcf.list
-    gatk --java-options "-Xmx4G -XX:+UseParallelGC -XX:ParallelGCThreads=1" GenotypeGVCFs \
+    gatk --java-options "-Xmx64G -XX:+UseParallelGC -XX:ParallelGCThreads=1" GenotypeGVCFs \
     -V $intervaldir/output.g.vcf.gz \
     -R $reference/fasta/genome.fa \
     -L /tmp/interval_files_folder/$scatter_interval \
@@ -198,7 +197,7 @@ function interval_rna_germline_workflow {
   echo "Running SplitNCigarReads on scattered intervals"
   for scatter_interval in ${scatter_intervals[@]}; do
     echo "$intervaldir/cigar_marked_duplicates.$scatter_interval.bam" >> /tmp/cigarbam.list
-    gatk --java-options "-Xmx4G -XX:+UseParallelGC -XX:ParallelGCThreads=1" SplitNCigarReads \
+    gatk --java-options "-Xmx64G -XX:+UseParallelGC -XX:ParallelGCThreads=1" SplitNCigarReads \
     -I $1 \
     -R $reference/fasta/genome.fa \
     --tmp-dir $tmpdir \
