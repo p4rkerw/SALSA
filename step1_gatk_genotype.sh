@@ -140,7 +140,7 @@ function gatk_germline_short_variant_scatter_gather {
   # call variants with haplotypecaller
   echo "Running HaplotypeCaller on scattered intervals for $interval"
   for scatter_interval in ${scatter_intervals[@]}; do
-    echo "$interval/output.g.$scatter_interval.vcf.gz" >> /tmp/gvcf.list
+    echo "$intervaldir/output.g.$scatter_interval.vcf.gz" >> /tmp/gvcf.list
     gatk --java-options "-Xmx8G -XX:+UseParallelGC -XX:ParallelGCThreads=1" HaplotypeCaller \
     -I $intervaldir/bqsr.$scatter_interval.bam \
     -R $reference/fasta/genome.fa \
