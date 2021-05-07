@@ -102,7 +102,7 @@ docker run \
 -e SCRATCH1="/mnt/g/scratch" \
 --rm -it p4rkerw/salsa:latest
 ```
-**Genotype an RNA sample with 🌶️SALSA** There are two options in the tutorial workflow depending on whether you did the cellranger alignment or skipped ahead. You only need to do one. 
+**Genotype an ATAC sample with 🌶️SALSA** There are two options in the tutorial workflow depending on whether you did the cellranger alignment or skipped ahead. You only need to do one. 
 ```
 # Option 1: if you followed the cellranger alignment step...
 bash SALSA/step1_gatk_genotype.sh \
