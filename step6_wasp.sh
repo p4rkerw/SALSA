@@ -243,11 +243,11 @@ if [ $modality == "atac" ]; then
   # check for bwa mem index
   if [ ! -f $atacref/fasta/genome.dict ]; then
   echo "Generating BWA index and putting in atac_ref directory"
-  bwa index atac_ref/fasta/genome.fa 
+  bwa index $atacref/fasta/genome.fa 
   fi  
   # use bwa to remap reads
   echo "Realigning reads with BWA" 
-  bwa mem -t $threads $atacrefref/fasta/genome.fa $workdir/$bn.remap.fq1.gz $workdir/$bn.remap.fq2.gz > $workdir/$bn.realigned.sam
+  bwa mem -t $threads $atacref/fasta/genome.fa $workdir/$bn.remap.fq1.gz $workdir/$bn.remap.fq2.gz > $workdir/$bn.realigned.sam
   # sort the realigned bam file
   samtools view -bS $workdir/$bn.realigned.sam > $workdir/$bn.realigned.bam
   samtools sort -@ $threads -o $workdir/$bn.sorted.realigned.bam $workdir/$bn.realigned.bam
