@@ -148,7 +148,7 @@ gatk --java-options "-Xmx4G -XX:+UseParallelGC -XX:ParallelGCThreads=1" Funcotat
   -L /tmp/interval_files_folder/$scatter_interval \
   --disable-sequence-dictionary-validation true \
   --verbosity INFO >> ${verbosity} 2>&1 \
-    || { echo "Funcotator failed on $scatter_interval. Check log.out for additional info"; exit 1 } &
+    || { echo "Funcotator failed on $scatter_interval. Check log.out for additional info"; exit 1; } &
 done
 wait
 
