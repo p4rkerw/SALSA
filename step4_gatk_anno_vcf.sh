@@ -80,6 +80,7 @@ echo "reference                 : $reference"
 echo "output_table              : $output_table"
 echo "modality                  : $modality"
 echo "funcotation               : $funcotation"
+echo "verbose                   : $verbose"
 echo "threads                   : $threads"
 echo "Parameters remaining are  : $@"
 
@@ -146,7 +147,7 @@ gatk --java-options "-Xmx4G -XX:+UseParallelGC -XX:ParallelGCThreads=1" Funcotat
   --output-file-format VCF \
   -L /tmp/interval_files_folder/$scatter_interval \
   --disable-sequence-dictionary-validation true \
-  --verbosity INFO ${verbosity} 2>&1 \
+  --verbosity INFO >> ${verbosity} 2>&1 \
     || { echo "Funcotator failed on $scatter_interval. Check log.out for additional info"; exit 1 } &
 done
 wait
