@@ -3,54 +3,49 @@
 **Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the [10X Genomics website](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest). 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The cellranger reference in this tutorial is compatible with the tutorial dataset (which is aligned to GRCh38-2020-A). Feel free to download a different reference and/or [dataset](https://support.10xgenomics.com/single-cell-gene-expression/datasets) from the 10X Genomics collection; just make sure it's aligned to GRCh38 so it matches the GATK bundle resources and ucsc contig style. Alignment information can be found in the summary html files. The tutorial assumes that you downloaded a reference to /mnt/g/reference so make sure you change the path if you used a different directory. 
 ```
 reference=/mnt/g/reference
-wget -P $reference https://cf.10xgenomics.com/supp/cell-exp/refdata-gex-GRCh38-2020-A.tar.gz
+wget -P $reference https://cf.10xgenomics.com/supp/cell-atac/refdata-cellranger-arc-GRCh38-2020-A-2.0.0.tar.gz
 
 # check md5
-md5sum $reference/refdata-gex-GRCh38-2020-A.tar.gz #dfd654de39bff23917471e7fcc7a00cd
+md5sum $reference/refdata-cellranger-arc-GRCh38-2020-A-2.0.0.tar.gz #2f12f6016197869e21e5559827002716
 
 # unpack
-tar -xvzf $reference/refdata-gex-GRCh38-2020-A.tar.gz
+tar -xvzf $reference/refdata-cellranger-arc-GRCh38-2020-A-2.0.0.tar.gz
 ```
 
-**(Optional) Step 0: Download tutorial fastq files** We will download a a single cell gene expression dataset obtained from 1k PBMCs from a healthy donor. This dataset uses the single cell gene expression v3 chemistry. If you want to skip ahead to the 🌶️SALSA workflow, you can download the coordinate-sorted bam and index from the 10X Genomics website. See Step 1 for details. 
+**(Optional) Step 0: Download tutorial fastq files** We will download a a single cell ATAC dataset obtained from 1k PBMCs from a healthy donor. This dataset uses the single NextGem v1.1 chemistry. If you want to skip ahead to the 🌶️SALSA workflow, you can download the coordinate-sorted bam and index from the 10X Genomics website. See Step 1 for details. 
 ```
-# URL to the dataset: https://support.10xgenomics.com/single-cell-gene-expression/datasets/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT
+# URL to the dataset: https://support.10xgenomics.com/single-cell-atac/datasets/2.0.0/atac_pbmc_1k_nextgem
 # create your salsa tutorial directory and download the fastq
 project=/mnt/g/salsa
-wget -P $project/tar https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_fastqs.tar
+wget -P $project/tar https://cf.10xgenomics.com/samples/cell-atac/2.0.0/atac_pbmc_1k_nextgem/atac_pbmc_1k_nextgem_fastqs.tar
 
 # check md5
-md5sum $project/tar/1k_PBMCs_TotalSeq_B_3p_LT_fastqs.tar #ac98de1046df421ff3d8dc6b1a3d6112
+md5sum $project/tar/atac_pbmc_1k_nextgem_fastqs.tar #2a7af90faea21b25b6549ccb727106cc
 
 # unpack
-tar -C $project -xvf $project/tar/1k_PBMCs_TotalSeq_B_3p_LT_fastqs.tar
+tar -C $project -xvf $project/tar/atac_pbmc_1k_nextgem_fastqs.tar
 ```
 **(Optional) Step 0: Align the tutorial dataset to the cellranger reference** If you want to skip ahead to the 🌶️SALSA workflow, you can download the coordinate-sorted bam and index from the 10X Genomics website. See Step 1 for details. 
 ```
-# align and count with cellranger (version 6.0.1)
+# align and count with cellranger-atac (version 2.0)
 # the output will appear in the working directory which should be $project
-# runtime ~40min
 reference=/mnt/g/reference
-cellranger count \
---id pbmc_1k \
---fastqs $project/1k_PBMCs_TotalSeq_B_3p_LT_fastqs/1k_PBMCs_TotalSeq_B_3p_LT_gex_fastqs \
---transcriptome $reference/refdata-gex-GRCh38-2020-A \
---nosecondary \
---nopreflight \
---expect-cells 1000 \
+cellranger-atac count \
+--id=pbmc_1k \
+--reference=$SCRATCH1/refdata-cellranger-arc-GRCh38-2020-A-2.0.0 \
+--fastqs=$SCRATCH1/salsa/atac_pbmc_1k_nextgem_fastqs \
+--sample=atac_pbmc_1k_nextgem \
 --localcores 10
 ```
 **Step 0: Download GATK resource bundle** The following files are required for genotyping with GATK using GRCh38 and can be found in the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false) . Download these files to a folder called gatk in your reference directory. For additional information on GATK germline and RNA-seq short variant discovery check out their [website](https://gatk.broadinstitute.org/hc/en-us/sections/360007226651-Best-Practices-Workflows)
 ```
 # download to /mnt/g/reference/gatk
-# files needed for GATK RNA-seq short variant discovery
+# files needed for GATK germline short variant discovery
 resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz
 resources_broad_hg38_v0_Homo_sapiens_assembly38.known_indels.vcf.gz
 resources_broad_hg38_v0_1000G_phase1.snps.high_confidence.hg38.vcf.gz
 resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
 resources_broad_hg38_v0_wgs_calling_regions.hg38
-
-# (not needed for the tutorial) additional files required for GATK germline short variant discovery in single cell ATAC datasets
 resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
 ```
 
@@ -114,29 +109,29 @@ docker run \
 bash SALSA/step1_gatk_genotype.sh \
 --inputbam project/pbmc_1k/outs/possorted_genome_bam.bam \
 --library_id pbmc_1k \
---reference reference/refdata-gex-GRCh38-2020-A \
+--reference reference/refdata-cellranger-arc-GRCh38-2020-A-2.0.0 \
 --gatk_bundle reference/gatk \
---outputdir project/rna_genotype \
---outputvcf pbmc.rna.chr22.vcf.gz \
+--outputdir project/atac_genotype \
+--outputvcf pbmc.atac.chr22.vcf.gz \
 --interval chr22 \
---modality rna \
+--modality atac \
 --threads 10
 
 # Option 2: if you skipped the cellranger alignment step...
 # download coordinate-sorted bam and index
-wget -P project/pbmc_1k/outs https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_possorted_genome_bam.bam
-wget -P project/pbmc_1k/outs https://cf.10xgenomics.com/samples/cell-exp/6.0.0/1k_PBMCs_TotalSeq_B_3p_LT/1k_PBMCs_TotalSeq_B_3p_LT_possorted_genome_bam.bam.bai
+wget -P project/pbmc_1k https://cf.10xgenomics.com/samples/cell-atac/2.0.0/atac_pbmc_1k_nextgem/atac_pbmc_1k_nextgem_possorted_bam.bam
+wget -P project/pbmc_1k https://cf.10xgenomics.com/samples/cell-atac/2.0.0/atac_pbmc_1k_nextgem/atac_pbmc_1k_nextgem_possorted_bam.bam.bai
 
 # genotype the downloaded bam
 bash SALSA/step1_gatk_genotype.sh \
---inputbam project/pbmc_1k/outs/1k_PBMCs_TotalSeq_B_3p_LT_possorted_genome_bam.bam \
+--inputbam project/pbmc_1k/atac_pbmc_1k_nextgem_possorted_bam.bam \
 --library_id pbmc_1k \
---reference reference/refdata-gex-GRCh38-2020-A \
+--reference reference/refdata-cellranger-arc-GRCh38-2020-A-2.0.0 \
 --gatk_bundle reference/gatk \
 --outputdir project/rna_genotype \
---outputvcf pbmc.rna.chr22.vcf.gz \
+--outputvcf pbmc.atac.chr22.vcf.gz \
 --interval chr22 \
---modality rna \
+--modality atac \
 --threads 10
 ```
 **Inspect the genotyped vcf** Note how the GT field has a "/" character, which indicates that the variants are not phased. 
