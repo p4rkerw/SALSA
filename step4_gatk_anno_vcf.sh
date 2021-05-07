@@ -3,6 +3,7 @@
 
 # Set some default values:
 threads=1
+verbose=false
 
 function usage {
 cat << "EOF"
@@ -32,6 +33,7 @@ Usage: step4_gatk_anno_vcf.sh [-nvdoramfth]
   -a  | --output_table       STR   name of output funcotation csv eg. [sample_1.pass.joint.hcphase.formatted.csv]
   -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
   -f  | --funcotation        STR   path/to/funcotation directory eg. [reference/funcotator_dataSources.v1.6.20190124g]
+  -v  | --verbose                  optional: stream GATK output to terminal. Default=[false]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
 
@@ -45,8 +47,8 @@ if [[ ${#} -eq 0 ]]; then
 fi
 
 PARSED_ARGUMENTS=$(getopt -a -n step4_gatk_anno_vcf.sh \
--o n:v:d:o:r:sirt:h \
---long library_id:,inputvcf:,outputdir:,outputvcf:,reference:,output_table:,modality:,funcotation:,threads:,help -- "$@")
+-o n:v:d:o:r:sirvt:h \
+--long library_id:,inputvcf:,outputdir:,outputvcf:,reference:,output_table:,modality:,funcotation:,verbose,threads:,help -- "$@")
 
 echo "PARSED_ARGUMENTS are $PARSED_ARGUMENTS"
 eval set -- "$PARSED_ARGUMENTS"
@@ -61,6 +63,7 @@ do
     -a | --output_table)      output_table=$2      ; shift 2 ;;
     -m | --modality)          modality=$2          ; shift 2 ;;
     -f | --funcotation)       funcotation=$2       ; shift 2 ;;
+    -v | --verbose)           verbose=true         ; shift 1 ;;
     -t | --threads)           threads=$2           ; shift 2 ;;
     -h | --help)              usage ;;
     --) shift; break ;;
@@ -86,6 +89,13 @@ export PATH=/gatk:/opt/miniconda/envs/gatk/bin:/opt/miniconda/bin:/usr/local/sbi
 # activate gatk conda environ
 source activate gatk
 
+# stream GATK output to terminal o/w capture in log file
+if [ $verbose == "true" ]; then
+  verbosity=/dev/stdout
+elif [ $verbose == "false" ]; then
+  verbosity=$SCRATCH1/log.out
+fi
+
 # create funcotation director
 mkdir $outputdir 2> /dev/null
 
@@ -101,7 +111,6 @@ fi
 # update output vcf file names
 funcotated_vcf=$outputdir/$outputvcf
 funcotated_table=$outputdir/$output_table
-verbosity=INFO
 workdir=$SCRATCH1/gatk_genotype/$modality/$library_id/annotation
 mkdir -p $workdir 2> /dev/null
 mkdir $outputdir 2> /dev/null
@@ -137,8 +146,8 @@ gatk --java-options "-Xmx4G -XX:+UseParallelGC -XX:ParallelGCThreads=1" Funcotat
   --output-file-format VCF \
   -L /tmp/interval_files_folder/$scatter_interval \
   --disable-sequence-dictionary-validation true \
-  --verbosity $verbosity > log.out 2>&1 \
-  || exit "Funcotator failed on $scatter_interval. Check log.out for additional info" &
+  --verbosity INFO ${verbosity} 2>&1 \
+    || { echo "Funcotator failed on $scatter_interval. Check log.out for additional info"; exit 1 } &
 done
 wait
 

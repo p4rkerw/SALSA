@@ -92,6 +92,16 @@ echo "Parameters remaining are  : $@"
 # ensure gatk and miniconda are in path when working in LSF environment
 export PATH=/gatk:/opt/miniconda/envs/gatk/bin:/opt/miniconda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
 
+# check for inputs
+if [ ! -f $inputvcf ]; then echo "Input vcf not found"; exit 1; fi
+
+# TODO: check for reference phasing vcfs by interval if selected
+
+# remove filtered variants
+echo "Removing filtered variants from input vcf"
+bcftools view -Oz -f PASS $inputvcf > /tmp/filter.vcf.gz
+bcftools index --tbi --threads $threads /tmp/filter.vcf.gz 
+
 # workflow for phasing vcf genotypes
 mkdir -p $outputdir
 
@@ -110,83 +120,48 @@ else
   intervals=(chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX)
 fi
 
-if [ ! -f $inputvcf.tbi ]; then
-  bcftools index --threads $threads --tbi $inputvcf
+# assign base shapeit args
+shapeit_args=(--map $workdir/phasing/shapeit4/maps/$interval.b38.gmap.gz \
+  --input /tmp/filter.vcf.gz \
+  --region ${interval} \
+  --seed 123456 \
+  --sequencing \
+  --output $workdir/phased.${interval}.vcf.gz)
+
+# set reference for SNV only or SNV_INDEL
+if [ $snvindel == "true" ]; then
+  shapeit_args+=(--reference $phasingref/ALL.$interval.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz)
+elif [ $snvonly == "true" ]; then
+  shapeit_args+=(--reference $phasingref/ALL.$interval.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz)
 fi
 
-# use a reference with both snv and indels for phasing
-if [ $snvindel == "true" ] && [ $reproduce == "false" ]; then
-  rm $workdir/vcf.list 2> /dev/null
+# set multithreading if reproduce flag is false
+if [ $reproduce == "false" ]; then
+  shapeit_args+=(--thread ${threads})
+fi
+
+# remove vcf list from any prior phasing runs
+rm $workdir/vcf.list 2> /dev/null
+
+# reproduce flag set to false run in multithreaded series
+if [ $reproduce == "false" ]; then
   for interval in ${intervals[@]}; do
-  echo "$workdir/phased.$interval.vcf.gz" >> $workdir/vcf.list
-  shapeit4.2 \
-  --thread $threads \
-  --input $inputvcf \
-  --map $workdir/phasing/shapeit4/maps/$interval.b38.gmap.gz \
-  --region $interval \
-  --seed 123456 \
-  --reference $phasingref/ALL.$interval.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz \
-  --sequencing \
-  --output $workdir/phased.$interval.vcf.gz
+    echo "$workdir/phased.$interval.vcf.gz" >> $workdir/vcf.list
+    shapeit4.2 ${shapeit_args[@]}
   done
 wait
 fi
 
-# reproduce flag set to true
-if [ $snvindel == "true" ] && [ $reproduce == "true" ]; then
-  rm $workdir/vcf.list 2> /dev/null
+# reproduce flag set to true run in parallel with single thread per interval
+if [ $reproduce == "true" ]; then
   for interval in ${intervals[@]}; do
-  echo "$workdir/phased.$interval.vcf.gz" >> $workdir/vcf.list
-  shapeit4.2 \
-  --input $inputvcf \
-  --map $workdir/phasing/shapeit4/maps/$interval.b38.gmap.gz \
-  --region $interval \
-  --seed 123456 \
-  --reference $phasingref/ALL.$interval.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz \
-  --sequencing \
-  --output $workdir/phased.$interval.vcf.gz & \
+    echo "$workdir/phased.$interval.vcf.gz" >> $workdir/vcf.list
+    shapeit4.2 ${shapeit_args[@]} & \
     while (( $(jobs |wc -l) >= (( ${threads} + 1 )) )); do
       sleep 0.1
     done
   done
 wait
-fi
-
-# use a reference with only snv for phasing
-if [ $snvonly = "true" ] && [ $reproduce == "false" ]; then
-  rm $workdir/vcf.list 2> /dev/null
-  for interval in ${intervals[@]}; do
-  echo "$workdir/phased.$interval.vcf.gz" >> $workdir/vcf.list
-  shapeit4.2 \
-  --thread $threads \
-  --input $inputvcf\
-  --map $workdir/phasing/shapeit4/maps/$interval.b38.gmap.gz \
-  --region $interval \
-  --seed 123456 \
-  --reference $phasingref/ALL.$interval.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz \
-  --sequencing \
-  --output $workdir/phased.$interval.vcf.gz
-  done
-  wait
-fi
-
-if [ $snvonly = "true" ] && [ $reproduce == "true" ]; then
-  rm $workdir/vcf.list 2> /dev/null
-  for interval in ${intervals[@]}; do
-  echo "$workdir/phased.$interval.vcf.gz" >> $workdir/vcf.list
-  shapeit4.2 \
-  --input $inputvcf \
-  --map $workdir/phasing/shapeit4/maps/$interval.b38.gmap.gz \
-  --region $interval \
-  --seed 123456 \
-  --reference $phasingref/ALL.$interval.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz \
-  --sequencing \
-  --output $workdir/phased.$interval.vcf.gz & \
-    while (( $(jobs |wc -l) >= (( ${threads} + 1 )) )); do
-      sleep 0.1
-    done
-  done
-  wait
 fi
 
 # concatenate phased vcf files from all intervals
