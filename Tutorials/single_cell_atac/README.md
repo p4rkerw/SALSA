@@ -93,7 +93,7 @@ SCRATCH1=/mnt/g/scratch
 project=/mnt/g/salsa
 reference=/mnt/g/reference
 docker run \
---cpus 2 \https://blog.softwaremill.com/docker-support-in-new-java-8-finally-fd595df0ca54
+--cpus 2 \
 --workdir $HOME \
 -v $HOME:$HOME \
 -v $project:$HOME/project \
