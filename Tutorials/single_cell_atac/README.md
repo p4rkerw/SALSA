@@ -87,12 +87,13 @@ Usage: step1_gatk_genotype.sh [-inrgdomlt]
   -h  | --help                     show usage
 
 ```
-**Launch 🌶️SALSA container** : Mount the required volumes in an interactive session. The $SCRATCH1 variable designates a temporary file directory. The tutorial assumes that your scratch directory is located at /mnt/g/scratch so make sure to change the path if you're using a different directory. 
+**Launch 🌶️SALSA container** : Mount the required volumes in an interactive session. The $SCRATCH1 variable designates a temporary file directory. The tutorial assumes that your scratch directory is located at /mnt/g/scratch so make sure to change the path if you're using a different directory. The --cpus flag is included to limit the number of threads that each Java process can access within the container. However, it does not limit the total number of threads that can be used by GATK. GATK runs on OpenJDK 1.8, which was the earliest version of Java to have container support. When a docker container is launched, each Java process can access all of the available threads within the container. Unfortunately, Java processes in docker are not aware of other Java processes running in parallel. As a result, GATK may exhaust your system resources when analyzing multiple genomic intervals. This probably wont affect performance in a high throughput computational environment (like a cluster), but it may cause Java to crash on a workstation. The --cpus flag is only needed for the genotyping step and should be left out in subsequent steps.     
 ```
 SCRATCH1=/mnt/g/scratch
 project=/mnt/g/salsa
 reference=/mnt/g/reference
 docker run \
+--cpus 2 \
 --workdir $HOME \
 -v $HOME:$HOME \
 -v $project:$HOME/project \
@@ -154,6 +155,23 @@ Usage: step2_merge_geno.sh [-nabdit]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
 ```
+
+**Launch 🌶️SALSA container** : Note how the --cpus flag is not needed for the rest of the workflow    
+```
+SCRATCH1=/mnt/g/scratch
+project=/mnt/g/salsa
+reference=/mnt/g/reference
+docker run \
+--workdir $HOME \
+-v $HOME:$HOME \
+-v $project:$HOME/project \
+-v $reference:$HOME/reference \
+-v $project/SALSA:$HOME/SALSA \
+-v $SCRATCH1:$SCRATCH1 \
+-e SCRATCH1="/mnt/g/scratch" \
+--rm -it p4rkerw/salsa:latest
+```
+
 **(Recommended) Step 3: Phase genotype with 🌶️SALSA** If you want to perform your analysis with phased genotypes you will need a phased reference. We will use [shapeit4](https://github.com/odelaneau/shapeit4) to phase our variants. To explore additional phasing options type 'shapeit4.2' into your terminal. Variant phasing increases the performance of the WASP variant-realignment and downstream analysis steps. Download the 1000G phased reference files for SNV only or SNV_and_INDEL from ftp.1000genomes.ebi.ac.uk . If you are analyzing the tutorial ATAC dataset select the SNV reference. If you want to skip ahead download the [phased vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorials/single_cell_atac/pbmc.pass.atac.chr22hcphase.vcf.gz) and its index to the volume mounted to project/phasing and proceed to the next step.
 
 a) SNV only: [/vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV/) </br>
