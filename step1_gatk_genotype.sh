@@ -386,8 +386,6 @@ fi
 
 ##################################################################
 ##################################################################
-ulimit -c unlimited
-
 # ensure gatk and miniconda are in path when working in LSF environment
 export PATH=/gatk:/opt/miniconda/envs/gatk/bin:/opt/miniconda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
 
