@@ -119,7 +119,7 @@ function gatk_germline_short_variant_scatter_gather {
   echo "Running ApplyBQSR on scattered intervals for $interval"
   pids=()
   for scatter_interval in ${scatter_intervals[@]}; do
-    gatk --java-options "-Xmx16G -XX:+UseParallelGC -XX:ParallelGCThreads=4" ApplyBQSR \
+    gatk --java-options "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap" ApplyBQSR \
     -I $1 \
     -R $reference/fasta/genome.fa \
     --bqsr-recal-file $intervaldir/recal_data.$scatter_interval.table \
@@ -149,7 +149,7 @@ function gatk_germline_short_variant_scatter_gather {
   pids=()
   for scatter_interval in ${scatter_intervals[@]}; do
     echo "$intervaldir/output.g.$scatter_interval.vcf.gz" >> /tmp/gvcf.list
-    gatk --java-options "-Xmx16G -XX:+UseParallelGC -XX:ParallelGCThreads=4" HaplotypeCaller \
+    gatk --java-options "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap" HaplotypeCaller \
     -I $intervaldir/bqsr.$scatter_interval.bam \
     -R $reference/fasta/genome.fa \
     -O $intervaldir/output.g.$scatter_interval.vcf.gz \
@@ -179,7 +179,7 @@ function gatk_germline_short_variant_scatter_gather {
   pids=()
   for scatter_interval in ${scatter_intervals[@]}; do
     echo "$intervaldir/output.$scatter_interval.vcf.gz" >> /tmp/vcf.list
-    gatk --java-options "-Xmx16G -XX:+UseParallelGC -XX:ParallelGCThreads=4" GenotypeGVCFs \
+    gatk --java-options "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap" GenotypeGVCFs \
     -V $intervaldir/output.g.vcf.gz \
     -R $reference/fasta/genome.fa \
     -L /tmp/interval_files_folder/$scatter_interval \
@@ -215,7 +215,7 @@ function interval_rna_germline_workflow {
   pids=()
   for scatter_interval in ${scatter_intervals[@]}; do
     echo "$intervaldir/cigar_marked_duplicates.$scatter_interval.bam" >> /tmp/cigarbam.list
-    gatk --java-options "-Xmx16G -XX:+UseParallelGC -XX:ParallelGCThreads=4" SplitNCigarReads \
+    gatk --java-options "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap" SplitNCigarReads \
     -I $1 \
     -R $reference/fasta/genome.fa \
     --tmp-dir $tmpdir \
@@ -252,7 +252,7 @@ function interval_rna_germline_workflow {
   pids=()
   for scatter_interval in ${scatter_intervals[@]}; do
     echo $intervaldir/$library_id.$scatter_interval.vcf.gz >> /tmp/fvcf.list
-    gatk VariantFiltration --java-options "-Xmx16G -XX:+UseParallelGC -XX:ParallelGCThreads=4" \
+    gatk VariantFiltration --java-options "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap" \
     --V $intervaldir/output.vcf.gz \
     --R $reference/fasta/genome.fa \
     -L /tmp/interval_files_folder/$scatter_interval \
@@ -303,7 +303,7 @@ function interval_atac_germline_workflow {
   pids=()
   for scatter_interval in ${scatter_intervals[@]}; do
     echo "$intervaldir/annotated.$scatter_interval.vcf.gz" >> /tmp/cnnvcf.list
-    gatk CNNScoreVariants --java-options "-Xmx16G -XX:+UseParallelGC -XX:ParallelGCThreads=4" \
+    gatk CNNScoreVariants --java-options "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap" \
     -V $intervaldir/output.vcf.gz \
     -R $reference/fasta/genome.fa \
     -L /tmp/interval_files_folder/$scatter_interval \
@@ -325,7 +325,7 @@ function interval_atac_germline_workflow {
 
   # filter variants with default tranches from gatk
   echo "Filtering gathered vcf using CNNScoreVariants tranches"
-  gatk FilterVariantTranches --java-options "-Xmx16G -XX:+UseParallelGC -XX:ParallelGCThreads=4" \
+  gatk FilterVariantTranches --java-options "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap" \
   -V $intervaldir/annotated.vcf.gz \
   --resource $gatk_bundle/resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz \
   --resource $gatk_bundle/resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz \
@@ -386,6 +386,8 @@ fi
 
 ##################################################################
 ##################################################################
+ulimit -c unlimited
+
 # ensure gatk and miniconda are in path when working in LSF environment
 export PATH=/gatk:/opt/miniconda/envs/gatk/bin:/opt/miniconda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
 
