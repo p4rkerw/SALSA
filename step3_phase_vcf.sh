@@ -28,7 +28,7 @@ Author: Parker C. Wilson MD, PhD
 Contact: parkerw@wustl.edu
 Version: 1.0
 
-Usage: step3_phase_vcf.sh [-nvdorlpsitrh]
+Usage: step3_phase_vcf.sh [-nfdorlpsirvth]
   -n  | --library_id         STR   library_id: eg. [sample_1]
   -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [project/joint_genotype/sample_1.pass.joint.vcf.gz]
   -d  | --outputdir          STR   output directory name eg. [project/phasing]
@@ -36,10 +36,10 @@ Usage: step3_phase_vcf.sh [-nvdorlpsitrh]
   -r  | --phasingref         STR   path/to/1000G reference eg. [reference/phasing/biallelic_SNV]
   -l  | --interval           STR   optional: phase a single chromosome eg. [chr22]
   -p  | --hcphase                  optional: recover haplotypecaller physical phasing variants that are not in shapeit reference. Default=[false]
-  -s  | --snvonly            STR   use the biallelic_SNV reference for phasing
-  -i  | --snvindel           STR   use the biallelic_SNV_and_INDEL reference for phasing
+  -s  | --snvonly                  use the biallelic_SNV reference for phasing
+  -i  | --snvindel                 use the biallelic_SNV_and_INDEL reference for phasing
   -r  | --reproduce                optional: run shapeit with a single thread for reproducibility. Default=[false]
-  -v  | --verbose                  optional: stream shapeit4 output to terminal. Default=[false]
+  -V  | --verbose                  optional: stream shapeit4 output to terminal. Default=[false]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
 
@@ -52,7 +52,7 @@ if [[ ${#} -eq 0 ]]; then
 fi
 
 PARSED_ARGUMENTS=$(getopt -a -n step3_phase_vcf.sh \
--o n:v:d:o:r:l:psirvt:h \
+-o n:v:d:o:r:l:psirVt:h \
 --long library_id:,inputvcf:,outputdir:,outputvcf:,phasingref:,interval:,hcphase,snvonly,snvindel,reproduce,verbose,threads:,help -- "$@")
 
 echo "PARSED_ARGUMENTS are $PARSED_ARGUMENTS"
@@ -70,7 +70,7 @@ do
     -s | --snvonly)           snvonly=true         ; shift 1 ;;
     -i | --snvindel)          snvindel=true        ; shift 1 ;;
     -r | --reproduce)         reproduce=true       ; shift 1 ;;
-    -v | --verbose)           verbose=true         ; shift 1 ;;
+    -V | --verbose)           verbose=true         ; shift 1 ;;
     -t | --threads)           threads=$2           ; shift 2 ;;
     -h | --help)              usage ;;
     --) shift; break ;;
@@ -162,6 +162,7 @@ if [ $reproduce = "false" ]; then
     shapeit4.2 ${shapeit_args[@]} >> ${outputlog}
     pids+=($!)
   done
+  # check exit status for each interva
   for pid in ${pids[@]}; do
     if ! wait $pid; then { echo "shapeit phasing failed"; exit 1; };  fi
   done
