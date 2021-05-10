@@ -87,6 +87,7 @@ Usage: step1_gatk_genotype.sh [-inrgdomlt]
   -o  | --outputvcf          STR   name of output vcf eg. [sample_1.rna.vcf.gz]
   -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
   -l  | --interval           STR   optional: genotype a single chromosome eg. [chr22]
+  -V  | --verbose                  optional: stream GATK output to terminal. Default=[false]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
 
@@ -249,6 +250,7 @@ Usage: step4_gatk_anno_vcf.sh [-nvdoramfth]
   -a  | --output_table       STR   name of output funcotation csv eg. [sample_1.pass.joint.hcphase.formatted.csv]
   -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
   -f  | --funcotation        STR   path/to/funcotation directory eg. [reference/funcotator_dataSources.v1.6.20190124g]
+  -V  | --verbose                  optional: stream GATK output to terminal. Default=[false]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
 ```
@@ -369,7 +371,7 @@ bash SALSA/step6_wasp.sh \
 ```
 **Step 7: Get allele-specific read counts with 🌶️SALSA** This step will filter a phased and genotyped vcf for heterozygous SNV to perform allele-specific counting in a coordinate-sorted and indexed bam file after WASP realignment. There are multiple options for count table outputs. The --pseudobulk option will group all barcodes together to perform allele-specific counting. This is analogous to bulk RNA-seq. The --celltype_counts option will use the barcode annotations to split the bam into cell-type-specific bam files before performing allele-specific counting. The --single_cell_counts option will split the input into individual single cell bam files and perform allele-specific counting. If your input vcf is phased you can select the --isphased option to add a phased genotype to the count tables.
 ```
-Usage: step7_gatk_alleleCount.sh [-viognmrlCcspt]
+Usage: step7_gatk_alleleCount.sh [-viognmrlCcspVt]
   -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [project/funcotation/sample_1.pass.joint.hcphase.funco.vcf.gz]
   -i  | --inputbam           STR   path/to/wasp.bam eg. [project/wasp_rna/sample_1.phase.wasp.bam]
   -b  | --barcodes           STR   path/to/barcodes.csv eg. [project/barcodes/rna_barcodes.csv]
@@ -382,6 +384,7 @@ Usage: step7_gatk_alleleCount.sh [-viognmrlCcspt]
   -c  | --celltype_counts          allele-specific counts after grouping cells by barcode celltype annotation
   -s  | --single_cell_counts       single cell allele-specific counts for provided barcodes     
   -p  | --isphased                 optional: input vcf is phased. Default=[false]
+  -V  | --verbose                  optional: stream GATK output to terminal. Default=[false]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
 ```
