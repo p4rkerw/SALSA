@@ -2,9 +2,6 @@
 # this script will generate a genotyped vcf using the input bam file
 # for info to implement a scatter workflow: https://www.ibm.com/downloads/cas/ZJQD0QAL
 
-# exit on error
-set -e
-
 # Set some default values:
 interval=""
 threads=1
