@@ -35,8 +35,8 @@ Author: Parker C. Wilson MD, PhD
 Contact: parkerw@wustl.edu
 Version: 1.0
 
-Usage: step7_gatk_alleleCount.sh [-fiognmrlCcspvt]
-  -f  | --inputvcf           STR   path/to/input.vcf.gz eg. [project/funcotation/sample_1.pass.joint.hcphase.funco.vcf.gz]
+Usage: step7_gatk_alleleCount.sh [-viognmrlCcspVt]
+  -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [project/funcotation/sample_1.pass.joint.hcphase.funco.vcf.gz]
   -i  | --inputbam           STR   path/to/wasp.bam eg. [project/wasp_rna/sample_1.phase.wasp.bam]
   -b  | --barcodes           STR   path/to/barcodes.csv eg. [project/barcodes/rna_barcodes.csv]
   -g  | --genotype           STR   genotype: [rna] [atac] [joint]
@@ -48,7 +48,7 @@ Usage: step7_gatk_alleleCount.sh [-fiognmrlCcspvt]
   -c  | --celltype_counts          allele-specific counts after grouping cells by barcode celltype annotation
   -s  | --single_cell_counts       single cell allele-specific counts for provided barcodes     
   -p  | --isphased                 optional: input vcf is phased. Default=[false]
-  -v  | --verbose                  optional: stream GATK output to terminal. Default=[false]
+  -V  | --verbose                  optional: stream GATK output to terminal. Default=[false]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
 
@@ -61,7 +61,7 @@ if [[ ${#} -eq 0 ]]; then
 fi
 
 PARSED_ARGUMENTS=$(getopt -a -n step7_gatk_alleleCount.sh \
--o f:i:o:b:g:n:m:r:l:Ccspvt:h \
+-o v:i:o:b:g:n:m:r:l:CcspVt:h \
 --long inputvcf:,inputbam:,outputdir:,barcodes:,genotype:,library_id:,modality:,reference:,interval:,\
 pseudobulk_counts,celltype_counts,single_cell_counts,isphased,verbose,threads:,help -- "$@")
 
@@ -83,7 +83,7 @@ do
     -c | --celltype_counts)     celltype_pseudobulk_counts=true ; shift 1 ;;
     -s | --single_cell_counts)  sc_counts=true                  ; shift 1 ;;
     -p | --isphased)            isphased=true                   ; shift 1 ;;
-    -v | --verbose)             verbose=true                    ; shift 1 ;;
+    -V | --verbose)             verbose=true                    ; shift 1 ;;
     -t | --threads)             threads=$2                      ; shift 2 ;;
     -h | --help)                usage ;;
     --) shift; break ;;

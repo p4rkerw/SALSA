@@ -114,10 +114,10 @@ TMPDIR=$workdir/TMPDIR
 rm -rf $TMPDIR; mkdir -p $TMPDIR 2> /dev/null
 cores=$(($threads / 2))
 subset-bam \
---bam $inputbam \
---cell-barcodes /tmp/${modality}_barcodes.$library_id.txt  \
---out-bam $outputdir/$outputbam \
---cores $cores
+  --bam $inputbam \
+  --cell-barcodes /tmp/${modality}_barcodes.$library_id.txt  \
+  --out-bam $outputdir/$outputbam \
+  --cores $cores
 
 # index output bam
 samtools index -@ $threads $outputdir/$outputbam
