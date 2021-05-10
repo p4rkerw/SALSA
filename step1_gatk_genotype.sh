@@ -397,7 +397,7 @@ if [ $verbose = "true" ]; then
   outputlog=/dev/stdout
 elif [ $verbose = "false" ]; then
   outputlog=$workdir/log.out
-  echo "output log" > $outputlog
+  echo "output log" > ${outputlog}
 fi
 
 # prepare a fasta dict file using the cellranger ref if not already present
