@@ -415,7 +415,7 @@ fi
 
 # create output directory
 mkdir -p $outputdir
-rm -rf $workdir; mkdir -p $workdir 2>> ${outputlog}
+rm -rf $workdir; mkdir -p $workdir 2> ${outputlog}
 
 # specify a temporary file directory for SplitNCigarReads and HaplotypeCaller
 tmpdir=$workdir/Temp
