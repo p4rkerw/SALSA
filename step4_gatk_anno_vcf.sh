@@ -152,7 +152,7 @@ for scatter_interval in ${scatter_intervals[@]}; do
     --verbosity INFO >> ${outputlog} 2>&1 \
     || { echo "Funcotator failed on $scatter_interval. Check log.out for additional info"; exit 1; } &
   pids+=($!)
-done
+done | pv -t
 # check exit status for each interval
 for pid in ${pids[@]}; do
   if ! wait $pid; then { exit_status=1; exit 1; };  fi
