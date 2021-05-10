@@ -14,6 +14,7 @@ pseudobulk_counts=false
 celltype_pseudobulk_counts=false
 sc_counts=false
 isphased=false
+verbose=false
 threads=1
 
 function usage {
