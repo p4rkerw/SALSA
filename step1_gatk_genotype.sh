@@ -391,13 +391,15 @@ source activate gatk
 
 # specify a work directory
 workdir=$SCRATCH1/gatk_genotype/$modality/$library_id
+# create output directory
+mkdir -p $outputdir
+rm -rf $workdir; mkdir -p $workdir 2> /dev/null
 
 # stream GATK output to terminal o/w capture in log file
 if [ $verbose = "true" ]; then
   outputlog=/dev/stdout
 elif [ $verbose = "false" ]; then
   outputlog=$workdir/log.out
-  echo "output log" > ${outputlog}
 fi
 
 # prepare a fasta dict file using the cellranger ref if not already present
@@ -414,9 +416,7 @@ elif [ $modality = "rna" ]; then
   grep -v '#' $reference/genes/genes.gtf |pv| awk -F'\t' 'BEGIN { OFS="\t" } $3=="exon" {print $1,$4-1,$5}' > /tmp/calling_intervals.bed
 fi
 
-# create output directory
-mkdir -p $outputdir
-rm -rf $workdir; mkdir -p $workdir 2>> ${outputlog}
+
 
 # specify a temporary file directory for SplitNCigarReads and HaplotypeCaller
 tmpdir=$workdir/Temp
