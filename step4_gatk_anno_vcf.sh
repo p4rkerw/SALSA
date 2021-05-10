@@ -25,7 +25,7 @@ Author: Parker C. Wilson MD, PhD
 Contact: parkerw@wustl.edu
 Version: 1.0
 
-Usage: step4_gatk_anno_vcf.sh [-nvdoramfth]
+Usage: step4_gatk_anno_vcf.sh [-nvdoramfVth]
   -n  | --library_id         STR   library_id: eg. [sample_1]
   -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [project/phasing/sample_1.pass.joint.hcphase.vcf.gz]
   -d  | --outputdir          STR   output directory name eg. [project/funcotation]
@@ -34,7 +34,7 @@ Usage: step4_gatk_anno_vcf.sh [-nvdoramfth]
   -a  | --output_table       STR   name of output funcotation csv eg. [sample_1.pass.joint.hcphase.formatted.csv]
   -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
   -f  | --funcotation        STR   path/to/funcotation directory eg. [reference/funcotator_dataSources.v1.6.20190124g]
-  -v  | --verbose                  optional: stream GATK output to terminal. Default=[false]
+  -V  | --verbose                  optional: stream GATK output to terminal. Default=[false]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
 
@@ -48,7 +48,7 @@ if [[ ${#} -eq 0 ]]; then
 fi
 
 PARSED_ARGUMENTS=$(getopt -a -n step4_gatk_anno_vcf.sh \
--o n:v:d:o:r:sirvt:h \
+-o n:v:d:o:r:sirVt:h \
 --long library_id:,inputvcf:,outputdir:,outputvcf:,reference:,output_table:,modality:,funcotation:,verbose,threads:,help -- "$@")
 
 echo "PARSED_ARGUMENTS are $PARSED_ARGUMENTS"
@@ -64,7 +64,7 @@ do
     -a | --output_table)      output_table=$2      ; shift 2 ;;
     -m | --modality)          modality=$2          ; shift 2 ;;
     -f | --funcotation)       funcotation=$2       ; shift 2 ;;
-    -v | --verbose)           verbose=true         ; shift 1 ;;
+    -V | --verbose)           verbose=true         ; shift 1 ;;
     -t | --threads)           threads=$2           ; shift 2 ;;
     -h | --help)              usage ;;
     --) shift; break ;;
@@ -107,7 +107,7 @@ if [ -d $funcotation ]; then
 else
   echo "Downloading funcotator resources"
   gatk FuncotatorDataSourceDownloader --germline --validate-integrity --extract-after-download --overwrite-output-file \
-  -O $reference/funcotator    
+    -O $reference/funcotator    
 fi
 
 # update output vcf file names
