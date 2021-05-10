@@ -389,6 +389,9 @@ export PATH=/gatk:/opt/miniconda/envs/gatk/bin:/opt/miniconda/bin:/usr/local/sbi
 echo "Activating GATK conda environment"
 source activate gatk
 
+# specify a work directory
+workdir=$SCRATCH1/gatk_genotype/$modality/$library_id
+
 # stream GATK output to terminal o/w capture in log file
 if [ $verbose = "true" ]; then
   outputlog=/dev/stdout
@@ -410,9 +413,8 @@ elif [ $modality = "rna" ]; then
   grep -v '#' $reference/genes/genes.gtf |pv| awk -F'\t' 'BEGIN { OFS="\t" } $3=="exon" {print $1,$4-1,$5}' > /tmp/calling_intervals.bed
 fi
 
-# create a output and work directories
+# create output directory
 mkdir -p $outputdir
-workdir=$SCRATCH1/gatk_genotype/$modality/$library_id
 rm -rf $workdir; mkdir -p $workdir 2>> ${outputlog}
 
 # specify a temporary file directory for SplitNCigarReads and HaplotypeCaller
