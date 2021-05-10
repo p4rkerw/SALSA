@@ -189,8 +189,8 @@ Usage: step3_phase_vcf.sh [-nvdorlpsitrVt]
   -r  | --phasingref         STR   path/to/1000G reference eg. [reference/phasing/biallelic_SNV]
   -l  | --interval           STR   optional: phase a single chromosome eg. [chr22]
   -p  | --hcphase                  optional: recover haplotypecaller physical phasing variants that are not in shapeit reference. Default=[false]
-  -s  | --snvonly            STR   use the biallelic_SNV reference for phasing
-  -i  | --snvindel           STR   use the biallelic_SNV_and_INDEL reference for phasing
+  -s  | --snvonly                  use the biallelic_SNV reference for phasing
+  -i  | --snvindel                 use the biallelic_SNV_and_INDEL reference for phasing
   -r  | --reproduce                optional: run shapeit4 with a single thread for reproducibility. Default=[false]
   -V  | --verbose                  optional: stream shapeit4 output to terminal. Default=[false]
   -t  | --threads            INT   number of threads. Default=[1]
