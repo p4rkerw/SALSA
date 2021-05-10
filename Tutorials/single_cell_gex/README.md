@@ -181,9 +181,9 @@ docker run \
 a) SNV only: [/vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20181203_biallelic_SNV/) </br>
 b) SNV_and_INDEL: [/vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL/)
 ```
-Usage: step3_phase_vcf.sh [-nfdorlpsitrh]
+Usage: step3_phase_vcf.sh [-nvdorlpsitrVt]
   -n  | --library_id         STR   library_id: eg. [sample_1]
-  -f  | --inputvcf           STR   path/to/input.vcf.gz eg. [project/joint_genotype/sample_1.pass.joint.vcf.gz]
+  -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [project/joint_genotype/sample_1.pass.joint.vcf.gz]
   -d  | --outputdir          STR   output directory name eg. [project/phasing]
   -o  | --outputvcf          STR   name of output vcf eg. [sample_1.pass.joint.phase.vcf.gz]
   -r  | --phasingref         STR   path/to/1000G reference eg. [reference/phasing/biallelic_SNV]
@@ -192,7 +192,7 @@ Usage: step3_phase_vcf.sh [-nfdorlpsitrh]
   -s  | --snvonly            STR   use the biallelic_SNV reference for phasing
   -i  | --snvindel           STR   use the biallelic_SNV_and_INDEL reference for phasing
   -r  | --reproduce                optional: run shapeit4 with a single thread for reproducibility. Default=[false]
-  -v  | --verbose                  optional: stream shapeit4 output to terminal. Default=[false]
+  -V  | --verbose                  optional: stream shapeit4 output to terminal. Default=[false]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
 ```
