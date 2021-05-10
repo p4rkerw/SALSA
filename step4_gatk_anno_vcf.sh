@@ -95,7 +95,7 @@ source activate gatk
 if [ $verbose = "true" ]; then
   outputlog=/dev/stdout
 elif [ $verbose = "false" ]; then
-  outputlog=$SCRATCH1/log.out
+  outputlog=$workdir/log.out
 fi
 
 # create funcotation director
@@ -150,7 +150,7 @@ for scatter_interval in ${scatter_intervals[@]}; do
     -L /tmp/interval_files_folder/$scatter_interval \
     --disable-sequence-dictionary-validation true \
     --verbosity INFO >> ${outputlog} 2>&1 \
-    || { echo "Funcotator failed on $scatter_interval. Check log.out for additional info"; exit 1; } &
+    || { echo "Funcotator failed on $scatter_interval. Check $outputlog for additional info"; exit 1; } &
   pids+=($!)
 done | pv -t
 # check exit status for each interval

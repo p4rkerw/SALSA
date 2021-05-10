@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# exit on error
-set -e
-
 # Set some default values:
 interval=""
 threads=1

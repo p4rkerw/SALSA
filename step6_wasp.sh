@@ -246,8 +246,8 @@ fi
 if [ $modality = "atac" ]; then
   # check for bwa mem index
   if [ ! -f $atacref/fasta/genome.dict ]; then
-  echo "Generating BWA index and putting in atac_ref directory"
-  bwa index $atacref/fasta/genome.fa 
+    echo "Generating BWA index and putting in atac_ref directory"
+    bwa index $atacref/fasta/genome.fa 
   fi  
   # use bwa to remap reads
   echo "Realigning reads with BWA" 
@@ -262,19 +262,19 @@ fi
 #################FILTER REMAPPED READS#################
 # filter the remapped/realigned reads and output as keep.bam
 python $wasp/mapping/filter_remapped_reads.py \
-$workdir/$bn.to.remap.bam \
-$workdir/$bn.sorted.realigned.bam \
-$workdir/keep.bam
+  $workdir/$bn.to.remap.bam \
+  $workdir/$bn.sorted.realigned.bam \
+  $workdir/keep.bam
 
 ###################MERGE AND SORT###################
 echo "Merging realigned bam file"
 # merge the output of find_intersecting_snps $bn.keep.bam and filter_remapped_reads keep.bam
 samtools merge -f --threads $threads $workdir/$bn.keep.merge.bam \
-$workdir/$bn.keep.bam \
-$workdir/keep.bam
+  $workdir/$bn.keep.bam \
+  $workdir/keep.bam
 echo "Sorting output: $outputbam"  
 samtools sort -@ $threads -T $workdir -o $outputdir/$outputbam \
-$workdir/$bn.keep.merge.bam
+  $workdir/$bn.keep.merge.bam
 echo "Indexing output: $outputbam"
 samtools index $outputdir/$outputbam
 echo "Writing to directory: $outputdir"          
