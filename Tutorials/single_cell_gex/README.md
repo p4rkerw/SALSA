@@ -87,6 +87,7 @@ Usage: step1_gatk_genotype.sh [-inrgdomlt]
   -o  | --outputvcf          STR   name of output vcf eg. [sample_1.rna.vcf.gz]
   -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
   -l  | --interval           STR   optional: genotype a single chromosome eg. [chr22]
+  -V  | --verbose                  optional: stream GATK output to terminal. Default=[false]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
 
@@ -249,6 +250,7 @@ Usage: step4_gatk_anno_vcf.sh [-nvdoramfth]
   -a  | --output_table       STR   name of output funcotation csv eg. [sample_1.pass.joint.hcphase.formatted.csv]
   -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
   -f  | --funcotation        STR   path/to/funcotation directory eg. [reference/funcotator_dataSources.v1.6.20190124g]
+  -V  | --verbose                  optional: stream GATK output to terminal. Default=[false]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
 ```
