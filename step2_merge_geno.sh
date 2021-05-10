@@ -95,15 +95,15 @@ if [ $includefiltered = "true" ]; then
 	# use bcftools concat/norm to join biallelic snps and indels into multiallelic records which are then filtered. retain single info/format field
 	echo "Retaining filtered variants"
 	bcftools isec -Oz --threads $threads -p /tmp/isec $vcfone $vcftwo
-	bcftools concat --threads $threads --allow-overlaps --rm-dups "none" /tmp/isec/0000.vcf.gz /tmp/isec/0001.vcf.gz /tmp/isec/0002.vcf.gz |\
-	bcftools norm -m +both |bcftools view -Oz -m2 -M2 > $outputdir/$outputvcf
+	bcftools concat --threads $threads --allow-overlaps --rm-dups "none" /tmp/isec/0000.vcf.gz /tmp/isec/0001.vcf.gz /tmp/isec/0002.vcf.gz \
+	  | bcftools norm -m +both |bcftools view -Oz -m2 -M2 > $outputdir/$outputvcf
 	bcftools index --threads $threads $outputdir/$outputvcf
 elif [ $includefiltered = "false" ]; then
 	echo "Removing filtered variants"
 	# remove filtered variants
 	bcftools isec -f PASS -Oz --threads $threads -p /tmp/isec $vcfone $vcftwo
-	bcftools concat --threads $threads --allow-overlaps --rm-dups "none" /tmp/isec/0000.vcf.gz /tmp/isec/0001.vcf.gz /tmp/isec/0002.vcf.gz |\
-	bcftools norm -m +both |bcftools view -Oz -f PASS -m2 -M2 > $outputdir/$outputvcf
+	bcftools concat --threads $threads --allow-overlaps --rm-dups "none" /tmp/isec/0000.vcf.gz /tmp/isec/0001.vcf.gz /tmp/isec/0002.vcf.gz \
+	  | bcftools norm -m +both |bcftools view -Oz -f PASS -m2 -M2 > $outputdir/$outputvcf
 	bcftools index --threads $threads $outputdir/$outputvcf
 fi
 
