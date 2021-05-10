@@ -366,6 +366,7 @@ Usage: step7_gatk_alleleCount.sh [-viognmrlCcspt]
   -c  | --celltype_counts          allele-specific counts after grouping cells by barcode celltype annotation
   -s  | --single_cell_counts       single cell allele-specific counts for provided barcodes     
   -p  | --isphased                 optional: input vcf is phased. Default=[false]
+  -V  | --verbose                  optional: stream GATK output to terminal. Default=[false]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
 ```
