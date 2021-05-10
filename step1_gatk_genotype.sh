@@ -286,11 +286,6 @@ function interval_rna_germline_workflow {
 # ATAC specific workflow
 function interval_atac_germline_workflow {
   echo "Starting ATAC germline workflow for $interval"
-
-  # before running pipeline ensure interval is coordinate-sorted and @HD tag is properly formatted
-  # samtools view -b -h $1 $interval > $intervaldir/$interval.bam
-  # samtools index -@ $threads $intervaldir/$interval.bam
-
   # workflow from here: https://gatk.broadinstitute.org/hc/en-us/articles/360035535932-Germline-short-variant-discovery-SNPs-Indels-
   # for single sample calling exclude joint-call cohort step
   # run variant pipeline using cellranger input bam
