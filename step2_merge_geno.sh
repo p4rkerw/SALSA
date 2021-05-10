@@ -54,9 +54,9 @@ do
     -n | --library_id)            library_id=$2        ; shift 2 ;;
     -a | --vcfone)                vcfone=$2            ; shift 2 ;;
     -b | --vcftwo)                vcftwo=$2            ; shift 2 ;;
-  	-d | --outputdir)             outputdir=$2         ; shift 2 ;;
-  	-o | --outputvcf)             outputvcf=$2         ; shift 2 ;;
-  	-i | --includefiltered)       includefiltered=true ; shift 1 ;;
+    -d | --outputdir)             outputdir=$2         ; shift 2 ;;
+    -o | --outputvcf)             outputvcf=$2         ; shift 2 ;;
+    -i | --includefiltered)       includefiltered=true ; shift 1 ;;
     -t | --threads)               threads=$2           ; shift 2 ;;
     -h | --help)                  usage ;;
     --) shift; break ;;
