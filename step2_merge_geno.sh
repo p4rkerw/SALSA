@@ -51,14 +51,14 @@ eval set -- "$PARSED_ARGUMENTS"
 while :
 do
   case "$1" in
-    -n | --library_id)        library_id=$2        ; shift 2 ;;
-    -a | --vcfone)            vcfone=$2            ; shift 2 ;;
-    -b | --vcftwo)            vcftwo=$2            ; shift 2 ;;
-  	-d | --outputdir)         outputdir=$2         ; shift 2 ;;
-  	-o | --outputvcf)         outputvcf=$2         ; shift 2 ;;
-  	-i | --includefiltered)   includefiltered=true ; shift 1 ;;
-    -t | --threads)           threads=$2           ; shift 2 ;;
-    -h | --help)              usage ;;
+    -n | --library_id)            library_id=$2        ; shift 2 ;;
+    -a | --vcfone)                vcfone=$2            ; shift 2 ;;
+    -b | --vcftwo)                vcftwo=$2            ; shift 2 ;;
+  	-d | --outputdir)             outputdir=$2         ; shift 2 ;;
+  	-o | --outputvcf)             outputvcf=$2         ; shift 2 ;;
+  	-i | --includefiltered)       includefiltered=true ; shift 1 ;;
+    -t | --threads)               threads=$2           ; shift 2 ;;
+    -h | --help)                  usage ;;
     --) shift; break ;;
     *) echo "Unexpected option: $1 - this should not happen."
        usage ;;
