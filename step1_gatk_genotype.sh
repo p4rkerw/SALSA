@@ -8,7 +8,7 @@ set -e
 # Set some default values:
 interval=""
 threads=1
-verbose="false"
+verbose=false
 exit_status=0
 
 function usage {
