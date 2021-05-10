@@ -346,6 +346,7 @@ Usage: step6_wasp.sh [-vbdogianlmpt]
 
 **(Not required for tutorial) Build a STAR index for 🌶️SALSA** The refdata-gex-GRCh38-2020-A reference comes with a pre-packaged STAR reference built with STAR-2.5.1b. If you want to use a more recent version of STAR or a different index you will need to build a new one. 
 ```
+# not run:
 # STAR \
 # --runMode genomeGenerate \
 # --genomeDir reference/refdata-gex-GRCh38-2020-A/salsa_star \
