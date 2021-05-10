@@ -397,6 +397,7 @@ if [ $verbose = "true" ]; then
   outputlog=/dev/stdout
 elif [ $verbose = "false" ]; then
   outputlog=$workdir/log.out
+  echo "output log" > $outputlog
 fi
 
 # prepare a fasta dict file using the cellranger ref if not already present
@@ -415,7 +416,7 @@ fi
 
 # create output directory
 mkdir -p $outputdir
-rm -rf $workdir; mkdir -p $workdir 2> ${outputlog}
+rm -rf $workdir; mkdir -p $workdir 2>> ${outputlog}
 
 # specify a temporary file directory for SplitNCigarReads and HaplotypeCaller
 tmpdir=$workdir/Temp
