@@ -96,6 +96,10 @@ echo "isphased     : $isphased"
 echo "threads      : $threads"
 echo "Parameters remaining are: $@"
 
+# checking input files
+if [ ! -f $inputbam ]; then { echo "Input bam file not found"; exit 1 }; fi
+if [ ! -f $inputvcf ]; then { echo "Input vcf file not found"; exit 1 }; fi
+
 # ensure gatk and miniconda are in path when working in LSF environment
 export PATH=/gatk:/opt/miniconda/envs/gatk/bin:/opt/miniconda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
 
@@ -145,7 +149,7 @@ else
 fi
 
 
-if [ $isphased == "true" ]; then
+if [ $isphased = "true" ]; then
   # set output file name to indicate that it's phased
   echo "Input vcf is phased"
   # chrominfo from http://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/chromInfo.txt.gz
@@ -158,27 +162,27 @@ if [ $isphased == "true" ]; then
   # create snp hdf5 file
   echo "Generating snp hdf5"
   $wasp/snp2h5/snp2h5 \
-  --chrom reference/hg38_chromInfo.txt.gz \
-  --format vcf \
-  --haplotype /tmp/haplotypes.h5 \
-  --snp_index /tmp/snp_index.h5 \
-  --snp_tab   /tmp/snp_tab.h5 \
-  /tmp/haplotype.chr*.vcf.gz
+    --chrom reference/hg38_chromInfo.txt.gz \
+    --format vcf \
+    --haplotype /tmp/haplotypes.h5 \
+    --snp_index /tmp/snp_index.h5 \
+    --snp_tab   /tmp/snp_tab.h5 \
+    /tmp/haplotype.chr*.vcf.gz
   # the is_paired_end variable expands to --is_paired_end for paired-end reads
   echo "Running WASP and writing to $workdir"
   python $wasp/mapping/find_intersecting_snps.py \
-  ${is_paired_end} \
-  --is_sorted \
-  --output_dir $workdir \
-  --snp_index /tmp/snp_index.h5 \
-  --snp_tab /tmp/snp_tab.h5 \
-  --haplotype /tmp/haplotypes.h5 \
-  $inputbam
+    ${is_paired_end} \
+    --is_sorted \
+    --output_dir $workdir \
+    --snp_index /tmp/snp_index.h5 \
+    --snp_tab /tmp/snp_tab.h5 \
+    --haplotype /tmp/haplotypes.h5 \
+    $inputbam
 fi
 
 
 # for unphased vcf use a text-based snv file as recommended by WASP
-if [ $isphased == "false" ]; then
+if [ $isphased = "false" ]; then
   # set output file name to indicate that it was not phased
   # split the vcf into separate files by contig and print ref and alt for each variant
   contigdir=/tmp/vcf 
@@ -192,46 +196,46 @@ if [ $isphased == "false" ]; then
   # the is_paired_end variable expands to --is_paired_end for paired-end reads
   echo "Running WASP and writing to $workdir"
   python $wasp/mapping/find_intersecting_snps.py \
-  ${is_paired_end} \
-  --is_sorted \
-  --output_dir $workdir \
-  --snp_dir $contigdir \
-  $inputbam
+    ${is_paired_end} \
+    --is_sorted \
+    --output_dir $workdir \
+    --snp_dir $contigdir \
+    $inputbam
 fi
 
 
 ################SCRNA SPECIFIC WORKFLOW################
 # create a STAR index if not specified
-if [ $modality == "rna" ]; then
+if [ $modality = "rna" ]; then
   if [ ! -f $stargdir/genomeParameters.txt ]; then
     echo "Generating STAR index and putting in $stargdir directory"
     STAR \
-    --runMode genomeGenerate \
-    --runThreadN $threads \
-    --genomeDir $stargdir \
-    --genomeFastaFiles rna_ref/fasta/genome.fa \
-    --sjdbGTFfile rna_ref/genes/genes.gtf
+      --runMode genomeGenerate \
+      --runThreadN $threads \
+      --genomeDir $stargdir \
+      --genomeFastaFiles rna_ref/fasta/genome.fa \
+      --sjdbGTFfile rna_ref/genes/genes.gtf
   fi
   ### use STAR to remap single end reads 
-  if [ $r2only == "true" ]; then
+  if [ $r2only = "true" ]; then
     echo "Running STAR with single end reads"
     STAR \
-    --genomeDir $stargdir \
-    --runThreadN $threads \
-    --readFilesIn <(gunzip -c $workdir/$bn.remap.fq.gz) \
-    --outSAMtype BAM SortedByCoordinate \
-    --outFileNamePrefix $workdir/$bn.
+      --genomeDir $stargdir \
+      --runThreadN $threads \
+      --readFilesIn <(gunzip -c $workdir/$bn.remap.fq.gz) \
+      --outSAMtype BAM SortedByCoordinate \
+      --outFileNamePrefix $workdir/$bn.
     mv $workdir/$bn.Aligned.sortedByCoord.out.bam $workdir/$bn.sorted.realigned.bam
     samtools index -@ $threads $workdir/$bn.sorted.realigned.bam
-  elif [ $r2only == "false" ]; then
+  elif [ $r2only = "false" ]; then
     echo "Running STAR with paired end reads"
     ### use STAR to remap paired end reads 
     STAR \
-    --genomeDir $stargdir \
-    --runThreadN $threads \
-    --readFilesIn <(gunzip -c $workdir/$bn.remap.fq1.gz) <(gunzip -c $workdir/$bn.remap.fq2.gz) \
-    --outSAMtype BAM SortedByCoordinate \
-    --outFileNamePrefix $workdir/$bn.
+      --genomeDir $stargdir \
+      --runThreadN $threads \
+      --readFilesIn <(gunzip -c $workdir/$bn.remap.fq1.gz) <(gunzip -c $workdir/$bn.remap.fq2.gz) \
+      --outSAMtype BAM SortedByCoordinate \
+      --outFileNamePrefix $workdir/$bn.
     mv $workdir/$bn.Aligned.sortedByCoord.out.bam $workdir/$bn.sorted.realigned.bam
     samtools index -@ $threads $workdir/$bn.sorted.realigned.bam
   fi
@@ -239,7 +243,7 @@ fi
 
 
 ###########SNATAC SPECIFIC WORKFLOW###########
-if [ $modality == "atac" ]; then
+if [ $modality = "atac" ]; then
   # check for bwa mem index
   if [ ! -f $atacref/fasta/genome.dict ]; then
   echo "Generating BWA index and putting in atac_ref directory"

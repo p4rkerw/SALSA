@@ -98,16 +98,16 @@ function gatk_germline_short_variant_scatter_gather {
   pids=()
   for scatter_interval in ${scatter_intervals[@]}; do
     gatk --java-options "-Xmx16G -XX:+UseParallelGC -XX:ParallelGCThreads=4" BaseRecalibrator \
-    -I $1 \
-    -R $reference/fasta/genome.fa \
-    --known-sites $gatk_bundle/resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz \
-    --known-sites $gatk_bundle/resources_broad_hg38_v0_Homo_sapiens_assembly38.known_indels.vcf.gz \
-    --known-sites $gatk_bundle/resources_broad_hg38_v0_1000G_phase1.snps.high_confidence.hg38.vcf.gz \
-    --known-sites $gatk_bundle/resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz \
-    -L /tmp/interval_files_folder/$scatter_interval \
-    -O $intervaldir/recal_data.$scatter_interval.table \
-    --tmp-dir $tmpdir \
-    --verbosity INFO >> ${outputlog} 2>&1 \
+      -I $1 \
+      -R $reference/fasta/genome.fa \
+      --known-sites $gatk_bundle/resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz \
+      --known-sites $gatk_bundle/resources_broad_hg38_v0_Homo_sapiens_assembly38.known_indels.vcf.gz \
+      --known-sites $gatk_bundle/resources_broad_hg38_v0_1000G_phase1.snps.high_confidence.hg38.vcf.gz \
+      --known-sites $gatk_bundle/resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz \
+      -L /tmp/interval_files_folder/$scatter_interval \
+      -O $intervaldir/recal_data.$scatter_interval.table \
+      --tmp-dir $tmpdir \
+      --verbosity INFO >> ${outputlog} 2>&1 \
       || { echo "BaseRecalibrator failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; } &
     pids+=($!)
   done 
@@ -121,13 +121,13 @@ function gatk_germline_short_variant_scatter_gather {
   pids=()
   for scatter_interval in ${scatter_intervals[@]}; do
     gatk --java-options "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap" ApplyBQSR \
-    -I $1 \
-    -R $reference/fasta/genome.fa \
-    --bqsr-recal-file $intervaldir/recal_data.$scatter_interval.table \
-    -L /tmp/interval_files_folder/$scatter_interval \
-    -O $intervaldir/bqsr.$scatter_interval.bam \
-    --tmp-dir $tmpdir \
-    --verbosity INFO >> ${outputlog} 2>&1 \
+      -I $1 \
+      -R $reference/fasta/genome.fa \
+      --bqsr-recal-file $intervaldir/recal_data.$scatter_interval.table \
+      -L /tmp/interval_files_folder/$scatter_interval \
+      -O $intervaldir/bqsr.$scatter_interval.bam \
+      --tmp-dir $tmpdir \
+      --verbosity INFO >> ${outputlog} 2>&1 \
       || { echo "ApplyBQSR failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; } &
     pids+=($!)
   done
@@ -151,14 +151,14 @@ function gatk_germline_short_variant_scatter_gather {
   for scatter_interval in ${scatter_intervals[@]}; do
     echo "$intervaldir/output.g.$scatter_interval.vcf.gz" >> /tmp/gvcf.list
     gatk --java-options "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap" HaplotypeCaller \
-    -I $intervaldir/bqsr.$scatter_interval.bam \
-    -R $reference/fasta/genome.fa \
-    -O $intervaldir/output.g.$scatter_interval.vcf.gz \
-    -ERC GVCF \
-    -D $gatk_bundle/resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz \
-    -L /tmp/interval_files_folder/$scatter_interval \
-    --verbosity INFO \
-    --tmp-dir $tmpdir >> ${outputlog} 2>&1 \
+      -I $intervaldir/bqsr.$scatter_interval.bam \
+      -R $reference/fasta/genome.fa \
+      -O $intervaldir/output.g.$scatter_interval.vcf.gz \
+      -ERC GVCF \
+      -D $gatk_bundle/resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz \
+      -L /tmp/interval_files_folder/$scatter_interval \
+      --verbosity INFO \
+      --tmp-dir $tmpdir >> ${outputlog} 2>&1 \
       || { echo "HaplotypeCaller failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; } &
     pids+=($!)
   done
@@ -181,10 +181,10 @@ function gatk_germline_short_variant_scatter_gather {
   for scatter_interval in ${scatter_intervals[@]}; do
     echo "$intervaldir/output.$scatter_interval.vcf.gz" >> /tmp/vcf.list
     gatk --java-options "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap" GenotypeGVCFs \
-    -V $intervaldir/output.g.vcf.gz \
-    -R $reference/fasta/genome.fa \
-    -L /tmp/interval_files_folder/$scatter_interval \
-    -O $intervaldir/output.$scatter_interval.vcf.gz >> ${outputlog} 2>&1 \
+      -V $intervaldir/output.g.vcf.gz \
+      -R $reference/fasta/genome.fa \
+      -L /tmp/interval_files_folder/$scatter_interval \
+      -O $intervaldir/output.$scatter_interval.vcf.gz >> ${outputlog} 2>&1 \
       || { echo "GenotypeGVCFs failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; } &
     pids+=($!)
   done
@@ -217,11 +217,11 @@ function interval_rna_germline_workflow {
   for scatter_interval in ${scatter_intervals[@]}; do
     echo "$intervaldir/cigar_marked_duplicates.$scatter_interval.bam" >> /tmp/cigarbam.list
     gatk --java-options "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap" SplitNCigarReads \
-    -I $1 \
-    -R $reference/fasta/genome.fa \
-    --tmp-dir $tmpdir \
-    -L /tmp/interval_files_folder/$scatter_interval \
-    -O $intervaldir/cigar_marked_duplicates.$scatter_interval.bam >> ${outputlog} 2>&1 \
+      -I $1 \
+      -R $reference/fasta/genome.fa \
+      --tmp-dir $tmpdir \
+      -L /tmp/interval_files_folder/$scatter_interval \
+      -O $intervaldir/cigar_marked_duplicates.$scatter_interval.bam >> ${outputlog} 2>&1 \
       || { echo "SplitNCigarReads failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; } &
     pids+=($!)
   done
@@ -254,17 +254,17 @@ function interval_rna_germline_workflow {
   for scatter_interval in ${scatter_intervals[@]}; do
     echo $intervaldir/$library_id.$scatter_interval.vcf.gz >> /tmp/fvcf.list
     gatk VariantFiltration --java-options "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap" \
-    --V $intervaldir/output.vcf.gz \
-    --R $reference/fasta/genome.fa \
-    -L /tmp/interval_files_folder/$scatter_interval \
-    --verbosity ERROR \
-    --window 35 \
-    --cluster 3 \
-    --filter-name "FS" \
-    --filter "FS > 30.0" \
-    --filter-name "QD" \
-    --filter "QD < 2.0" \
-    -O $interval/$library_id.$scatter_interval.vcf.gz >> ${outputlog} 2>&1 \
+      --V $intervaldir/output.vcf.gz \
+      --R $reference/fasta/genome.fa \
+      -L /tmp/interval_files_folder/$scatter_interval \
+      --verbosity ERROR \
+      --window 35 \
+      --cluster 3 \
+      --filter-name "FS" \
+      --filter "FS > 30.0" \
+      --filter-name "QD" \
+      --filter "QD < 2.0" \
+      -O $interval/$library_id.$scatter_interval.vcf.gz >> ${outputlog} 2>&1 \
       || { echo "VariantFiltration failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; } &
     pids+=($!)
   done
@@ -305,10 +305,10 @@ function interval_atac_germline_workflow {
   for scatter_interval in ${scatter_intervals[@]}; do
     echo "$intervaldir/annotated.$scatter_interval.vcf.gz" >> /tmp/cnnvcf.list
     gatk CNNScoreVariants --java-options "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap" \
-    -V $intervaldir/output.vcf.gz \
-    -R $reference/fasta/genome.fa \
-    -L /tmp/interval_files_folder/$scatter_interval \
-    -O $intervaldir/annotated.$scatter_interval.vcf.gz >> ${outputlog} 2>&1 \
+      -V $intervaldir/output.vcf.gz \
+      -R $reference/fasta/genome.fa \
+      -L /tmp/interval_files_folder/$scatter_interval \
+      -O $intervaldir/annotated.$scatter_interval.vcf.gz >> ${outputlog} 2>&1 \
       || { echo "CNNScoreVariants failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; } &
     pids+=($!)
   done
@@ -327,13 +327,13 @@ function interval_atac_germline_workflow {
   # filter variants with default tranches from gatk
   echo "Filtering gathered vcf using CNNScoreVariants tranches"
   gatk FilterVariantTranches --java-options "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap" \
-  -V $intervaldir/annotated.vcf.gz \
-  --resource $gatk_bundle/resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz \
-  --resource $gatk_bundle/resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz \
-  --info-key CNN_1D \
-  --snp-tranche 99.95 \
-  --indel-tranche 99.4 \
-  -O $workdir/genotype.$interval.vcf.gz >> ${outputlog} 2>&1 \
+    -V $intervaldir/annotated.vcf.gz \
+    --resource $gatk_bundle/resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz \
+    --resource $gatk_bundle/resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz \
+    --info-key CNN_1D \
+    --snp-tranche 99.95 \
+    --indel-tranche 99.4 \
+    -O $workdir/genotype.$interval.vcf.gz >> ${outputlog} 2>&1 \
     || { echo "FilterVariantTranches failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; exit 1; }
 
   # index the interval vcf
@@ -428,8 +428,8 @@ mkdir -p $tmpdir
 rm -rf /tmp/scatter_by_Ns.interval_list 2>> ${outputlog}
 echo "Scattering intervals across reference"
 gatk ScatterIntervalsByNs \
--R $reference/fasta/genome.fa \
--O /tmp/scatter_by_Ns.interval_list 
+  -R $reference/fasta/genome.fa \
+  -O /tmp/scatter_by_Ns.interval_list 
 
 # limit to specified interval
 if [ $interval ]; then
@@ -451,12 +451,12 @@ for interval in ${intervals[@]}; do
   # intersect scatter gather intervals with calling bed and divide across available no. threads
   rm -rf /tmp/interval_files_folder/ 2>> ${outputlog}
   gatk SplitIntervals \
-  -R $reference/fasta/genome.fa \
-  -O /tmp/interval_files_folder/ \
-  --scatter-count $threads \
-  --interval-set-rule INTERSECTION \
-  -L /tmp/calling_intervals_sel.bed \
-  -L /tmp/scatter_by_Ns.interval_list >> ${outputlog} 2>&1 \
+    -R $reference/fasta/genome.fa \
+    -O /tmp/interval_files_folder/ \
+    --scatter-count $threads \
+    --interval-set-rule INTERSECTION \
+    -L /tmp/calling_intervals_sel.bed \
+    -L /tmp/scatter_by_Ns.interval_list >> ${outputlog} 2>&1 \
     || { echo "SplitIntervals failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; exit 1; }
 
   # create array of scatter gather intervals  

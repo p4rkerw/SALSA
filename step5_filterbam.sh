@@ -82,6 +82,9 @@ echo "validate                  : $validate"
 echo "threads                   : $threads"
 echo "Parameters remaining are  : $@"
 
+# check input files
+if [ ! -f $inputbam ]; then { echo "Input bam file not found"; exit 1 }; fi
+
 # ensure gatk and miniconda are in path when working in LSF environment
 export PATH=/gatk:/opt/miniconda/envs/gatk/bin:/opt/miniconda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
 
@@ -121,7 +124,7 @@ samtools index -@ $threads $outputdir/$outputbam
 
 # validate the output bam with gatk and ignore warnings which result from missing NM tags
 # if this step is omitted subset-bam can produce silent errors resulting in malformed bam output
-if [ $validate == "true" ]; then
+if [ $validate = "true" ]; then
   gatk ValidateSamFile -I $outputdir/$outputbam --IGNORE_WARNINGS true
 fi
 

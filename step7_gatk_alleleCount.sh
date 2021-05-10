@@ -35,8 +35,8 @@ Author: Parker C. Wilson MD, PhD
 Contact: parkerw@wustl.edu
 Version: 1.0
 
-Usage: step7_gatk_alleleCount.sh [-viognmrlCcspt]
-  -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [project/funcotation/sample_1.pass.joint.hcphase.funco.vcf.gz]
+Usage: step7_gatk_alleleCount.sh [-fiognmrlCcspvt]
+  -f  | --inputvcf           STR   path/to/input.vcf.gz eg. [project/funcotation/sample_1.pass.joint.hcphase.funco.vcf.gz]
   -i  | --inputbam           STR   path/to/wasp.bam eg. [project/wasp_rna/sample_1.phase.wasp.bam]
   -b  | --barcodes           STR   path/to/barcodes.csv eg. [project/barcodes/rna_barcodes.csv]
   -g  | --genotype           STR   genotype: [rna] [atac] [joint]
@@ -48,6 +48,7 @@ Usage: step7_gatk_alleleCount.sh [-viognmrlCcspt]
   -c  | --celltype_counts          allele-specific counts after grouping cells by barcode celltype annotation
   -s  | --single_cell_counts       single cell allele-specific counts for provided barcodes     
   -p  | --isphased                 optional: input vcf is phased. Default=[false]
+  -v  | --verbose                  optional: stream GATK output to terminal. Default=[false]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
 
@@ -60,9 +61,9 @@ if [[ ${#} -eq 0 ]]; then
 fi
 
 PARSED_ARGUMENTS=$(getopt -a -n step7_gatk_alleleCount.sh \
--o v:i:o:b:g:n:m:r:l:Ccspt:h \
+-o f:i:o:b:g:n:m:r:l:Ccspvt:h \
 --long inputvcf:,inputbam:,outputdir:,barcodes:,genotype:,library_id:,modality:,reference:,interval:,\
-pseudobulk_counts,celltype_counts,single_cell_counts,isphased,threads:,help -- "$@")
+pseudobulk_counts,celltype_counts,single_cell_counts,isphased,verbose,threads:,help -- "$@")
 
 echo "PARSED_ARGUMENTS are $PARSED_ARGUMENTS"
 eval set -- "$PARSED_ARGUMENTS"
@@ -82,6 +83,7 @@ do
     -c | --celltype_counts)     celltype_pseudobulk_counts=true ; shift 1 ;;
     -s | --single_cell_counts)  sc_counts=true                  ; shift 1 ;;
     -p | --isphased)            isphased=true                   ; shift 1 ;;
+    -v | --verbose)             verbose=true                    ; shift 1 ;;
     -t | --threads)             threads=$2                      ; shift 2 ;;
     -h | --help)                usage ;;
     --) shift; break ;;
@@ -103,15 +105,28 @@ echo "pseudobulk_counts         : $pseudobulk_counts"
 echo "celltype_counts           : $celltype_pseudobulk_counts"
 echo "single_cell_counts        : $sc_counts"
 echo "isphased                  : $isphased"
+echo "verbose                   : $verbose"
 echo "threads                   : $threads"
 echo "Parameters remaining are  : $@"
 
+
+# checking input files
+if [ ! -f $inputbam ]; then { echo "Input bam file not found"; exit 1 }; fi
+if [ ! -f $inputvcf ]; then { echo "Input vcf file not found"; exit 1 }; fi
+if [ ! -f $barcodes ]; then { echo "Barcodes file not found"; exit 1 }; fi
 
 # ensure gatk and miniconda are in path when working in LSF environment
 export PATH=/gatk:/opt/miniconda/envs/gatk/bin:/opt/miniconda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
 
 # activate gatk conda environ
 source activate gatk
+
+# stream GATK output to terminal o/w capture in log file
+if [ $verbose == "true" ]; then
+  outputlog=/dev/stdout
+elif [ $verbose == "false" ]; then
+  outputlog=$SCRATCH1/log.out
+fi
 
 # prepare a fasta dict file using the cellranger ref
 # gatk CreateSequenceDictionary -R /ref/fasta/genome.fa
@@ -123,10 +138,12 @@ mkdir -p $workdir
 # add filter tag in format field to heterozygous variants
 echo "Adding heterozygosity filter to input VCF"
 gatk VariantFiltration \
--V $inputvcf \
--O /tmp/isHet.$(basename $inputvcf) \
---genotype-filter-expression "isHet == 1" \
---genotype-filter-name "isHetFilter"
+  -V $inputvcf \
+  -O /tmp/isHet.$(basename $inputvcf) \
+  --genotype-filter-expression "isHet == 1" \
+  --genotype-filter-name "isHetFilter" >> ${outputlog} 2>&1 \
+  || { echo "VariantFiltration failed. Check $SCRATCH1/log.out for additional info"; exit 1; }
+
 
 echo "Filtering multiallelic and non-heterozygous variants from $inputvcf and retaining biallelic SNV"
 # collapse variants with the same context and remove multiallelic variants
@@ -135,7 +152,8 @@ bcftools norm /tmp/isHet.$(basename $inputvcf) -m +snps |bcftools view -Oz -m2 -
 # remove variants that are not heterozygous
 (bcftools view -h /tmp/single_context.vcf.gz; bcftools view -H /tmp/single_context.vcf.gz|grep 'isHetFilter')|\
   bcftools view -Oz - > /tmp/filter.$(basename $inputvcf)
-gatk IndexFeatureFile -I /tmp/filter.$(basename $inputvcf)
+gatk IndexFeatureFile -I /tmp/filter.$(basename $inputvcf) >> ${outputlog} 2>&1 \
+  || { echo "IndexFeatureFile failed. Check $SCRATCH1/log.out for additional info"; exit 1; }
 
 # limit to specified interval if -L flag selected
 rm -rf /tmp/interval_files_folder 2> /dev/null
@@ -152,17 +170,19 @@ if [ $interval ]; then
 
   # create scatter gather intervals across selected interval and no. threads
   gatk SplitIntervals \
-  -R $reference/fasta/genome.fa \
-  -O /tmp/interval_files_folder \
-  --scatter-count $threads \
-  -L $interval \
-  --interval-set-rule INTERSECTION
+    -R $reference/fasta/genome.fa \
+    -O /tmp/interval_files_folder \
+    --scatter-count $threads \
+    -L $interval \
+    --interval-set-rule INTERSECTION >> ${outputlog} 2>&1 \
+    || { echo "SplitIntervals failed. Check $SCRATCH1/log.out for additional info"; exit 1; }
 else
   # create scatter gather intervals across no. threads
   gatk SplitIntervals \
-  -R $reference/fasta/genome.fa \
-  -O /tmp/interval_files_folder \
-  --scatter-count $threads
+    -R $reference/fasta/genome.fa \
+    -O /tmp/interval_files_folder \
+    --scatter-count $threads >> ${outputlog} 2>&1 \
+    || { echo "SplitIntervals failed. Check $SCRATCH1/log.out for additional info"; exit 1; }
 fi
 # create array of scatter gather intervals
 scatter_intervals=$(ls /tmp/interval_files_folder)
@@ -175,17 +195,23 @@ if [ $pseudobulk_counts == "true" ]; then
   rm -rf /tmp/gather_tables; mkdir /tmp/gather_tables > /dev/null
 
   # do allele counting across intervals
+  pids=()
   for scatter_interval in ${scatter_intervals[@]}; do
     # perform allele specific counting for all celltypes (pseudobulk)
     # tool will automatically filter out non-heterozygous positions and duplicates (if not already removed)
     gatk ASEReadCounter \
-    -R $reference/fasta/genome.fa \
-    -I $waspbam \
-    -V /tmp/filter.$(basename $inputvcf) \
-    -L /tmp/interval_files_folder/$scatter_interval \
-    -O /tmp/gather_tables/$scatter_interval &
+      -R $reference/fasta/genome.fa \
+      -I $waspbam \
+      -V /tmp/filter.$(basename $inputvcf) \
+      -L /tmp/interval_files_folder/$scatter_interval \
+      -O /tmp/gather_tables/$scatter_interval >> ${outputlog} 2>&1 \
+      || { echo "ASEReadCounter failed on $scatter_interval. Check $SCRATCH1/log.out for additional info"; exit 1; } &
+    pids+=($!)
   done
-  wait
+  # check exit status for each interval
+  for pid in ${pids[@]}; do
+    if ! wait $pid; then exit 1;  fi
+  done
 
   echo "Gathering $celltype scattered interval count tables"
   # gather all the count tables into a single table
@@ -234,10 +260,10 @@ if [ $celltype_pseudobulk_counts == "true" ]; then
     TMPDIR=$workdir/TMPDIR  
     rm -rf $TMPDIR; mkdir -p $TMPDIR 2> /dev/null
     subset-bam \
-    --bam $waspbam \
-    --cell-barcodes /tmp/${modality}_barcodes.$library_id.$celltype.txt  \
-    --out-bam $workdir/$library_id.$celltype.${interval}wasp.bam \
-    --cores $threads
+      --bam $waspbam \
+      --cell-barcodes /tmp/${modality}_barcodes.$library_id.$celltype.txt  \
+      --out-bam $workdir/$library_id.$celltype.${interval}wasp.bam \
+      --cores $threads
 
     # index the celltype bam to enable traversal by intervals
     samtools index -@ $threads $workdir/$library_id.$celltype.${interval}wasp.bam
@@ -246,17 +272,23 @@ if [ $celltype_pseudobulk_counts == "true" ]; then
     rm -rf /tmp/gather_tables; mkdir /tmp/gather_tables > /dev/null
 
     # do allele counting across intervals
+    pids=()
     for scatter_interval in ${scatter_intervals[@]}; do
       # perform allele specific counting for all celltypes (pseudobulk)
       # tool will automatically filter out non-heterozygous positions and duplicates (if not already removed)
       gatk ASEReadCounter \
-      -R $reference/fasta/genome.fa \
-      -I $workdir/$library_id.$celltype.${interval}wasp.bam \
-      -V /tmp/filter.$(basename $inputvcf) \
-      -L /tmp/interval_files_folder/$scatter_interval \
-      -O /tmp/gather_tables/$scatter_interval &
+        -R $reference/fasta/genome.fa \
+        -I $workdir/$library_id.$celltype.${interval}wasp.bam \
+        -V /tmp/filter.$(basename $inputvcf) \
+        -L /tmp/interval_files_folder/$scatter_interval \
+        -O /tmp/gather_tables/$scatter_interval >> ${outputlog} 2>&1 \
+        || { echo "ASEReadCounter failed on $scatter_interval. Check $SCRATCH1/log.out for additional info"; exit 1; } &
+      pids+=($!)
     done
-    wait
+    # check exit status for each interval
+    for pid in ${pids[@]}; do
+      if ! wait $pid; then exit 1;  fi
+    done
 
     echo "Gathering celltype pseudobulk count tables"
     # gather all the count tables into a single table
@@ -314,10 +346,10 @@ if [ $sc_counts == "true" ]; then
   for barcode in ${barcodes[*]}; do \
     echo $barcode > /tmp/barcode.txt
     subset-bam \
-    --bam $bamsites \
-    --cell-barcodes /tmp/barcode.txt \
-    --out-bam $scbamdir/bam/$barcode.bam \
-    --cores $threads
+      --bam $bamsites \
+      --cell-barcodes /tmp/barcode.txt \
+      --out-bam $scbamdir/bam/$barcode.bam \
+      --cores $threads
     echo $barcode 
   done | pv -l -s $num_barcodes > /dev/null
 
@@ -325,6 +357,7 @@ if [ $sc_counts == "true" ]; then
   # output as [barcode].counts in counts dir
   echo "Counting single cell bam files"
   bamfiles=($(ls $scbamdir/bam))
+  pids=()
   for bamfile in ${bamfiles[*]}; do
     table=$(basename $bamfile .bam).counts
     gatk ASEReadCounter \
@@ -333,11 +366,16 @@ if [ $sc_counts == "true" ]; then
       -V /tmp/filter.$(basename $inputvcf) \
       --verbosity ERROR \
       -O $scbamdir/counts/$table > /dev/null 2>&1  &
+    pids+=($!)
     while (( $(jobs |wc -l) >= (( ${threads} + 1 )) )); do
   	  sleep 0.1
     done
     echo $bamfile
-  done | pv -l -s $num_barcodes > /dev/null	 
+  done | pv -l -s $num_barcodes > /dev/null
+  # check exit status for each interval
+  for pid in ${pids[@]}; do
+    if ! wait $pid; then exit 1;  fi
+  done	 
 
   # add a barcode column to each count table
   tables=($(ls $scbamdir/counts))

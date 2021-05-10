@@ -4,6 +4,7 @@
 # Set some default values:
 threads=1
 verbose=false
+exit_status=0
 
 function usage {
 cat << "EOF"
@@ -92,9 +93,9 @@ source activate gatk
 
 # stream GATK output to terminal o/w capture in log file
 if [ $verbose == "true" ]; then
-  verbosity=/dev/stdout
+  outputlog=/dev/stdout
 elif [ $verbose == "false" ]; then
-  verbosity=$SCRATCH1/log.out
+  outputlog=$SCRATCH1/log.out
 fi
 
 # create funcotation director
@@ -121,10 +122,10 @@ gatk IndexFeatureFile -I $inputvcf
 
 # create scatter gather intervals across no. threads
 gatk SplitIntervals \
--R $reference/fasta/genome.fa \
--O /tmp/interval_files_folder \
--L $inputvcf \
---scatter-count $threads
+  -R $reference/fasta/genome.fa \
+  -O /tmp/interval_files_folder \
+  -L $inputvcf \
+  --scatter-count $threads
 
 # # create array of scatter gather intervals  
 scatter_intervals=$(ls /tmp/interval_files_folder)
@@ -135,23 +136,27 @@ if [ -f /tmp/vcf.list ]; then
 fi
 
 echo "Annotating contigs with funcotator"
+pids=()
 for scatter_interval in ${scatter_intervals[@]}; do
-echo "$workdir/$library_id.$modality.$scatter_interval.funcotated.vcf.gz" >> /tmp/vcf.list
-# annotate variants
-gatk --java-options "-Xmx4G -XX:+UseParallelGC -XX:ParallelGCThreads=1" Funcotator \
-  --variant $inputvcf \
-  --reference $reference/fasta/genome.fa \
-  --ref-version hg38 \
-  --data-sources-path $funcotation  \
-  --output $workdir/$library_id.$modality.$scatter_interval.funcotated.vcf.gz \
-  --output-file-format VCF \
-  -L /tmp/interval_files_folder/$scatter_interval \
-  --disable-sequence-dictionary-validation true \
-  --verbosity INFO >> ${verbosity} 2>&1 \
+  echo "$workdir/$library_id.$modality.$scatter_interval.funcotated.vcf.gz" >> /tmp/vcf.list
+  # annotate variants
+  gatk --java-options "-Xmx4G -XX:+UseParallelGC -XX:ParallelGCThreads=1" Funcotator \
+    --variant $inputvcf \
+    --reference $reference/fasta/genome.fa \
+    --ref-version hg38 \
+    --data-sources-path $funcotation  \
+    --output $workdir/$library_id.$modality.$scatter_interval.funcotated.vcf.gz \
+    --output-file-format VCF \
+    -L /tmp/interval_files_folder/$scatter_interval \
+    --disable-sequence-dictionary-validation true \
+    --verbosity INFO >> ${outputlog} 2>&1 \
     || { echo "Funcotator failed on $scatter_interval. Check log.out for additional info"; exit 1; } &
+  pids+=($!)
 done
-wait
-
+# check exit status for each interval
+for pid in ${pids[@]}; do
+  if ! wait $pid; then { exit_status=1; exit 1; };  fi
+done
 
 # merge and index vcfs. GatherVcfs throws an unexpected error here that may be due to GATK not correctly ordering the contigs after splitintervals
 # or multiple variants with the same context in different intervals
@@ -191,9 +196,8 @@ Gencode_27_transcriptExon,Gencode_27_hugoSymbol' \
 awk 'BEGIN{FS=OFS=","} {print (NR>1?$1"_"$2"_"$3"_"$4:"variant_id"), $0}' $workdir/funco_no_varid.csv > $funcotated_table
 
 
-#echo "Removing temporary files"
+if [ $exit_status -eq 0 ]; then
 rm -rf $workdir
-
 format_time() {
   ((h=${1}/3600))
   ((m=(${1}%3600)/60))
@@ -201,4 +205,7 @@ format_time() {
   printf "%02d:%02d:%02d\n" $h $m $s
  }
 
+echo -e "\e[92mWriting $outputvcf to $outputdir\033[0m"
+
 echo -e "\033[35;40mAnnotation completed in $(format_time $SECONDS)\033[0m"
+fi

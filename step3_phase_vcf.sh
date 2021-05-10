@@ -7,6 +7,7 @@ hcphase=false
 snvonly=false
 snvindel=false
 reproduce=false
+verbose=false
 
 function usage {
 cat << "EOF"
@@ -38,6 +39,7 @@ Usage: step3_phase_vcf.sh [-nvdorlpsitrh]
   -s  | --snvonly            STR   use the biallelic_SNV reference for phasing
   -i  | --snvindel           STR   use the biallelic_SNV_and_INDEL reference for phasing
   -r  | --reproduce                optional: run shapeit with a single thread for reproducibility. Default=[false]
+  -v  | --verbose                  optional: stream shapeit4 output to terminal. Default=[false]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
 
@@ -50,8 +52,8 @@ if [[ ${#} -eq 0 ]]; then
 fi
 
 PARSED_ARGUMENTS=$(getopt -a -n step3_phase_vcf.sh \
--o n:v:d:o:r:l:psirt:h \
---long library_id:,inputvcf:,outputdir:,outputvcf:,phasingref:,interval:,hcphase,snvonly,snvindel,reproduce,threads:,help -- "$@")
+-o n:v:d:o:r:l:psirvt:h \
+--long library_id:,inputvcf:,outputdir:,outputvcf:,phasingref:,interval:,hcphase,snvonly,snvindel,reproduce,verbose,threads:,help -- "$@")
 
 echo "PARSED_ARGUMENTS are $PARSED_ARGUMENTS"
 eval set -- "$PARSED_ARGUMENTS"
@@ -68,6 +70,7 @@ do
     -s | --snvonly)           snvonly=true         ; shift 1 ;;
     -i | --snvindel)          snvindel=true        ; shift 1 ;;
     -r | --reproduce)         reproduce=true       ; shift 1 ;;
+    -v | --verbose)           verbose=true         ; shift 1 ;;
     -t | --threads)           threads=$2           ; shift 2 ;;
     -h | --help)              usage ;;
     --) shift; break ;;
@@ -86,6 +89,7 @@ echo "hcphase                   : $hcphase"
 echo "snvonly                   : $snvonly"
 echo "snvindel                  : $snvindel"
 echo "reproduce                 : $reproduce"
+echo "verbose                   : $verbose"
 echo "threads                   : $threads"
 echo "Parameters remaining are  : $@"
 
@@ -96,6 +100,13 @@ export PATH=/gatk:/opt/miniconda/envs/gatk/bin:/opt/miniconda/bin:/usr/local/sbi
 if [ ! -f $inputvcf ]; then echo "Input vcf not found"; exit 1; fi
 
 # TODO: check for reference phasing vcfs by interval if selected
+
+# stream output to terminal o/w capture in log file
+if [ $verbose = "true" ]; then
+  outputlog=/dev/stdout
+elif [ $verbose = "false" ]; then
+  outputlog=$SCRATCH1/log.out
+fi
 
 # remove filtered variants
 echo "Removing filtered variants from input vcf"
@@ -129,14 +140,14 @@ shapeit_args=(--map $workdir/phasing/shapeit4/maps/$interval.b38.gmap.gz \
   --output $workdir/phased.${interval}.vcf.gz)
 
 # set reference for SNV only or SNV_INDEL
-if [ $snvindel == "true" ]; then
+if [ $snvindel = "true" ]; then
   shapeit_args+=(--reference $phasingref/ALL.$interval.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz)
-elif [ $snvonly == "true" ]; then
+elif [ $snvonly = "true" ]; then
   shapeit_args+=(--reference $phasingref/ALL.$interval.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz)
 fi
 
 # set multithreading if reproduce flag is false
-if [ $reproduce == "false" ]; then
+if [ $reproduce = "false" ]; then
   shapeit_args+=(--thread ${threads})
 fi
 
@@ -144,24 +155,33 @@ fi
 rm $workdir/vcf.list 2> /dev/null
 
 # reproduce flag set to false run in multithreaded series
-if [ $reproduce == "false" ]; then
+if [ $reproduce = "false" ]; then
+  pids=()
   for interval in ${intervals[@]}; do
     echo "$workdir/phased.$interval.vcf.gz" >> $workdir/vcf.list
-    shapeit4.2 ${shapeit_args[@]}
+    shapeit4.2 ${shapeit_args[@]} >> ${outputlog}
+    pids+=($!)
   done
-wait
+  for pid in ${pids[@]}; do
+    if ! wait $pid; then { echo "shapeit phasing failed"; exit 1; };  fi
+  done
 fi
 
 # reproduce flag set to true run in parallel with single thread per interval
-if [ $reproduce == "true" ]; then
+if [ $reproduce = "true" ]; then
+  pids=()
   for interval in ${intervals[@]}; do
     echo "$workdir/phased.$interval.vcf.gz" >> $workdir/vcf.list
-    shapeit4.2 ${shapeit_args[@]} & \
+    shapeit4.2 ${shapeit_args[@]} >> ${outputlog} &
+    pids+=($!)
     while (( $(jobs |wc -l) >= (( ${threads} + 1 )) )); do
       sleep 0.1
     done
   done
-wait
+  # check exit status for each interval
+  for pid in ${pids[@]}; do
+    if ! wait $pid; then { echo "shapeit phasing failed"; exit 1; };  fi
+  done
 fi
 
 # concatenate phased vcf files from all intervals
@@ -214,6 +234,8 @@ format_time() {
   ((s=${1}%60))
   printf "%02d:%02d:%02d\n" $h $m $s
  }
+
+echo -e "\e[92mWriting $outputvcf to $outputdir\033[0m"
 
 echo -e "\033[35;40mPhasing completed in $(format_time $SECONDS)\033[0m"
 

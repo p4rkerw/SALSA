@@ -74,6 +74,9 @@ echo "includefiltered           : $includefiltered"
 echo "threads                   : $threads"
 echo "Parameters remaining are  : $@"
 
+# check input vcfs
+if [ ! -f $vcfone ] || [ ! -f $vcftwo ]; then { echo "Input vcfs not found"; exit 1; }; fi
+
 # start script
 echo "Merging vcf files:"
 echo $vcfone 
@@ -103,3 +106,5 @@ elif [ $includefiltered = "false" ]; then
 	bcftools norm -m +both |bcftools view -Oz -f PASS -m2 -M2 > $outputdir/$outputvcf
 	bcftools index --threads $threads $outputdir/$outputvcf
 fi
+
+echo -e "\e[92mWriting $outputvcf to $outputdir\033[0m"
