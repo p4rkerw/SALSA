@@ -122,9 +122,9 @@ export PATH=/gatk:/opt/miniconda/envs/gatk/bin:/opt/miniconda/bin:/usr/local/sbi
 source activate gatk
 
 # stream GATK output to terminal o/w capture in log file
-if [ $verbose == "true" ]; then
+if [ $verbose = "true" ]; then
   outputlog=/dev/stdout
-elif [ $verbose == "false" ]; then
+elif [ $verbose = "false" ]; then
   outputlog=$SCRATCH1/log.out
 fi
 
@@ -190,7 +190,7 @@ scatter_intervals=$(ls /tmp/interval_files_folder)
 #########################################################
 ##################PSEUDOBULK COUNTS######################
 # ase counting for all cell types grouped together
-if [ $pseudobulk_counts == "true" ]; then
+if [ $pseudobulk_counts = "true" ]; then
   # create a new directory for split tables
   rm -rf /tmp/gather_tables; mkdir /tmp/gather_tables > /dev/null
 
@@ -219,7 +219,7 @@ if [ $pseudobulk_counts == "true" ]; then
   (head -n1 /tmp/gather_tables/$tables; tail -q -n+2 /tmp/gather_tables/*) > $outputdir/$library_id.${interval}counts.pseudobulk.table
 
 # add phased genotypes to counts table if input vcf is phased
-  if [ $isphased == "true" ]; then
+  if [ $isphased = "true" ]; then
     # create a genotype table with unique variant ids and their corresponding genotypes using the filtered input vcf
     bcftools query -f'%CHROM\t%POS\t%REF\t%ALT\t[%GT]\n' /tmp/filter.$(basename $inputvcf) |\
     awk 'BEGIN{FS=OFS="\t"} {print $1"_"$2"_"$3"_"$4, $5}' > /tmp/genotype_table.tsv
@@ -243,7 +243,7 @@ fi
 # ase counting for individual celltypes (ie group all cells of the same type and count together)
 # create another bam file that only contains reads for a specified cell type
 # read in the barcodes with the following format:barcode,celltype,lowres.celltype,orig.ident
-if [ $celltype_pseudobulk_counts == "true" ]; then
+if [ $celltype_pseudobulk_counts = "true" ]; then
   echo "Performing cell type pseudobulk counts"
   # first format the barcode file by printing out barcode,orig.ident,lowres.celltype columns and then filter by sample name
   awk -F ',' 'NR==1 {for (i=1; i<=NF; i++) {f[$i] = i}}{ print $(f["barcode"]),$(f["orig.ident"]),$(f["celltype"]) }' $barcodes |\
@@ -296,7 +296,7 @@ if [ $celltype_pseudobulk_counts == "true" ]; then
     (head -n1 /tmp/gather_tables/$tables; tail -q -n+2 /tmp/gather_tables/*) > $outputdir/$library_id.${interval}counts.$celltype.table
 
     # add phased genotypes to counts table if input vcf is phased
-    if [ $isphased == "true" ]; then
+    if [ $isphased = "true" ]; then
       # create a genotype table with unique variant ids and their corresponding genotypes using the filtered input vcf
       bcftools query -f'%CHROM\t%POS\t%REF\t%ALT\t[%GT]\n' /tmp/filter.$(basename $inputvcf) |\
       awk 'BEGIN{FS=OFS="\t"} {print $1"_"$2"_"$3"_"$4, $5}' > /tmp/genotype_table.tsv
@@ -319,7 +319,7 @@ fi
 ###################################################################
 ##################SINGLE CELL BAMS AND COUNTS######################
 # generate individual single cell bams and perform single cell counts
-if [ $sc_counts == "true" ]; then
+if [ $sc_counts = "true" ]; then
   echo "Creating single cell bams and performing single cell counts"
 
   # create output subdirectories for single cell bams
@@ -389,7 +389,7 @@ if [ $sc_counts == "true" ]; then
   (head -n1 /tmp/gather_tables/$tables; tail -q -n+2 /tmp/gather_tables/*) > $outputdir/$library_id.${interval}counts.single_cell.table
 
   # add phased genotypes to counts table if input vcf is phased
-  if [ $isphased == "true" ]; then
+  if [ $isphased = "true" ]; then
     # create a genotype table with unique variant ids and their corresponding genotypes using the filtered input vcf
     bcftools query -f'%CHROM\t%POS\t%REF\t%ALT\t[%GT]\n' /tmp/filter.$(basename $inputvcf) |\
     awk 'BEGIN{FS=OFS="\t"} {print $1"_"$2"_"$3"_"$4, $5}' > /tmp/genotype_table.tsv

@@ -92,9 +92,9 @@ export PATH=/gatk:/opt/miniconda/envs/gatk/bin:/opt/miniconda/bin:/usr/local/sbi
 source activate gatk
 
 # stream GATK output to terminal o/w capture in log file
-if [ $verbose == "true" ]; then
+if [ $verbose = "true" ]; then
   outputlog=/dev/stdout
-elif [ $verbose == "false" ]; then
+elif [ $verbose = "false" ]; then
   outputlog=$SCRATCH1/log.out
 fi
 
