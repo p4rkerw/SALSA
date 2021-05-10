@@ -1,3 +1,5 @@
+# **🌶️SALSA! Single Cell ATAC Tutorial**
+
 **🌶️SALSA** is a tool for generating and analyzing phased single cell allele-specific read counts from 10X Genomics cellranger datasets. For additional information, please consult the [10X Genomics website](https://www.10xgenomics.com/). The workflow runs in a publicly-available docker container with all the necessary dependencies for code execution. For this tutorial, we will download a dataset from the 10X Genomics website. To complete all of the steps in the tutorial, you will need to download a cellranger reference, GATK bundle resources, and 1000G phased reference (see below for more information). All of the tutorial outputs are included in the this repository or on the 10X Genomics website in case you want to skip a step or compare results. If you are analyzing your own data, you will need to run cellranger and annotate your barcodes before starting the workflow.
 
 **Step 0: Download cellranger reference** If you don't already have a GRCh38 cellranger reference download one from the [10X Genomics website](https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest). 10X Genomics routinely updates their references with each new cellranger build, but new references are often backwards-compatible. The cellranger reference in this tutorial is compatible with the tutorial dataset (which is aligned to GRCh38-2020-A). Feel free to download a different reference and/or [dataset](https://support.10xgenomics.com/single-cell-gene-expression/datasets) from the 10X Genomics collection; just make sure it's aligned to GRCh38 so it matches the GATK bundle resources and ucsc contig style. Alignment information can be found in the summary html files. The tutorial assumes that you downloaded a reference to /mnt/g/reference so make sure you change the path if you used a different directory. 
@@ -12,7 +14,7 @@ md5sum $reference/refdata-cellranger-arc-GRCh38-2020-A-2.0.0.tar.gz #2f12f601619
 tar -xvzf $reference/refdata-cellranger-arc-GRCh38-2020-A-2.0.0.tar.gz
 ```
 
-**(Optional) Step 0: Download tutorial fastq files** We will download a a single cell ATAC dataset obtained from 1k PBMCs from a healthy donor. This dataset uses the single NextGem v1.1 chemistry. If you want to skip ahead to the 🌶️SALSA workflow, you can download the coordinate-sorted bam and index from the 10X Genomics website. See Step 1 for details. 
+**(Optional) Step 0: Download tutorial fastq files** We will download a a single cell ATAC dataset obtained from 1k PBMCs from a healthy donor. This dataset uses the NextGem v1.1 chemistry. If you want to skip ahead to the 🌶️SALSA workflow, you can download the coordinate-sorted bam and index from the 10X Genomics website. See Step 1 for details. 
 ```
 # URL to the dataset: https://support.10xgenomics.com/single-cell-atac/datasets/2.0.0/atac_pbmc_1k_nextgem
 # create your salsa tutorial directory and download the fastq
