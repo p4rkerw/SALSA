@@ -126,7 +126,7 @@ source activate gatk
 if [ $verbose = "true" ]; then
   outputlog=/dev/stdout
 elif [ $verbose = "false" ]; then
-  outputlog=$SCRATCH1/log.out
+  outputlog=$workdir/log.out
 fi
 
 # prepare a fasta dict file using the cellranger ref
@@ -143,7 +143,7 @@ gatk VariantFiltration \
   -O /tmp/isHet.$(basename $inputvcf) \
   --genotype-filter-expression "isHet == 1" \
   --genotype-filter-name "isHetFilter" >> ${outputlog} 2>&1 \
-  || { echo "VariantFiltration failed. Check $SCRATCH1/log.out for additional info"; exit 1; }
+  || { echo "VariantFiltration failed. Check $outputlog for additional info"; exit 1; }
 
 
 echo "Filtering multiallelic and non-heterozygous variants from $inputvcf and retaining biallelic SNV"
@@ -154,7 +154,7 @@ bcftools norm /tmp/isHet.$(basename $inputvcf) -m +snps |bcftools view -Oz -m2 -
 (bcftools view -h /tmp/single_context.vcf.gz; bcftools view -H /tmp/single_context.vcf.gz|grep 'isHetFilter')|\
   bcftools view -Oz - > /tmp/filter.$(basename $inputvcf)
 gatk IndexFeatureFile -I /tmp/filter.$(basename $inputvcf) >> ${outputlog} 2>&1 \
-  || { echo "IndexFeatureFile failed. Check $SCRATCH1/log.out for additional info"; exit 1; }
+  || { echo "IndexFeatureFile failed. Check $outputlog for additional info"; exit 1; }
 
 # limit to specified interval if -L flag selected
 rm -rf /tmp/interval_files_folder 2> /dev/null
@@ -176,14 +176,14 @@ if [ $interval ]; then
     --scatter-count $threads \
     -L $interval \
     --interval-set-rule INTERSECTION >> ${outputlog} 2>&1 \
-    || { echo "SplitIntervals failed. Check $SCRATCH1/log.out for additional info"; exit 1; }
+    || { echo "SplitIntervals failed. Check $outputlog for additional info"; exit 1; }
 else
   # create scatter gather intervals across no. threads
   gatk SplitIntervals \
     -R $reference/fasta/genome.fa \
     -O /tmp/interval_files_folder \
     --scatter-count $threads >> ${outputlog} 2>&1 \
-    || { echo "SplitIntervals failed. Check $SCRATCH1/log.out for additional info"; exit 1; }
+    || { echo "SplitIntervals failed. Check $outputlog for additional info"; exit 1; }
 fi
 # create array of scatter gather intervals
 scatter_intervals=$(ls /tmp/interval_files_folder)
@@ -206,7 +206,7 @@ if [ $pseudobulk_counts = "true" ]; then
       -V /tmp/filter.$(basename $inputvcf) \
       -L /tmp/interval_files_folder/$scatter_interval \
       -O /tmp/gather_tables/$scatter_interval >> ${outputlog} 2>&1 \
-      || { echo "ASEReadCounter failed on $scatter_interval. Check $SCRATCH1/log.out for additional info"; exit 1; } &
+      || { echo "ASEReadCounter failed on $scatter_interval. Check $outputlog for additional info"; exit 1; } &
     pids+=($!)
   done
   # check exit status for each interval
@@ -283,7 +283,7 @@ if [ $celltype_pseudobulk_counts = "true" ]; then
         -V /tmp/filter.$(basename $inputvcf) \
         -L /tmp/interval_files_folder/$scatter_interval \
         -O /tmp/gather_tables/$scatter_interval >> ${outputlog} 2>&1 \
-        || { echo "ASEReadCounter failed on $scatter_interval. Check $SCRATCH1/log.out for additional info"; exit 1; } &
+        || { echo "ASEReadCounter failed on $scatter_interval. Check $outputlog for additional info"; exit 1; } &
       pids+=($!)
     done
     # check exit status for each interval

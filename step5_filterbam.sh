@@ -116,12 +116,13 @@ rm -rf $TMPDIR; mkdir -p $TMPDIR 2> /dev/null
 cores=$(($threads / 2))
 subset-bam \
   --bam $inputbam \
-  --cell-barcodes /tmp/${modality}_barcodes.$library_id.txt  \
+  --cell-barcodes /tmp/${modality}_barcodes.$library_id.txt \
   --out-bam $outputdir/$outputbam \
   --cores $cores \
   | pv -t
 
 # index output bam
+echo "Indexing barcode filtered bam"
 samtools index -@ $threads $outputdir/$outputbam
 
 # validate the output bam with gatk and ignore warnings which result from missing NM tags
