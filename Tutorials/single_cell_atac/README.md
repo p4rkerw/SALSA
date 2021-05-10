@@ -73,7 +73,7 @@ git -C $project clone https://github.com/p4rkerw/SALSA
 
 **Step 1: Genotype a single cell gene expression dataset** The tutorial workflow is based on the GATK germline short variant discovery pipeline. Additional info can be found on the [GATK website](https://gatk.broadinstitute.org/hc/en-us/articles/360035535932-Germline-short-variant-discovery-SNPs-Indels-) . To explore additional GATK options type 'gatk --list' into the terminal. If you want to skip ahead move the [genotyped vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorials/single_cell_atac/pbmc.atac.chr22.vcf.gz) and its index to the volume mounted to project/atac_genotype and proceed to the next step.
 ```
-Usage: step1_gatk_genotype.sh [-inrgdomlt]
+Usage: step1_gatk_genotype.sh [-inrgdomlVt]
   -i  | --inputbam           STR   path/to/input.bam eg. [rna_counts/sample_1/outs/possorted*.bam]
   -n  | --library_id         STR   library_id: eg. [sample_1]
   -r  | --reference          STR   path/to/cellranger_ref eg. [reference/refdata-gex-GRCh38-2020-A]
@@ -82,7 +82,7 @@ Usage: step1_gatk_genotype.sh [-inrgdomlt]
   -o  | --outputvcf          STR   name of output vcf eg. [sample_1.rna.vcf.gz]
   -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
   -l  | --interval           STR   optional: genotype a single chromosome eg. [chr22]
-  -v  | --verbose                  optional: stream GATK output to terminal. Default=[false]
+  -V  | --verbose                  optional: stream GATK output to terminal. Default=[false]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
 
@@ -234,7 +234,7 @@ bcftools query -f '[%CHROM,%POS,%REF,%ALT,%GT\n]' project/phasing/pbmc.pass.atac
 ```
 **(Optional) Step 4: Annotate vcf with GATK Funcotator** If you want to annotate your vcf with GENCODE and gnomAD you will need to download the [GATK Funcotator resource](https://gatk.broadinstitute.org/hc/en-us/articles/360035889931-Funcotator-Information-and-Tutorial). GATK routinely updates its resources so you may need to change the name of the folder in the tutorial to match the one you downloaded. gnomAD resources need to be enabled after download (see GATK instructions on their website). When the resources have been downloaded, move the dataSources folder into to the reference directory (eg. [reference/funcotator_dataSources.v1.6.20190124]). If you want to skip ahead while these files are downloading move the [funcotated vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorials/single_cell_atac/pbmc.pass.atac.chr22hcphase.funco.vcf.gz) and its index to the volume mounted to project/funcotation and proceed to the next step.
 ```
-Usage: step4_gatk_anno_vcf.sh [-nvdoramfth]
+Usage: step4_gatk_anno_vcf.sh [-nvdoramfVth]
   -n  | --library_id         STR   library_id: eg. [sample_1]
   -v  | --inputvcf           STR   path/to/input.vcf.gz eg. [project/phasing/sample_1.pass.joint.hcphase.vcf.gz]
   -d  | --outputdir          STR   output directory name eg. [project/funcotation]
@@ -243,7 +243,7 @@ Usage: step4_gatk_anno_vcf.sh [-nvdoramfth]
   -a  | --output_table       STR   name of output funcotation csv eg. [sample_1.pass.joint.hcphase.formatted.csv]
   -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
   -f  | --funcotation        STR   path/to/funcotation directory eg. [reference/funcotator_dataSources.v1.6.20190124g]
-  -v  | --verbose                  optional: stream GATK output to terminal. Default=[false]
+  -V  | --verbose                  optional: stream GATK output to terminal. Default=[false]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
 ```
