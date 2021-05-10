@@ -197,15 +197,15 @@ awk 'BEGIN{FS=OFS=","} {print (NR>1?$1"_"$2"_"$3"_"$4:"variant_id"), $0}' $workd
 
 
 if [ $exit_status -eq 0 ]; then
-rm -rf $workdir
-format_time() {
-  ((h=${1}/3600))
-  ((m=(${1}%3600)/60))
-  ((s=${1}%60))
-  printf "%02d:%02d:%02d\n" $h $m $s
- }
+  rm -rf $workdir
+  format_time() {
+    ((h=${1}/3600))
+    ((m=(${1}%3600)/60))
+    ((s=${1}%60))
+    printf "%02d:%02d:%02d\n" $h $m $s
+   }
 
-echo -e "\e[92mWriting $outputvcf to $outputdir\033[0m"
+  echo -e "\e[92mWriting $outputvcf to $outputdir\033[0m"
 
-echo -e "\033[35;40mAnnotation completed in $(format_time $SECONDS)\033[0m"
+  echo -e "\033[35;40mAnnotation completed in $(format_time $SECONDS)\033[0m"
 fi
