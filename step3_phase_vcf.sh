@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# exit on error
+set -e
+
 # Set some default values:
 interval=""
 threads=1
@@ -8,6 +11,7 @@ snvonly=false
 snvindel=false
 reproduce=false
 verbose=false
+exit_status=0
 
 function usage {
 cat << "EOF"
@@ -47,9 +51,7 @@ EOF
 exit 1
 }
 
-if [[ ${#} -eq 0 ]]; then
-   usage
-fi
+if [[ ${#} -eq 0 ]]; then usage; fi
 
 PARSED_ARGUMENTS=$(getopt -a -n step3_phase_vcf.sh \
 -o n:v:d:o:r:l:psirVt:h \
@@ -105,7 +107,7 @@ if [ ! -f $inputvcf ]; then echo "Input vcf not found"; exit 1; fi
 if [ $verbose = "true" ]; then
   outputlog=/dev/stdout
 elif [ $verbose = "false" ]; then
-  outputlog=$SCRATCH1/log.out
+  outputlog=$workdir/log.out
 fi
 
 # remove filtered variants
@@ -164,7 +166,7 @@ if [ $reproduce = "false" ]; then
   done
   # check exit status for each interva
   for pid in ${pids[@]}; do
-    if ! wait $pid; then { echo "shapeit phasing failed"; exit 1; };  fi
+    if ! wait $pid; then { echo "shapeit phasing failed check $outputlog"; exit_status=1; exit 1; };  fi
   done
 fi
 
@@ -181,7 +183,7 @@ if [ $reproduce = "true" ]; then
   done
   # check exit status for each interval
   for pid in ${pids[@]}; do
-    if ! wait $pid; then { echo "shapeit phasing failed"; exit 1; };  fi
+    if ! wait $pid; then { echo "shapeit phasing failed check $outputlog"; exit_status=1; exit 1; };  fi
   done
 fi
 
@@ -229,16 +231,18 @@ if [ $hcphase = "true" ]; then
   bcftools index -f --threads $threads --tbi $outputdir/$outputvcf
 fi
 
-format_time() {
-  ((h=${1}/3600))
-  ((m=(${1}%3600)/60))
-  ((s=${1}%60))
-  printf "%02d:%02d:%02d\n" $h $m $s
- }
+if [ $exit_status -eq 0 ]; then
+  format_time() {
+    ((h=${1}/3600))
+    ((m=(${1}%3600)/60))
+    ((s=${1}%60))
+    printf "%02d:%02d:%02d\n" $h $m $s
+   }
 
-echo -e "\e[92mWriting $outputvcf to $outputdir\033[0m"
+  echo -e "\e[92mWriting $outputvcf to $outputdir\033[0m"
 
-echo -e "\033[35;40mPhasing completed in $(format_time $SECONDS)\033[0m"
+  echo -e "\033[35;40mPhasing completed in $(format_time $SECONDS)\033[0m"
 
-# clean up
-rm -rf $workdir
+  # clean up
+  rm -rf $workdir
+fi
