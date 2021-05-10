@@ -264,7 +264,7 @@ function interval_rna_germline_workflow {
       --filter "FS > 30.0" \
       --filter-name "QD" \
       --filter "QD < 2.0" \
-      -O $interval/$library_id.$scatter_interval.vcf.gz >> ${outputlog} 2>&1 \
+      -O $intervaldir/$library_id.$scatter_interval.vcf.gz >> ${outputlog} 2>&1 \
       || { echo "VariantFiltration failed on $interval. Check $SCRATCH1/log.out for additional info"; exit 1; } &
     pids+=($!)
   done
