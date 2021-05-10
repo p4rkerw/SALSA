@@ -30,7 +30,7 @@ Author: Parker C. Wilson MD, PhD
 Contact: parkerw@wustl.edu
 Version: 1.0
 
-Usage: step1_gatk_genotype.sh [-inrgdomlt]
+Usage: step1_gatk_genotype.sh [-inrgdomlVt]
   -i  | --inputbam           STR   path/to/input.bam eg. [project/sample_1/outs/possorted*.bam]
   -n  | --library_id         STR   library_id: eg. [sample_1]
   -r  | --reference          STR   path/to/cellranger_ref eg. [reference/refdata-gex-GRCh38-2020-A]
@@ -39,7 +39,7 @@ Usage: step1_gatk_genotype.sh [-inrgdomlt]
   -o  | --outputvcf          STR   name of output vcf eg. [sample_1.rna.vcf.gz]
   -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
   -l  | --interval           STR   optional: genotype a single chromosome eg. [chr22]
-  -v  | --verbose                  optional: stream GATK output to terminal. Default=[false]
+  -V  | --verbose                  optional: stream GATK output to terminal. Default=[false]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
 
@@ -50,7 +50,7 @@ exit 1
 if [[ ${#} -eq 0 ]]; then usage; fi
 
 PARSED_ARGUMENTS=$(getopt -a -n step1_gatk_genotype.sh \
--o i:n:r:g:d:o:m:l:vt:h \
+-o i:n:r:g:d:o:m:l:Vt:h \
 --long inputbam:,library_id:,reference:,gatk_bundle:,outputdir:,outputvcf:,modality:,interval:,verbose,threads:,help -- "$@")
 
 echo "PARSED_ARGUMENTS are $PARSED_ARGUMENTS"
@@ -66,7 +66,7 @@ do
     -o | --outputvcf)           outputvcf=$2                    ; shift 2 ;;
     -m | --modality)            modality=$2                     ; shift 2 ;;
     -l | --interval)            interval=$2                     ; shift 2 ;;
-    -v | --verbose)             verbose=true                    ; shift 1 ;;
+    -V | --verbose)             verbose=true                    ; shift 1 ;;
     -t | --threads)             threads=$2                      ; shift 2 ;;
     -h | --help)                usage ;;
     --) shift; break ;;
@@ -237,7 +237,7 @@ function interval_rna_germline_workflow {
   -O $intervaldir/cigar_marked_duplicates.bam >> ${outputlog} 2>&1 \
     || { echo "GatherBamFiles failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; exit 1; }
   echo "Sorting gathered bam file"
-  samtools sort -@ $threads $intervaldir/cigar_marked_duplicates.bam -o $intervaldir/sorted.cigar_marked_duplicates.bam > ${outputlog} 2>&1 \
+  samtools sort -@ $threads $intervaldir/cigar_marked_duplicates.bam -o $intervaldir/sorted.cigar_marked_duplicates.bam >> ${outputlog} 2>&1 \
     || { echo "samtools sort failed on $interval. Check $SCRATCH1/log.out file for additional info"; exit_status=1; exit 1; }
   samtools index -@ $threads $intervaldir/sorted.cigar_marked_duplicates.bam >> ${outputlog} 2>&1 \
     || { echo "samtools index failed on $interval. Check $SCRATCH1/log.out for additional info"; exit_status=1; exit 1; }
