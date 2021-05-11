@@ -417,7 +417,6 @@ elif [ $modality = "rna" ]; then
 fi
 
 
-
 # specify a temporary file directory for SplitNCigarReads and HaplotypeCaller
 tmpdir=$workdir/Temp
 mkdir -p $tmpdir
