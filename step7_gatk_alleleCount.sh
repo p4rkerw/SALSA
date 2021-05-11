@@ -16,6 +16,7 @@ sc_counts=false
 isphased=false
 verbose=false
 threads=1
+exit_status=0
 
 function usage {
 cat << "EOF"
@@ -119,6 +120,9 @@ if [ ! -f $barcodes ]; then { echo "Barcodes file not found"; exit 1; }; fi
 # ensure gatk and miniconda are in path when working in LSF environment
 export PATH=/gatk:/opt/miniconda/envs/gatk/bin:/opt/miniconda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
 
+# set exit status temporary file for monitoring return values in parallel processes
+echo $exit_status > /tmp/exit_status.txt
+
 # activate gatk conda environ
 source activate gatk
 
@@ -196,7 +200,6 @@ if [ $pseudobulk_counts = "true" ]; then
   rm -rf /tmp/gather_tables; mkdir /tmp/gather_tables > /dev/null
 
   # do allele counting across intervals
-  pids=()
   for scatter_interval in ${scatter_intervals[@]}; do
     # perform allele specific counting for all celltypes (pseudobulk)
     # tool will automatically filter out non-heterozygous positions and duplicates (if not already removed)
@@ -206,13 +209,12 @@ if [ $pseudobulk_counts = "true" ]; then
       -V /tmp/filter.$(basename $inputvcf) \
       -L /tmp/interval_files_folder/$scatter_interval \
       -O /tmp/gather_tables/$scatter_interval >> ${outputlog} 2>&1 \
-      || { echo "ASEReadCounter failed on $scatter_interval. Check $outputlog for additional info"; exit 1; } &
-    pids+=($!)
+      || { echo "ASEReadCounter failed on $scatter_interval. Check $outputlog for additional info"; echo 1 > /tmp/exit_status.txt; exit 1; } &
   done
-  # check exit status for each interval
-  for pid in ${pids[@]}; do
-    if ! wait $pid; then exit 1;  fi
-  done
+  # exit with 1 if interval failed
+  wait
+  exit_status=$(head -n1 /tmp/exit_status.txt)
+  if [ $exit_status -eq 1 ]; then exit 1; fi
 
   echo "Gathering $celltype scattered interval count tables"
   # gather all the count tables into a single table
@@ -273,7 +275,6 @@ if [ $celltype_pseudobulk_counts = "true" ]; then
     rm -rf /tmp/gather_tables; mkdir /tmp/gather_tables > /dev/null
 
     # do allele counting across intervals
-    pids=()
     for scatter_interval in ${scatter_intervals[@]}; do
       # perform allele specific counting for all celltypes (pseudobulk)
       # tool will automatically filter out non-heterozygous positions and duplicates (if not already removed)
@@ -283,13 +284,12 @@ if [ $celltype_pseudobulk_counts = "true" ]; then
         -V /tmp/filter.$(basename $inputvcf) \
         -L /tmp/interval_files_folder/$scatter_interval \
         -O /tmp/gather_tables/$scatter_interval >> ${outputlog} 2>&1 \
-        || { echo "ASEReadCounter failed on $scatter_interval. Check $outputlog for additional info"; exit 1; } &
-      pids+=($!)
+        || { echo "ASEReadCounter failed on $scatter_interval. Check $outputlog for additional info"; echo 1 > /tmp/exit_status.txt; exit 1; } &
     done
-    # check exit status for each interval
-    for pid in ${pids[@]}; do
-      if ! wait $pid; then exit 1;  fi
-    done
+    # exit with 1 if interval failed
+    wait
+    exit_status=$(head -n1 /tmp/exit_status.txt)
+    if [ $exit_status -eq 1 ]; then exit 1; fi
 
     echo "Gathering celltype pseudobulk count tables"
     # gather all the count tables into a single table
@@ -358,7 +358,6 @@ if [ $sc_counts = "true" ]; then
   # output as [barcode].counts in counts dir
   echo "Counting single cell bam files"
   bamfiles=($(ls $scbamdir/bam))
-  pids=()
   for bamfile in ${bamfiles[*]}; do
     table=$(basename $bamfile .bam).counts
     gatk ASEReadCounter \
@@ -367,16 +366,11 @@ if [ $sc_counts = "true" ]; then
       -V /tmp/filter.$(basename $inputvcf) \
       --verbosity ERROR \
       -O $scbamdir/counts/$table > /dev/null 2>&1  &
-    pids+=($!)
     while (( $(jobs |wc -l) >= (( ${threads} + 1 )) )); do
   	  sleep 0.1
     done
     echo $bamfile
   done | pv -l -s $num_barcodes > /dev/null
-  # check exit status for each interval
-  for pid in ${pids[@]}; do
-    if ! wait $pid; then exit 1;  fi
-  done	 
 
   # add a barcode column to each count table
   tables=($(ls $scbamdir/counts))

@@ -139,7 +139,7 @@ function gatk_germline_short_variant_scatter_gather {
   # make sure bam outputs are indexed
   for scatter_interval in ${scatter_intervals[@]}; do
     if [ ! -f $intervaldir/bqsr.$scatter_interval.bam.bai ]; then
-      samtools index -@ $threads $intervaldir/bqsr.$scatter_interval.bam
+      samtools index -@ $threads $intervaldir/bqsr.$scatter_interval.bam || exit 1
     fi
   done
 

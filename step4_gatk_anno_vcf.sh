@@ -88,6 +88,9 @@ echo "Parameters remaining are  : $@"
 # ensure gatk and miniconda are in path when working in LSF environment
 export PATH=/gatk:/opt/miniconda/envs/gatk/bin:/opt/miniconda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
 
+# set exit status temporary file for monitoring return values in parallel processes
+echo $exit_status > /tmp/exit_status.txt
+
 # activate gatk conda environ
 source activate gatk
 
@@ -136,7 +139,6 @@ if [ -f /tmp/vcf.list ]; then
 fi
 
 echo "Annotating contigs with funcotator"
-pids=()
 for scatter_interval in ${scatter_intervals[@]}; do
   echo "$workdir/$library_id.$modality.$scatter_interval.funcotated.vcf.gz" >> /tmp/vcf.list
   # annotate variants
@@ -150,13 +152,12 @@ for scatter_interval in ${scatter_intervals[@]}; do
     -L /tmp/interval_files_folder/$scatter_interval \
     --disable-sequence-dictionary-validation true \
     --verbosity INFO >> ${outputlog} 2>&1 \
-    || { echo "Funcotator failed on $scatter_interval. Check $outputlog for additional info"; exit 1; } &
-  pids+=($!)
+    || { echo -e "\033[0;33mFuncotator failed on $scatter_interval. Check $outputlog for additional info\033[0m"; echo 1 > /tmp/exit_status.txt; } &
 done | pv -t
-# check exit status for each interval
-for pid in ${pids[@]}; do
-  if ! wait $pid; then { exit_status=1; exit 1; };  fi
-done
+ # exit with 1 if interval failed
+wait
+exit_status=$(head -n1 /tmp/exit_status.txt)
+if [ $exit_status -eq 1 ]; then exit 1; fi
 
 # merge and index vcfs. GatherVcfs throws an unexpected error here that may be due to GATK not correctly ordering the contigs after splitintervals
 # or multiple variants with the same context in different intervals
