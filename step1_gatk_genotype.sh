@@ -481,7 +481,7 @@ if [ $exit_status -eq 0 ]; then
     || { echo -e "\033[0;33mGatherVcfs failed. Check $workdir/log.out for additional info\033[0m"; exit 1; }
 
   #cleanup
-  rm -rf $workdir; rm $outputlog
+  rm -rf $workdir
 
   format_time() {
     ((h=${1}/3600))
