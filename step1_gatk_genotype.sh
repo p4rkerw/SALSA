@@ -330,6 +330,7 @@ function interval_atac_germline_workflow {
 ###########################################################
 # check for input bam file
 if [ ! -f $inputbam ]; then echo "Input bam file not found"; exit 1; fi
+if [ ! -f $inputbam.bai ]; then echo "Input bam index not found"; exit 1; fi
 
 # check for ref
 if [ ! -f $reference/fasta/genome.fa ]; then
@@ -407,7 +408,6 @@ if [ $modality = "atac" ]; then
 elif [ $modality = "rna" ]; then
   grep -v '#' $reference/genes/genes.gtf |pv| awk -F'\t' 'BEGIN { OFS="\t" } $3=="exon" {print $1,$4-1,$5}' > /tmp/calling_intervals.bed
 fi
-
 
 # specify a temporary file directory for SplitNCigarReads and HaplotypeCaller
 tmpdir=$workdir/Temp
