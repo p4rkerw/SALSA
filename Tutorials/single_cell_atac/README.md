@@ -117,7 +117,7 @@ bash SALSA/step1_gatk_genotype.sh \
 --outputvcf pbmc.atac.chr22.vcf.gz \
 --interval chr22 \
 --modality atac \
---threads 10
+--threads 4
 
 # Option 2: if you skipped the cellranger alignment step...
 # download coordinate-sorted bam and index
@@ -134,7 +134,7 @@ bash SALSA/step1_gatk_genotype.sh \
 --outputvcf pbmc.atac.chr22.vcf.gz \
 --interval chr22 \
 --modality atac \
---threads 10
+--threads 4
 ```
 **Inspect the genotyped vcf** Note how the GT field for the majority of variants has a "/" character, which indicates that the variants are not phased. The variants with a "|" are physically-phased by GATK HaplotypeCaller.
 ```
