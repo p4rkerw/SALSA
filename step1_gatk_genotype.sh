@@ -330,7 +330,7 @@ function interval_atac_germline_workflow {
 ###########################################################
 # check for input bam file
 if [ ! -f $inputbam ]; then echo "Input bam file not found"; exit 1; fi
-if [ ! -f $inputbam.bai ]; then echo "Input bam index not found"; exit 1; fi
+if [ ! -f $inputbam.bai ]; then echo "Input bam index not found. Run samtools index on input bam"; exit 1; fi
 
 # check for ref
 if [ ! -f $reference/fasta/genome.fa ]; then
