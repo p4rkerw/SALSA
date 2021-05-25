@@ -123,7 +123,7 @@ bash SALSA/step1_gatk_genotype.sh \
 --outputvcf pbmc.rna.chr22.vcf.gz \
 --interval chr22 \
 --modality rna \
---threads 10
+--threads 4
 
 # Option 2: if you skipped the cellranger alignment step...
 # download coordinate-sorted bam and index
@@ -140,7 +140,7 @@ bash SALSA/step1_gatk_genotype.sh \
 --outputvcf pbmc.rna.chr22.vcf.gz \
 --interval chr22 \
 --modality rna \
---threads 10
+--threads 4
 ```
 **Inspect the genotyped vcf** Note how the GT field has a "/" character, which indicates that the variants are not phased. 
 ```
