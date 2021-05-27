@@ -126,19 +126,19 @@ echo $exit_status > /tmp/exit_status.txt
 # activate gatk conda environ
 source activate gatk
 
-# stream GATK output to terminal o/w capture in log file
-if [ $verbose = "true" ]; then
-  outputlog=/dev/stdout
-elif [ $verbose = "false" ]; then
-  outputlog=$workdir/log.out
-fi
-
 # prepare a fasta dict file using the cellranger ref
 # gatk CreateSequenceDictionary -R /ref/fasta/genome.fa
 scbamdir=$outputdir/scbam/$library_id
 workdir=$SCRATCH1/wasp_${modality}/$genotype/$library_id
 mkdir -p $outputdir
 mkdir -p $workdir
+
+# stream GATK output to terminal o/w capture in log file
+if [ $verbose = "true" ]; then
+  outputlog=/dev/stdout
+elif [ $verbose = "false" ]; then
+  outputlog=$workdir/log.out
+fi
 
 # add filter tag in format field to heterozygous variants
 echo "Adding heterozygosity filter to input VCF"
