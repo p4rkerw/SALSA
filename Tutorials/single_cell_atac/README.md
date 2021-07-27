@@ -111,6 +111,7 @@ done
 # check contents of reference/gatk folder
 ls -1a reference/gatk
 # resources_broad_hg38_v0_1000G_phase1.snps.high_confidence.hg38.vcf.gz
+# resources_broad_hg38_v0_1000G_phase1.snps.high_confidence.hg38.vcf.gz.tbi
 # resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz
 # resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz.tbi
 # resources_broad_hg38_v0_Homo_sapiens_assembly38.known_indels.vcf.gz
