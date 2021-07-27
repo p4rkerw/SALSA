@@ -495,5 +495,5 @@ if [ $exit_status -eq 0 ]; then
     printf "%02d:%02d:%02d\n" $h $m $s
    }
 
-  echo -e "\033[0;40mGenotype completed in $(format_time $SECONDS)\033[0m"
+  echo -e "\033[35;40mGenotype completed in $(format_time $SECONDS)\033[0m"
 fi
