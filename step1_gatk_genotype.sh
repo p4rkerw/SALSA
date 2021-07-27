@@ -480,7 +480,7 @@ done | pv -t
 # gather the genotyped vcf intervals
 exit_status=$(head -n1 /tmp/exit_status.txt)
 if [ $exit_status -eq 0 ]; then
-  echo "Saving $outputvcf to $outputdir"
+  echo -e "\e[0;92mSaving $outputvcf to $outputdir \033[0m"
   ls -1 $workdir/genotype.chr*.vcf.gz > /tmp/final_vcf.list
   gatk MergeVcfs -I /tmp/final_vcf.list -O $outputdir/$outputvcf >> ${outputlog} 2>&1 \
     || { echo -e "\033[0;33mGatherVcfs failed. Check $workdir/log.out for additional info\033[0m"; exit 1; }
@@ -495,5 +495,5 @@ if [ $exit_status -eq 0 ]; then
     printf "%02d:%02d:%02d\n" $h $m $s
    }
 
-  echo -e "\033[40mGenotype completed in $(format_time $SECONDS)\033[0m"
+  echo -e "\033[0;40mGenotype completed in $(format_time $SECONDS)\033[0m"
 fi
