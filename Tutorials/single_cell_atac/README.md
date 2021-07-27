@@ -337,6 +337,12 @@ Usage: step6_wasp.sh [-vbdogianlmpt]
   -h  | --help                    show usage
 ```
 
+**Download the hg38 chromInfo file from UCSC**
+```
+reference=/mnt/g/reference
+wget http://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/chromInfo.txt.gz -O $reference/hg38_chromInfo.txt.gz
+```
+
 **Run WASP on the barcode-filtered bam**
 ```
 # runtime ~2min
