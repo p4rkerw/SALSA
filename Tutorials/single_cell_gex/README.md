@@ -45,11 +45,12 @@ cellranger count \
 **Step 0: Download GATK resource bundle** The following files are required for genotyping with GATK using GRCh38 and can be found in the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false) . Download these files to a folder called gatk in your reference directory. For additional information on GATK germline and RNA-seq short variant discovery check out their [website](https://gatk.broadinstitute.org/hc/en-us/sections/360007226651-Best-Practices-Workflows)
 ```
 # files needed for hg38 GATK RNA-seq short variant discovery
-Homo_sapiens_assembly38.dbsnp138.vcf # md5sum 
-Homo_sapiens_assembly38.known_indels.vcf.gz # md5sum 
-1000G_phase1.snps.high_confidence.hg38.vcf.gz # md5sum 
-Mills_and_1000G_gold_standard.indels.hg38.vcf.gz # md5sum 
-wgs_calling_regions.hg38.interval_list # md5sum 
+# files are prepended with "resources_broad_hg38_v0_" when you download them and may not be compressed
+Homo_sapiens_assembly38.dbsnp138.vcf
+Homo_sapiens_assembly38.known_indels.vcf.gz
+1000G_phase1.snps.high_confidence.hg38.vcf.gz
+Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
+wgs_calling_regions.hg38.interval_list
 
 # (not needed for the tutorial) additional files required for GATK germline short variant discovery in single cell ATAC datasets
 hapmap_3.3.hg38.vcf.gz # md5sum 
@@ -93,17 +94,38 @@ docker run \
 -e SCRATCH1="/mnt/g/scratch" \
 --rm -it p4rkerw/salsa:latest
 ```
-**Step 0: Index and validate the GATK resource bundle files** We will use GATK to index the resource bundle files. In the process of indexing the files, GATK will automatically validate them for proper formatting. 
+**Step 0: Index and validate the GATK resource bundle files** We will use GATK to index the resource bundle files. In the process of indexing the vcfs, GATK will also validate them for proper formatting. 
 ```
-# the dbsnp resource bundle file needs to be compressed prior to indexing
-bcftools view -Oz reference/gatk/Homo_sapiens_assembly38.dbsnp138.vcf > reference/gatk/Homo_sapiens_assembly38.dbsnp138.vcf.gz
-gatk IndexFeatureFile -I reference/gatk/Homo_sapiens_assembly38.dbsnp138.vcf.gz 
-gatk IndexFeatureFile -I reference/gatk/Homo_sapiens_assembly38.known_indels.vcf.gz
-gatk IndexFeatureFile -I reference/gatk/1000G_phase1.snps.high_confidence.hg38.vcf.gz
-gatk IndexFeatureFile -I reference/gatk/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
+# check the md5sum of the gatk resource files to ensure download integrity
+md5sum reference/gatk/resources_broad_hg38_v0*
+# b2979b47800b59b41920bf5432c4b2a0  reference/gatk/resources_broad_hg38_v0_1000G_phase1.snps.high_confidence.hg38.vcf
+# f7e1ef5c1830bfb33675b9c7cbaa4868  reference/gatk/resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf
+# 14cc588a271951ac1806f9be895fb51f  reference/gatk/resources_broad_hg38_v0_Homo_sapiens_assembly38.known_indels.vcf
+# 2e02696032dcfe95ff0324f4a13508e3  reference/gatk/resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf
+# d05ac6b9a247a21ce0030c7494194da9  reference/gatk/resources_broad_hg38_v0_hapmap_3.3.hg38.vcf
+# 1790be6605825971526fff7cb3232764  reference/gatk/resources_broad_hg38_v0_wgs_calling_regions.hg38.interval_list
 
-# only needed for analyzing ATAC datasets
-gatk IndexFeature -I $reference/gatk/hapmap_3.3.hg38.vcf.gz
+# ensure the GATK resource bundle vcf are compressed prior to indexing. Indexing the files with GATK has the added benefit 
+# stringent vcf format validation. Processing the dbsnp resource will take a few minutes...
+for vcf in $(ls reference/gatk/*.vcf); do
+  bcftools view -Oz $vcf > $vcf.gz
+  gatk IndexFeatureFile -I $vcf.gz
+  rm $vcf
+done  
+
+# check contents of reference/gatk folder
+ls -1a reference/gatk
+# resources_broad_hg38_v0_1000G_phase1.snps.high_confidence.hg38.vcf.gz
+# resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz
+# resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz.tbi
+# resources_broad_hg38_v0_Homo_sapiens_assembly38.known_indels.vcf.gz
+# resources_broad_hg38_v0_Homo_sapiens_assembly38.known_indels.vcf.gz.tbi
+# resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
+# resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz.tbi
+# resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
+# resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz.tbi
+# resources_broad_hg38_v0_wgs_calling_regions.hg38.interval_list
+
 ```
 
 **Step 1: Genotype a single cell gene expression dataset** The tutorial workflow is based on the GATK germline short variant discovery pipeline for RNAseq. Additional info can be found on the [GATK website](https://gatk.broadinstitute.org/hc/en-us/articles/360035531192-RNAseq-short-variant-discovery-SNPs-Indels-) . To explore additional GATK options type 'gatk --list' into the terminal. If you want to skip ahead move the [genotyped vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorials/single_cell_gex/pbmc_1k.rna.chr22.vcf.gz) and its index to the volume mounted to project/rna_genotype and proceed to the next step.
