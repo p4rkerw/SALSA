@@ -44,7 +44,6 @@ cellranger count \
 ```
 **Step 0: Download GATK resource bundle** The following files are required for genotyping with GATK using GRCh38 and can be found in the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false) . Download these files to a folder called gatk in your reference directory. For additional information on GATK germline and RNA-seq short variant discovery check out their [website](https://gatk.broadinstitute.org/hc/en-us/sections/360007226651-Best-Practices-Workflows)
 ```
-reference=/mnt/g/reference
 # files needed for hg38 GATK RNA-seq short variant discovery
 Homo_sapiens_assembly38.dbsnp138.vcf # md5sum 
 Homo_sapiens_assembly38.known_indels.vcf.gz # md5sum 
