@@ -328,6 +328,9 @@ function interval_atac_germline_workflow {
 # check input files
 ###########################################################
 ###########################################################
+# check if SCRATCH1 variable points to a directory
+if [ ! -d $SCRATCH1 ]; then echo "$SCRATCH1 variable does not point to scratch directory"; exit 1; fi
+
 # check for input bam file
 if [ ! -f $inputbam ]; then echo "Input bam file not found"; exit 1; fi
 if [ ! -f $inputbam.bai ]; then echo "Input bam index not found. Run samtools index on input bam"; exit 1; fi
@@ -339,6 +342,7 @@ if [ ! -f $reference/fasta/genome.fa ]; then
 fi
 
 # check for rna and atac gatk resource files for haplotype caller
+# TODO: check for indexes and change names of files
 if [ ! -f $gatk_bundle/resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz ] \
   || [ ! -f $gatk_bundle/resources_broad_hg38_v0_Homo_sapiens_assembly38.known_indels.vcf.gz ] \
   || [ ! -f $gatk_bundle/resources_broad_hg38_v0_1000G_phase1.snps.high_confidence.hg38.vcf.gz ] \
@@ -358,12 +362,13 @@ if [ $modality = rna ] && [ ! -f $reference/genes/genes.gtf ]; then
 fi
 
 # check for wgs calling regions and dna variant gatk resources
-if [ ! -f $gatk_bundle/resources_broad_hg38_v0_wgs_calling_regions.hg38 ] \
+# TODO: check for indexes
+if [ ! -f $gatk_bundle/resources_broad_hg38_v0_wgs_calling_regions.hg38.interval_list ] \
   || [ ! -f $gatk_bundle/resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz ] \
   || [ ! -f $gatk_bundle/resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz ]; then
   if [ $modality = "atac" ]; then
   echo "One or more GATK resource files not found in gatk_bundle directory:"
-  echo "resources_broad_hg38_v0_wgs_calling_regions.hg38"
+  echo "resources_broad_hg38_v0_wgs_calling_regions.hg38.interval_list"
   echo "resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz"
   echo "resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz"
   exit 1
@@ -404,7 +409,7 @@ fi
 # or from gtf file used to create rna reference. Change gtf to 0-based coords by subtracting 1 from start in column 4
 echo "Generating calling intervals bed file"
 if [ $modality = "atac" ]; then
-  grep -v @ $gatk_bundle/resources_broad_hg38_v0_wgs_calling_regions.hg38 |pv| cut -f1-3 > /tmp/calling_intervals.bed
+  grep -v @ $gatk_bundle/resources_broad_hg38_v0_wgs_calling_regions.hg38.interval_list |pv| cut -f1-3 > /tmp/calling_intervals.bed
 elif [ $modality = "rna" ]; then
   grep -v '#' $reference/genes/genes.gtf |pv| awk -F'\t' 'BEGIN { OFS="\t" } $3=="exon" {print $1,$4-1,$5}' > /tmp/calling_intervals.bed
 fi
