@@ -94,22 +94,6 @@ project=/mnt/g/salsa
 git -C $project clone https://github.com/p4rkerw/SALSA
 ```
 
-**Step 1: Genotype a single cell gene expression dataset** The tutorial workflow is based on the GATK germline short variant discovery pipeline for RNAseq. Additional info can be found on the [GATK website](https://gatk.broadinstitute.org/hc/en-us/articles/360035531192-RNAseq-short-variant-discovery-SNPs-Indels-) . To explore additional GATK options type 'gatk --list' into the terminal. If you want to skip ahead move the [genotyped vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorials/single_cell_gex/pbmc_1k.rna.chr22.vcf.gz) and its index to the volume mounted to project/rna_genotype and proceed to the next step.
-```
-Usage: step1_gatk_genotype.sh [-inrgdomlt]
-  -i  | --inputbam           STR   path/to/input.bam eg. [rna_counts/sample_1/outs/possorted*.bam]
-  -n  | --library_id         STR   library_id: eg. [sample_1]
-  -r  | --reference          STR   path/to/cellranger_ref eg. [reference/refdata-gex-GRCh38-2020-A]
-  -g  | --gatk_bundle        STR   path/to/gatk_bundle eg. [reference/gatk]
-  -d  | --outputdir          STR   output directory name eg. [project/rna_genotype]
-  -o  | --outputvcf          STR   name of output vcf eg. [sample_1.rna.vcf.gz]
-  -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
-  -l  | --interval           STR   optional: genotype a single chromosome eg. [chr22]
-  -V  | --verbose                  optional: stream GATK output to terminal. Default=[false]
-  -t  | --threads            INT   number of threads. Default=[1]
-  -h  | --help                     show usage
-
-```
 **Launch 🌶️SALSA container** : Mount the required volumes in an interactive session. The $SCRATCH1 variable designates a temporary file directory. The tutorial assumes that your scratch directory is located at /mnt/g/scratch so make sure to change the path if you're using a different directory. The --cpus flag is included to limit the number of threads that each Java process can access within the container. Importantly, it does not limit the total number of threads that can be used by GATK. GATK runs on OpenJDK 1.8, which was the earliest version of Java to have container support. When a docker container is launched, each Java process can access all of the available threads within the container. Unfortunately, Java processes in docker are not aware of other Java processes running in parallel. As a result, GATK may exhaust your system resources when analyzing multiple genomic intervals. You probably wont need to set the --cpus flag in a in a high throughput computational environment (like a cluster), but its absence may cause Java to crash on a workstation. The --cpus flag is only needed for the genotyping step and should be left out in subsequent steps. You can read more about docker and Java [here](https://blog.softwaremill.com/docker-support-in-new-java-8-finally-fd595df0ca54)          
 ```
 SCRATCH1=/mnt/g/scratch
@@ -126,6 +110,35 @@ docker run \
 -e SCRATCH1="/mnt/g/scratch" \
 --rm -it p4rkerw/salsa:latest
 ```
+**Step 0: Index and validate the GATK resource bundle files** We will use GATK to index the resource bundle files. In the process of indexing the files, GATK will automatically validate them for proper formatting. 
+```
+reference=/mnt/g/reference
+gatk IndexFeature -I $reference/gatk/Homo_sapiens_assembly38.dbsnp138.vcf.gz 
+gatk IndexFeature -I $reference/gatk/Homo_sapiens_assembly38.known_indels.vcf.gz
+gatk IndexFeature -I $reference/gatk/1000G_phase1.snps.high_confidence.hg38.vcf.gz
+gatk IndexFeature -I $reference/gatk/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
+
+# only needed for analyzing ATAC datasets
+gatk IndexFeature -I $reference/gatk/hapmap_3.3.hg38.vcf.gz
+```
+
+**Step 1: Genotype a single cell gene expression dataset** The tutorial workflow is based on the GATK germline short variant discovery pipeline for RNAseq. Additional info can be found on the [GATK website](https://gatk.broadinstitute.org/hc/en-us/articles/360035531192-RNAseq-short-variant-discovery-SNPs-Indels-) . To explore additional GATK options type 'gatk --list' into the terminal. If you want to skip ahead move the [genotyped vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorials/single_cell_gex/pbmc_1k.rna.chr22.vcf.gz) and its index to the volume mounted to project/rna_genotype and proceed to the next step.
+```
+Usage: step1_gatk_genotype.sh [-inrgdomlt]
+  -i  | --inputbam           STR   path/to/input.bam eg. [rna_counts/sample_1/outs/possorted*.bam]
+  -n  | --library_id         STR   library_id: eg. [sample_1]
+  -r  | --reference          STR   path/to/cellranger_ref eg. [reference/refdata-gex-GRCh38-2020-A]
+  -g  | --gatk_bundle        STR   path/to/gatk_bundle eg. [reference/gatk]
+  -d  | --outputdir          STR   output directory name eg. [project/rna_genotype]
+  -o  | --outputvcf          STR   name of output vcf eg. [sample_1.rna.vcf.gz]
+  -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
+  -l  | --interval           STR   optional: genotype a single chromosome eg. [chr22]
+  -V  | --verbose                  optional: stream GATK output to terminal. Default=[false]
+  -t  | --threads            INT   number of threads. Default=[1]
+  -h  | --help                     show usage
+
+```
+
 **Genotype an RNA sample with 🌶️SALSA** There are two options in the tutorial workflow depending on whether you did the cellranger alignment or skipped ahead. You only need to do one. 
 ```
 # Option 1: if you followed the cellranger alignment step...
