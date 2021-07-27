@@ -44,16 +44,26 @@ cellranger count \
 ```
 **Step 0: Download GATK resource bundle** The following files are required for genotyping with GATK using GRCh38 and can be found in the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false) . Download these files to a folder called gatk in your reference directory. For additional information on GATK germline and RNA-seq short variant discovery check out their [website](https://gatk.broadinstitute.org/hc/en-us/sections/360007226651-Best-Practices-Workflows)
 ```
-# download to /mnt/g/reference/gatk
-# files needed for GATK RNA-seq short variant discovery
-resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz
-resources_broad_hg38_v0_Homo_sapiens_assembly38.known_indels.vcf.gz
-resources_broad_hg38_v0_1000G_phase1.snps.high_confidence.hg38.vcf.gz
-resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
-resources_broad_hg38_v0_wgs_calling_regions.hg38
+reference=/mnt/g/reference
+# files needed for hg38 GATK RNA-seq short variant discovery
+# Homo_sapiens_assembly38.dbsnp138.vcf.gz
+wget -P $reference/gatk https://console.cloud.google.com/storage/browser/_details/genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf
+
+# Homo_sapiens_assembly38.known_indels.vcf.gz
+wget -P $reference/gatk https://console.cloud.google.com/storage/browser/_details/genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz
+
+# 1000G_phase1.snps.high_confidence.hg38.vcf.gz
+wget -P $reference/gatk https://console.cloud.google.com/storage/browser/_details/genomics-public-data/resources/broad/hg38/v0/1000G_phase1.snps.high_confidence.hg38.vcf.gz
+
+# Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
+wget -P $reference/gatk https://console.cloud.google.com/storage/browser/_details/genomics-public-data/resources/broad/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
+
+# wgs_calling_regions.hg38
+wget -P $reference/gatk https://console.cloud.google.com/storage/browser/_details/genomics-public-data/resources/broad/hg38/v0/wgs_calling_regions.hg38.interval_list
 
 # (not needed for the tutorial) additional files required for GATK germline short variant discovery in single cell ATAC datasets
-resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
+# resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
+wget -P $reference/gatk https://console.cloud.google.com/storage/browser/_details/genomics-public-data/resources/broad/hg38/v0/hapmap_3.3.hg38.vcf.gz
 ```
 
 **Step 0: Pull 🌶️SALSA container** 
