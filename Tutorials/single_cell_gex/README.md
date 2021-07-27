@@ -44,16 +44,16 @@ cellranger count \
 ```
 **Step 0: Download GATK resource bundle** The following files are required for genotyping with GATK using GRCh38 and can be found in the [GATK google cloud bucket](https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0;tab=objects?pli=1&prefix=&forceOnObjectsSortingFiltering=false) . Download these files to a folder called gatk in your reference directory. For additional information on GATK germline and RNA-seq short variant discovery check out their [website](https://gatk.broadinstitute.org/hc/en-us/sections/360007226651-Best-Practices-Workflows)
 ```
-# download to /mnt/g/reference/gatk
-# files needed for GATK RNA-seq short variant discovery
-resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz
-resources_broad_hg38_v0_Homo_sapiens_assembly38.known_indels.vcf.gz
-resources_broad_hg38_v0_1000G_phase1.snps.high_confidence.hg38.vcf.gz
-resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
-resources_broad_hg38_v0_wgs_calling_regions.hg38
+# files needed for hg38 GATK RNA-seq short variant discovery
+# files are prepended with "resources_broad_hg38_v0_" when you download them and may not be compressed
+Homo_sapiens_assembly38.dbsnp138.vcf
+Homo_sapiens_assembly38.known_indels.vcf.gz
+1000G_phase1.snps.high_confidence.hg38.vcf.gz
+Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
+wgs_calling_regions.hg38.interval_list
 
-# (not needed for the tutorial) additional files required for GATK germline short variant discovery in single cell ATAC datasets
-resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
+# (not needed for the single_cell_gex tutorial) additional files required for GATK germline short variant discovery in single cell ATAC datasets
+hapmap_3.3.hg38.vcf.gz
 ```
 
 **Step 0: Pull 🌶️SALSA container** 
@@ -78,22 +78,6 @@ project=/mnt/g/salsa
 git -C $project clone https://github.com/p4rkerw/SALSA
 ```
 
-**Step 1: Genotype a single cell gene expression dataset** The tutorial workflow is based on the GATK germline short variant discovery pipeline for RNAseq. Additional info can be found on the [GATK website](https://gatk.broadinstitute.org/hc/en-us/articles/360035531192-RNAseq-short-variant-discovery-SNPs-Indels-) . To explore additional GATK options type 'gatk --list' into the terminal. If you want to skip ahead move the [genotyped vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorials/single_cell_gex/pbmc_1k.rna.chr22.vcf.gz) and its index to the volume mounted to project/rna_genotype and proceed to the next step.
-```
-Usage: step1_gatk_genotype.sh [-inrgdomlt]
-  -i  | --inputbam           STR   path/to/input.bam eg. [rna_counts/sample_1/outs/possorted*.bam]
-  -n  | --library_id         STR   library_id: eg. [sample_1]
-  -r  | --reference          STR   path/to/cellranger_ref eg. [reference/refdata-gex-GRCh38-2020-A]
-  -g  | --gatk_bundle        STR   path/to/gatk_bundle eg. [reference/gatk]
-  -d  | --outputdir          STR   output directory name eg. [project/rna_genotype]
-  -o  | --outputvcf          STR   name of output vcf eg. [sample_1.rna.vcf.gz]
-  -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
-  -l  | --interval           STR   optional: genotype a single chromosome eg. [chr22]
-  -V  | --verbose                  optional: stream GATK output to terminal. Default=[false]
-  -t  | --threads            INT   number of threads. Default=[1]
-  -h  | --help                     show usage
-
-```
 **Launch 🌶️SALSA container** : Mount the required volumes in an interactive session. The $SCRATCH1 variable designates a temporary file directory. The tutorial assumes that your scratch directory is located at /mnt/g/scratch so make sure to change the path if you're using a different directory. The --cpus flag is included to limit the number of threads that each Java process can access within the container. Importantly, it does not limit the total number of threads that can be used by GATK. GATK runs on OpenJDK 1.8, which was the earliest version of Java to have container support. When a docker container is launched, each Java process can access all of the available threads within the container. Unfortunately, Java processes in docker are not aware of other Java processes running in parallel. As a result, GATK may exhaust your system resources when analyzing multiple genomic intervals. You probably wont need to set the --cpus flag in a in a high throughput computational environment (like a cluster), but its absence may cause Java to crash on a workstation. The --cpus flag is only needed for the genotyping step and should be left out in subsequent steps. You can read more about docker and Java [here](https://blog.softwaremill.com/docker-support-in-new-java-8-finally-fd595df0ca54)          
 ```
 SCRATCH1=/mnt/g/scratch
@@ -110,6 +94,57 @@ docker run \
 -e SCRATCH1="/mnt/g/scratch" \
 --rm -it p4rkerw/salsa:latest
 ```
+**Step 0: Index and validate the GATK resource bundle files** We will use GATK to index the resource bundle files. In the process of indexing the vcfs, GATK will also validate them for proper formatting. 
+```
+# check the md5sum of the gatk resource files to ensure download integrity
+md5sum reference/gatk/resources_broad_hg38_v0*
+# b2979b47800b59b41920bf5432c4b2a0  reference/gatk/resources_broad_hg38_v0_1000G_phase1.snps.high_confidence.hg38.vcf
+# f7e1ef5c1830bfb33675b9c7cbaa4868  reference/gatk/resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf
+# 14cc588a271951ac1806f9be895fb51f  reference/gatk/resources_broad_hg38_v0_Homo_sapiens_assembly38.known_indels.vcf
+# 2e02696032dcfe95ff0324f4a13508e3  reference/gatk/resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf
+# d05ac6b9a247a21ce0030c7494194da9  reference/gatk/resources_broad_hg38_v0_hapmap_3.3.hg38.vcf
+# 1790be6605825971526fff7cb3232764  reference/gatk/resources_broad_hg38_v0_wgs_calling_regions.hg38.interval_list
+
+# ensure the GATK resource bundle vcf are compressed prior to indexing. Indexing the files with GATK has the added benefit 
+# stringent vcf format validation. Processing the dbsnp resource will take a few minutes...
+for vcf in $(ls reference/gatk/*.vcf); do
+  bcftools view -Oz $vcf > $vcf.gz
+  gatk IndexFeatureFile -I $vcf.gz
+  rm $vcf
+done  
+
+# check contents of reference/gatk folder
+ls -1a reference/gatk
+# resources_broad_hg38_v0_1000G_phase1.snps.high_confidence.hg38.vcf.gz
+# resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz
+# resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.vcf.gz.tbi
+# resources_broad_hg38_v0_Homo_sapiens_assembly38.known_indels.vcf.gz
+# resources_broad_hg38_v0_Homo_sapiens_assembly38.known_indels.vcf.gz.tbi
+# resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
+# resources_broad_hg38_v0_Mills_and_1000G_gold_standard.indels.hg38.vcf.gz.tbi
+# resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz
+# resources_broad_hg38_v0_hapmap_3.3.hg38.vcf.gz.tbi
+# resources_broad_hg38_v0_wgs_calling_regions.hg38.interval_list
+
+```
+
+**Step 1: Genotype a single cell gene expression dataset** The tutorial workflow is based on the GATK germline short variant discovery pipeline for RNAseq. Additional info can be found on the [GATK website](https://gatk.broadinstitute.org/hc/en-us/articles/360035531192-RNAseq-short-variant-discovery-SNPs-Indels-) . To explore additional GATK options type 'gatk --list' into the terminal. If you want to skip ahead move the [genotyped vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorials/single_cell_gex/pbmc_1k.rna.chr22.vcf.gz) and its index to the volume mounted to project/rna_genotype and proceed to the next step.
+```
+Usage: step1_gatk_genotype.sh [-inrgdomlt]
+  -i  | --inputbam           STR   path/to/input.bam eg. [rna_counts/sample_1/outs/possorted*.bam]
+  -n  | --library_id         STR   library_id: eg. [sample_1]
+  -r  | --reference          STR   path/to/cellranger_ref eg. [reference/refdata-gex-GRCh38-2020-A]
+  -g  | --gatk_bundle        STR   path/to/gatk_bundle eg. [reference/gatk]
+  -d  | --outputdir          STR   output directory name eg. [project/rna_genotype]
+  -o  | --outputvcf          STR   name of output vcf eg. [sample_1.rna.vcf.gz]
+  -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
+  -l  | --interval           STR   optional: genotype a single chromosome eg. [chr22]
+  -V  | --verbose                  optional: stream GATK output to terminal. Default=[false]
+  -t  | --threads            INT   number of threads. Default=[1]
+  -h  | --help                     show usage
+
+```
+
 **Genotype an RNA sample with 🌶️SALSA** There are two options in the tutorial workflow depending on whether you did the cellranger alignment or skipped ahead. You only need to do one. 
 ```
 # Option 1: if you followed the cellranger alignment step...
@@ -354,6 +389,12 @@ Usage: step6_wasp.sh [-vbdogianlmpt]
 # --sjdbGTFfile reference/refdata-gex-GRCh38-2020-A/genes/genes.gtf \
 # --genomeSAsparseD 3 \
 # --runThreadN 10
+```
+
+**Download the hg38 chromInfo file from UCSC**
+```
+reference=/mnt/g/reference
+wget http://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/chromInfo.txt.gz -O $reference/hg38_chromInfo.txt.gz
 ```
 
 **Run WASP on the barcode-filtered bam**
