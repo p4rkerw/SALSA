@@ -46,30 +46,14 @@ cellranger count \
 ```
 reference=/mnt/g/reference
 # files needed for hg38 GATK RNA-seq short variant discovery
-# Homo_sapiens_assembly38.dbsnp138.vcf.gz 
-# md5sum e7d04b9403b2833d7c09d7fc314201fa
-wget -P $reference/gatk https://console.cloud.google.com/storage/browser/_details/genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf
-
-# Homo_sapiens_assembly38.known_indels.vcf.gz
-# md5sum e5da36dd77485d375bd6ea2d49e0262f
-wget -P $reference/gatk https://console.cloud.google.com/storage/browser/_details/genomics-public-data/resources/broad/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz
-
-# 1000G_phase1.snps.high_confidence.hg38.vcf.gz
-# md5sum 3145ae390a0ee8379d93ac0297f2e8e8
-wget -P $reference/gatk https://console.cloud.google.com/storage/browser/_details/genomics-public-data/resources/broad/hg38/v0/1000G_phase1.snps.high_confidence.hg38.vcf.gz
-
-# Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
-# md5sum 425078412d91859759b71222fdd599a3
-wget -P $reference/gatk https://console.cloud.google.com/storage/browser/_details/genomics-public-data/resources/broad/hg38/v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
-
-# wgs_calling_regions.hg38.interval_list
-# md5sum 695ab4980d02b93853fd3b119a0316f8
-wget -P $reference/gatk https://console.cloud.google.com/storage/browser/_details/genomics-public-data/resources/broad/hg38/v0/wgs_calling_regions.hg38.interval_list
+Homo_sapiens_assembly38.dbsnp138.vcf # md5sum 
+Homo_sapiens_assembly38.known_indels.vcf.gz # md5sum 
+1000G_phase1.snps.high_confidence.hg38.vcf.gz # md5sum 
+Mills_and_1000G_gold_standard.indels.hg38.vcf.gz # md5sum 
+wgs_calling_regions.hg38.interval_list # md5sum 
 
 # (not needed for the tutorial) additional files required for GATK germline short variant discovery in single cell ATAC datasets
-# hapmap_3.3.hg38.vcf.gz
-# md5sum 3a023ff61484864585fc404cf1cba735
-wget -P $reference/gatk https://console.cloud.google.com/storage/browser/_details/genomics-public-data/resources/broad/hg38/v0/hapmap_3.3.hg38.vcf.gz
+hapmap_3.3.hg38.vcf.gz # md5sum 
 ```
 
 **Step 0: Pull 🌶️SALSA container** 
@@ -112,11 +96,12 @@ docker run \
 ```
 **Step 0: Index and validate the GATK resource bundle files** We will use GATK to index the resource bundle files. In the process of indexing the files, GATK will automatically validate them for proper formatting. 
 ```
-reference=/mnt/g/reference
-gatk IndexFeature -I $reference/gatk/Homo_sapiens_assembly38.dbsnp138.vcf.gz 
-gatk IndexFeature -I $reference/gatk/Homo_sapiens_assembly38.known_indels.vcf.gz
-gatk IndexFeature -I $reference/gatk/1000G_phase1.snps.high_confidence.hg38.vcf.gz
-gatk IndexFeature -I $reference/gatk/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
+# the dbsnp resource bundle file needs to be compressed prior to indexing
+bcftools view -Oz reference/gatk/Homo_sapiens_assembly38.dbsnp138.vcf > reference/gatk/Homo_sapiens_assembly38.dbsnp138.vcf.gz
+gatk IndexFeatureFile -I reference/gatk/Homo_sapiens_assembly38.dbsnp138.vcf.gz 
+gatk IndexFeatureFile -I reference/gatk/Homo_sapiens_assembly38.known_indels.vcf.gz
+gatk IndexFeatureFile -I reference/gatk/1000G_phase1.snps.high_confidence.hg38.vcf.gz
+gatk IndexFeatureFile -I reference/gatk/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
 
 # only needed for analyzing ATAC datasets
 gatk IndexFeature -I $reference/gatk/hapmap_3.3.hg38.vcf.gz
