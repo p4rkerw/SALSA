@@ -52,8 +52,8 @@ Homo_sapiens_assembly38.known_indels.vcf.gz
 Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
 wgs_calling_regions.hg38.interval_list
 
-# (not needed for the tutorial) additional files required for GATK germline short variant discovery in single cell ATAC datasets
-hapmap_3.3.hg38.vcf.gz # md5sum 
+# (not needed for the single_cell_gex tutorial) additional files required for GATK germline short variant discovery in single cell ATAC datasets
+hapmap_3.3.hg38.vcf.gz
 ```
 
 **Step 0: Pull 🌶️SALSA container** 
