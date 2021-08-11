@@ -411,7 +411,7 @@ echo "Generating calling intervals bed file"
 if [ $modality = "atac" ]; then
   grep -v @ $gatk_bundle/resources_broad_hg38_v0_wgs_calling_regions.hg38.interval_list |pv| cut -f1-3 > /tmp/calling_intervals.bed
 elif [ $modality = "rna" ]; then
-  grep -v '#' $reference/genes/genes.gtf |pv| awk -F'\t' 'BEGIN { OFS="\t" } $3=="exon" {print $1,$4-1,$5}' > /tmp/calling_intervals.bed
+  cat $reference/genes/genes.gtf| grep -v "#" |pv| awk -F'\t' 'BEGIN { OFS="\t" } $3=="exon" {print $1,$4-1,$5}' > /tmp/calling_intervals.bed
 fi
 
 # specify a temporary file directory for SplitNCigarReads and HaplotypeCaller
