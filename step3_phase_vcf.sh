@@ -110,7 +110,7 @@ fi
 # remove filtered variants
 echo "Removing filtered variants from input vcf"
 bcftools view -Oz -f PASS $inputvcf > /tmp/filter.vcf.gz
-bcftools index --tbi --threads $threads /tmp/filter.vcf.gz 
+bcftools index --tbi --threads $threads /tmp/filter.vcf.gz
 
 # workflow for phasing vcf genotypes
 mkdir -p $outputdir
@@ -153,36 +153,42 @@ fi
 # remove vcf list from any prior phasing runs
 rm $workdir/vcf.list 2> /dev/null
 
-# reproduce flag set to false run in multithreaded series
-if [ $reproduce = "false" ]; then
-  pids=()
-  for interval in ${intervals[@]}; do
-    echo "$workdir/phased.$interval.vcf.gz" >> $workdir/vcf.list
-    shapeit4.2 ${shapeit_args[@]} >> ${outputlog}
-    pids+=($!)
-  done
-  # check exit status for each interva
-  for pid in ${pids[@]}; do
-    if ! wait $pid; then { echo "shapeit phasing failed check $outputlog"; exit_status=1; exit 1; };  fi
-  done
-fi
+# phase each interval in series
+for interval in ${intervals[@]}; do
+  echo "$workdir/phased.$interval.vcf.gz" >> $workdir/vcf.list
+  shapeit4.2 ${shapeit_args[@]} >> ${outputlog}
+done
 
-# reproduce flag set to true run in parallel with single thread per interval
-if [ $reproduce = "true" ]; then
-  pids=()
-  for interval in ${intervals[@]}; do
-    echo "$workdir/phased.$interval.vcf.gz" >> $workdir/vcf.list
-    shapeit4.2 ${shapeit_args[@]} >> ${outputlog} &
-    pids+=($!)
-    while (( $(jobs |wc -l) >= (( ${threads} + 1 )) )); do
-      sleep 0.1
-    done
-  done
-  # check exit status for each interval
-  for pid in ${pids[@]}; do
-    if ! wait $pid; then { echo "shapeit phasing failed check $outputlog"; exit_status=1; exit 1; };  fi
-  done
-fi
+# # reproduce flag set to false run in multithreaded series
+# if [ $reproduce = "false" ]; then
+#   pids=()
+#   for interval in ${intervals[@]}; do
+#     echo "$workdir/phased.$interval.vcf.gz" >> $workdir/vcf.list
+#     shapeit4.2 ${shapeit_args[@]} >> ${outputlog}
+#     pids+=($!)
+#   done
+#   # check exit status for each interva
+#   for pid in ${pids[@]}; do
+#     if ! wait $pid; then { echo "shapeit phasing failed check $outputlog"; exit_status=1; exit 1; };  fi
+#   done
+# fi
+
+# # reproduce flag set to true run in parallel with single thread per interval
+# if [ $reproduce = "true" ]; then
+#   pids=()
+#   for interval in ${intervals[@]}; do
+#     echo "$workdir/phased.$interval.vcf.gz" >> $workdir/vcf.list
+#     shapeit4.2 ${shapeit_args[@]} >> ${outputlog} &
+#     pids+=($!)
+#     while (( $(jobs |wc -l) >= (( ${threads} + 1 )) )); do
+#       sleep 0.1
+#     done
+#   done
+#   # check exit status for each interval
+#   for pid in ${pids[@]}; do
+#     if ! wait $pid; then { echo "shapeit phasing failed check $outputlog"; exit_status=1; exit 1; };  fi
+#   done
+# fi
 
 # concatenate phased vcf files from all intervals
 bcftools concat --threads $threads -Oz -f $workdir/vcf.list -o $outputdir/$outputvcf
