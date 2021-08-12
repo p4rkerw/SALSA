@@ -107,6 +107,11 @@ elif [ $verbose = "false" ]; then
   outputlog=$workdir/log.out
 fi
 
+# remove filtered variants
+echo "Removing filtered variants from input vcf"
+bcftools view -Oz -f PASS $inputvcf > /tmp/filter.vcf.gz
+bcftools index --tbi --threads $threads /tmp/filter.vcf.gz 
+
 # workflow for phasing vcf genotypes
 mkdir -p $outputdir
 
