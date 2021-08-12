@@ -251,7 +251,7 @@ for i in {1..22} X;do echo "${i} chr${i}";done > /tmp/rename_chrm.txt
 inputvcf=ALL.chr22.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz
 bcftools annotate reference/phasing/biallelic_SNV/$inputvcf --threads 4 --rename-chrs /tmp/rename_chrm.txt -Oz -o $SCRATCH1/$inputvcf
 mv $SCRATCH1/$inputvcf reference/phasing/biallelic_SNV
-bcftools index --threads 4 reference/phasing/biallelic_SNV/$inputvcf
+bcftools index --threads 4 --tbi reference/phasing/biallelic_SNV/$inputvcf
 ```
 **Phase an interval with 🌶️SALSA** For the tutorial, we will use multithreading to phase the variants, which means we will not set the --reproduce flag. As a result, there may be small differences between the phased vcf in the repository and your vcf. 
 ```
