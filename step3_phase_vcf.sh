@@ -116,7 +116,7 @@ bcftools index --tbi --threads $threads /tmp/filter.vcf.gz
 mkdir -p $outputdir
 
 workdir=$SCRATCH1/phasing/$library_id
-rm -rf $workdir; mkdir -p $workdir 2> /dev/null
+rm -rf $workdir; mkdir -p $workdir
 
 # unpack individual chromosome maps
 mkdir -p $workdir/phasing/shapeit4/maps
@@ -133,10 +133,8 @@ fi
 # assign base shapeit args
 shapeit_args=(--map $workdir/phasing/shapeit4/maps/$interval.b38.gmap.gz \
   --input /tmp/filter.vcf.gz \
-  --region ${interval} \
   --seed 123456 \
-  --sequencing \
-  --output $workdir/phased.${interval}.vcf.gz)
+  --sequencing)
 
 # set multithreading if reproduce flag is false
 if [ $reproduce = "false" ]; then
@@ -150,12 +148,18 @@ rm $workdir/vcf.list 2> /dev/null
 if [ $snvindel = "true" ]; then
   for interval in ${intervals[@]}; do
   echo "$workdir/phased.$interval.vcf.gz" >> $workdir/vcf.list
-  shapeit4.2 ${shapeit_args[@]} --reference $phasingref/ALL.${interval}.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz >> ${outputlog}
+  shapeit4.2 ${shapeit_args[@]} \
+  --region ${interval} \
+  --reference $phasingref/ALL.${interval}.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz \
+  --output $workdir/phased.${interval}.vcf.gz >> ${outputlog}
   done
 elif [ $snvonly = "true" ]; then
   for interval in ${intervals[@]}; do
   echo "$workdir/phased.$interval.vcf.gz" >> $workdir/vcf.list
-  shapeit4.2 ${shapeit_args[@]} --reference $phasingref/ALL.${interval}.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz >> ${outputlog}
+  shapeit4.2 ${shapeit_args[@]} \
+  --region ${interval} \
+  --reference $phasingref/ALL.${interval}.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz \
+  --output $workdir/phased.${interval}.vcf.gz >> ${outputlog}
   done
 fi
 
