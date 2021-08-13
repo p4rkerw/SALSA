@@ -138,13 +138,6 @@ shapeit_args=(--map $workdir/phasing/shapeit4/maps/$interval.b38.gmap.gz \
   --sequencing \
   --output $workdir/phased.${interval}.vcf.gz)
 
-# set reference for SNV only or SNV_INDEL
-if [ $snvindel = "true" ]; then
-  shapeit_args+=(--reference $phasingref/ALL.$interval.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz)
-elif [ $snvonly = "true" ]; then
-  shapeit_args+=(--reference $phasingref/ALL.$interval.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz)
-fi
-
 # set multithreading if reproduce flag is false
 if [ $reproduce = "false" ]; then
   shapeit_args+=(--thread ${threads})
@@ -153,11 +146,18 @@ fi
 # remove vcf list from any prior phasing runs
 rm $workdir/vcf.list 2> /dev/null
 
-# phase each interval in series
-for interval in ${intervals[@]}; do
+# set reference for SNV only or SNV_INDEL
+if [ $snvindel = "true" ]; then
+  for interval in ${intervals[@]}; do
   echo "$workdir/phased.$interval.vcf.gz" >> $workdir/vcf.list
-  shapeit4.2 ${shapeit_args[@]} >> ${outputlog}
-done
+  shapeit4.2 ${shapeit_args[@]} --reference $phasingref/ALL.${interval}.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz >> ${outputlog}
+  done
+elif [ $snvonly = "true" ]; then
+  for interval in ${intervals[@]}; do
+  echo "$workdir/phased.$interval.vcf.gz" >> $workdir/vcf.list
+  shapeit4.2 ${shapeit_args[@]} --reference $phasingref/ALL.${interval}.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz >> ${outputlog}
+  done
+fi
 
 # # reproduce flag set to false run in multithreaded series
 # if [ $reproduce = "false" ]; then
