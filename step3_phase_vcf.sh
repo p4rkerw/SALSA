@@ -131,8 +131,7 @@ else
 fi
 
 # assign base shapeit args
-shapeit_args=(--map $workdir/phasing/shapeit4/maps/$interval.b38.gmap.gz \
-  --input /tmp/filter.vcf.gz \
+shapeit_args=(--input /tmp/filter.vcf.gz \
   --seed 123456 \
   --sequencing)
 
@@ -149,6 +148,7 @@ if [ $snvindel = "true" ]; then
   for interval in ${intervals[@]}; do
   echo "$workdir/phased.$interval.vcf.gz" >> $workdir/vcf.list
   shapeit4.2 ${shapeit_args[@]} \
+  --map $workdir/phasing/shapeit4/maps/$interval.b38.gmap.gz \
   --region ${interval} \
   --reference $phasingref/ALL.${interval}.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz \
   --output $workdir/phased.${interval}.vcf.gz >> ${outputlog}
@@ -157,6 +157,7 @@ elif [ $snvonly = "true" ]; then
   for interval in ${intervals[@]}; do
   echo "$workdir/phased.$interval.vcf.gz" >> $workdir/vcf.list
   shapeit4.2 ${shapeit_args[@]} \
+  --map $workdir/phasing/shapeit4/maps/$interval.b38.gmap.gz \
   --region ${interval} \
   --reference $phasingref/ALL.${interval}.shapeit2_integrated_v1a.GRCh38.20181129.phased.vcf.gz \
   --output $workdir/phased.${interval}.vcf.gz >> ${outputlog}
