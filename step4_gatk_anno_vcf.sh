@@ -94,6 +94,10 @@ echo $exit_status > /tmp/exit_status.txt
 # activate gatk conda environ
 source activate gatk
 
+# load workdir
+workdir=$SCRATCH1/gatk_genotype/$modality/$library_id/annotation
+mkdir -p $workdir 2> /dev/null
+
 # stream GATK output to terminal o/w capture in log file
 if [ $verbose = "true" ]; then
   outputlog=/dev/stdout
@@ -116,8 +120,6 @@ fi
 # update output vcf file names
 funcotated_vcf=$outputdir/$outputvcf
 funcotated_table=$outputdir/$output_table
-workdir=$SCRATCH1/gatk_genotype/$modality/$library_id/annotation
-mkdir -p $workdir 2> /dev/null
 mkdir $outputdir 2> /dev/null
 
 # index vcf
