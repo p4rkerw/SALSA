@@ -113,7 +113,7 @@ echo "Parameters remaining are  : $@"
 
 
 # checking input files
-if [ ! -f $inputbam ]; then { echo "Input bam file not found"; exit 1; }; fi
+if [ ! -f $waspbam ]; then { echo "Input bam file not found"; exit 1; }; fi
 if [ ! -f $inputvcf ]; then { echo "Input vcf file not found"; exit 1; }; fi
 if [ ! -f $barcodes ]; then { echo "Barcodes file not found"; exit 1; }; fi
 
