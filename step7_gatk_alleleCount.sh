@@ -117,6 +117,8 @@ if [ ! -f $waspbam ]; then { echo "Input bam file not found"; exit 1; }; fi
 if [ ! -f $inputvcf ]; then { echo "Input vcf file not found"; exit 1; }; fi
 if [ ! -f $barcodes ]; then { echo "Barcodes file not found"; exit 1; }; fi
 
+# TODO: check for reference .dict file
+
 # ensure gatk and miniconda are in path when working in LSF environment
 export PATH=/gatk:/opt/miniconda/envs/gatk/bin:/opt/miniconda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
 
