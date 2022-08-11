@@ -32,7 +32,7 @@ Usage: step5_filterbam.sh [-nidolmbeth]
 -o  | --outputbam          STR   filtered output bam eg. [sample_1.bcfilter.bam]
 -l  | --interval           STR   optional: filter a single chromosome eg. [chr22]
 -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
--b  | --barcodes           STR   path/to/barcodes.csv with headers and three columns. First column is named "barcodes"
+-b  | --barcodes           STR   path/to/barcodes.csv with headers and three columns. First column is named "barcode"
                                  second column is group "orig.ident" and third column is cell type eg. [project/barcodes/rna_barcodes.csv]
 -e  | --validate                 validate the barcode-filtered bam file. Default=[false]
 -t  | --threads            INT   number of threads. Default=[1]
