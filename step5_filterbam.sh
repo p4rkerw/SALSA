@@ -84,7 +84,7 @@ echo "Parameters remaining are  : $@"
 
 # check input files
 if [ ! -f $inputbam ]; then { echo "Input bam file not found"; exit 1; }; fi
-if [ ! -f $barocdes ]; then { echo "Barcodes file not found"; exit 1; }; fi
+if [ ! -f $barcodes ]; then { echo "Barcodes file not found"; exit 1; }; fi
 
 # ensure gatk and miniconda are in path when working in LSF environment
 export PATH=/gatk:/opt/miniconda/envs/gatk/bin:/opt/miniconda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
