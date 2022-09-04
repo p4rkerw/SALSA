@@ -142,6 +142,9 @@ function gatk_germline_short_variant_scatter_gather {
   exit_status=$(head -n1 /tmp/exit_status.txt)
   if [ $exit_status -eq 1 ]; then return 1; fi
 
+  #TODO: add option to save analysis-read bam interval to $workdir
+
+
   # remove vcf list if session has been used multiple times
   if [ -f /tmp/gvcf.list ]; then rm /tmp/gvcf.list; fi
   # call variants with haplotypecaller
@@ -484,6 +487,8 @@ if [ $exit_status -eq 0 ]; then
   ls -1 $workdir/genotype.chr*.vcf.gz > /tmp/final_vcf.list
   gatk MergeVcfs -I /tmp/final_vcf.list -O $outputdir/$outputvcf >> ${outputlog} 2>&1 \
     || { echo -e "\033[0;33mGatherVcfs failed. Check $workdir/log.out for additional info\033[0m"; exit 1; }
+    
+  # TODO: add option to gather analysis-ready bam intervals and save to outputdir  
 
   #cleanup
   rm -rf $workdir
