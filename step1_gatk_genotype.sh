@@ -40,7 +40,7 @@ Usage: step1_gatk_genotype.sh [-inrgdomlbVt]
   -o  | --outputvcf          STR   name of output vcf eg. [sample_1.rna.vcf.gz]
   -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
   -l  | --interval           STR   optional: genotype a single chromosome eg. [chr22]
-  -b  | --outputbam          STR   optional: save bam to output dir. eg. [sample_1.rna.chr22.bam]
+  -b  | --outputbam          STR   optional: save bqsr bam to output dir. eg. [sample_1.rna.chr22.bam]
   -V  | --verbose                  optional: stream GATK output to terminal. Default=[false]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
