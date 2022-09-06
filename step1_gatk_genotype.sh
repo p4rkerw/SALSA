@@ -8,6 +8,7 @@ set -e
 # Set some default values:
 interval=""
 threads=1
+savebam=false
 verbose=false
 exit_status=0
 
@@ -30,7 +31,7 @@ Author: Parker C. Wilson MD, PhD
 Contact: parkerw@wustl.edu
 Version: 1.0
 
-Usage: step1_gatk_genotype.sh [-inrgdomlVt]
+Usage: step1_gatk_genotype.sh [-inrgdomlsVt]
   -i  | --inputbam           STR   path/to/input.bam eg. [project/sample_1/outs/possorted*.bam]
   -n  | --library_id         STR   library_id: eg. [sample_1]
   -r  | --reference          STR   path/to/cellranger_ref eg. [reference/refdata-gex-GRCh38-2020-A]
@@ -39,6 +40,7 @@ Usage: step1_gatk_genotype.sh [-inrgdomlVt]
   -o  | --outputvcf          STR   name of output vcf eg. [sample_1.rna.vcf.gz]
   -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
   -l  | --interval           STR   optional: genotype a single chromosome eg. [chr22]
+  -s  | --savebam                  optional: save analysis-ready bam to output dir. Default=[false]
   -V  | --verbose                  optional: stream GATK output to terminal. Default=[false]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
@@ -50,8 +52,8 @@ exit 1
 if [[ ${#} -eq 0 ]]; then usage; fi
 
 PARSED_ARGUMENTS=$(getopt -a -n step1_gatk_genotype.sh \
--o i:n:r:g:d:o:m:l:Vt:h \
---long inputbam:,library_id:,reference:,gatk_bundle:,outputdir:,outputvcf:,modality:,interval:,verbose,threads:,help -- "$@")
+-o i:n:r:g:d:o:m:l:sVt:h \
+--long inputbam:,library_id:,reference:,gatk_bundle:,outputdir:,outputvcf:,modality:,interval:,savebam,verbose,threads:,help -- "$@")
 
 echo "PARSED_ARGUMENTS are $PARSED_ARGUMENTS"
 eval set -- "$PARSED_ARGUMENTS"
@@ -66,6 +68,7 @@ do
     -o | --outputvcf)           outputvcf=$2                    ; shift 2 ;;
     -m | --modality)            modality=$2                     ; shift 2 ;;
     -l | --interval)            interval=$2                     ; shift 2 ;;
+    -s | --savebam)             savebam=true                    ; shift 1 ;;
     -V | --verbose)             verbose=true                    ; shift 1 ;;
     -t | --threads)             threads=$2                      ; shift 2 ;;
     -h | --help)                usage ;;
@@ -83,6 +86,7 @@ echo "outputdir                 : $outputdir"
 echo "outputvcf                 : $outputvcf"
 echo "modality                  : $modality"
 echo "interval                  : $interval"
+echo "savebam                   : $savebam"
 echo "verbose                   : $verbose"
 echo "threads                   : $threads"
 echo "Parameters remaining are  : $@"
@@ -133,7 +137,10 @@ function gatk_germline_short_variant_scatter_gather {
   if [ $exit_status -eq 1 ]; then return 1; fi
 
   # make sure bam outputs are indexed
+  # and create list of bqsr interval bam
+  if [ -f /tmp/ibam.list ]; then rm /tmp/ibam.list; fi
   for scatter_interval in ${scatter_intervals[@]}; do
+    echo "$intervaldir/bqsr.$scatter_interval.bam" >> /tmp/ibam.list
     if [ ! -f $intervaldir/bqsr.$scatter_interval.bam.bai ]; then
       samtools index -@ $threads $intervaldir/bqsr.$scatter_interval.bam \
         || { echo -e "\033[0;33msamtools index failed on $scatter_interval\033[0m"; echo 1 > /tmp/exit_status.txt; }
@@ -142,8 +149,20 @@ function gatk_germline_short_variant_scatter_gather {
   exit_status=$(head -n1 /tmp/exit_status.txt)
   if [ $exit_status -eq 1 ]; then return 1; fi
 
-  #TODO: add option to save analysis-read bam interval to $workdir
-
+  # gather the analysis-ready bam intervals and index
+  if [ $savebam == "true" ]; then
+    echo "Gathering scattered bqsr bams for $interval"
+    gatk GatherBamFiles \
+      -I /tmp/ibam.list \
+      -O $workdir/bqsr.$interval.bam >> ${outputlog} 2>&1 \
+      || { echo -e "\033[0;33mGatherBamFiles failed on $interval. Check $outputlog for additional info\033[0m"; return 1; }
+    echo "Sorting gathered bam file"
+    samtools sort -@ $threads $workdir/bqsr.$interval.bam -o $workdir/sorted.bqsr.$interval.bam >> ${outputlog} 2>&1 \
+      || { echo -e "\033[0;33msamtools sort failed on $interval. Check $outputlog file for additional info\033[0m"; return 1; }
+    samtools index -@ $threads $workdir/sorted.bqsr.$interval.bam >> ${outputlog} 2>&1 \
+      || { echo -e "\033[0;33msamtools index failed on $interval. Check $outputlog for additional info\033[0m"; return 1; }
+    rm $workdir/bqsr.$interval.bam
+  fi
 
   # remove vcf list if session has been used multiple times
   if [ -f /tmp/gvcf.list ]; then rm /tmp/gvcf.list; fi
@@ -488,7 +507,21 @@ if [ $exit_status -eq 0 ]; then
   gatk MergeVcfs -I /tmp/final_vcf.list -O $outputdir/$outputvcf >> ${outputlog} 2>&1 \
     || { echo -e "\033[0;33mGatherVcfs failed. Check $workdir/log.out for additional info\033[0m"; exit 1; }
     
-  # TODO: add option to gather analysis-ready bam intervals and save to outputdir  
+  # save analysis-ready bam to outputdir  
+  if [ $savebam == "true" ]; then
+    echo -e "\e[0;92mSaving analysis-ready bam to $outputdir \033[0m"
+    if [ -f /tmp/bam.list ]; then rm /tmp/bam.list; fi
+    ls -1 $workdir/sorted.bqsr.chr*.bam > /tmp/bam.list
+    gatk GatherBamFiles \
+      -I /tmp/bam.list \
+      -O $workdir/$library_id.$modality.bqsr.bam >> ${outputlog} 2>&1 \
+      || { echo -e "\033[0;33mGatherBamFiles failed. Check $outputlog for additional info\033[0m"; return 1; }
+    echo "Sorting gathered bam file"
+    samtools sort -@ $threads $workdir/$library_id.$modality.bqsr.bam -o $outputdir/$library_id.$modality.bqsr.bam >> ${outputlog} 2>&1 \
+      || { echo -e "\033[0;33msamtools sort failed. Check $outputlog file for additional info\033[0m"; return 1; }
+    samtools index -@ $threads $outputdir/$library_id.$modality.bqsr.bam >> ${outputlog} 2>&1 \
+      || { echo -e "\033[0;33msamtools index failed. Check $outputlog for additional info\033[0m"; return 1; }
+  fi
 
   #cleanup
   rm -rf $workdir
