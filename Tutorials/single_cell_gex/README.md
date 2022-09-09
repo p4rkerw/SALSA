@@ -131,8 +131,8 @@ ls -1a reference/gatk
 
 **Step 1: Genotype a single cell gene expression dataset** The tutorial workflow is based on the GATK germline short variant discovery pipeline for RNAseq. Additional info can be found on the [GATK website](https://gatk.broadinstitute.org/hc/en-us/articles/360035531192-RNAseq-short-variant-discovery-SNPs-Indels-) . To explore additional GATK options type 'gatk --list' into the terminal. If you want to skip ahead move the [genotyped vcf](https://github.com/p4rkerw/SALSA/blob/main/Tutorials/single_cell_gex/pbmc_1k.rna.chr22.vcf.gz) and its index to the volume mounted to project/rna_genotype and proceed to the next step.
 ```
-Usage: step1_gatk_genotype.sh [-inrgdomlt]
-  -i  | --inputbam           STR   path/to/input.bam eg. [rna_counts/sample_1/outs/possorted*.bam]
+Usage: step1_gatk_genotype.sh [-inrgdomlbVt]
+  -i  | --inputbam           STR   path/to/input.bam eg. [project/sample_1/outs/possorted*.bam]
   -n  | --library_id         STR   library_id: eg. [sample_1]
   -r  | --reference          STR   path/to/cellranger_ref eg. [reference/refdata-gex-GRCh38-2020-A]
   -g  | --gatk_bundle        STR   path/to/gatk_bundle eg. [reference/gatk]
@@ -140,6 +140,7 @@ Usage: step1_gatk_genotype.sh [-inrgdomlt]
   -o  | --outputvcf          STR   name of output vcf eg. [sample_1.rna.vcf.gz]
   -m  | --modality           STR   sequencing modality for short variant discovery: [rna] [atac]
   -l  | --interval           STR   optional: genotype a single chromosome eg. [chr22]
+  -b  | --outputbam          STR   optional: save bqsr bam to output dir. eg. [sample_1.rna.chr22.bam]
   -V  | --verbose                  optional: stream GATK output to terminal. Default=[false]
   -t  | --threads            INT   number of threads. Default=[1]
   -h  | --help                     show usage
