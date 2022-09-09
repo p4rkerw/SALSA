@@ -378,6 +378,7 @@ if [ ! -f $gatk_bundle/resources_broad_hg38_v0_Homo_sapiens_assembly38.dbsnp138.
 fi
 
 # check for rna gtf file used to generate calling intervals
+# TODO: make compatible with genes.gtf.gz file as seen in cellranger-arc reference
 if [ $modality = rna ] && [ ! -f $reference/genes/genes.gtf ]; then
   echo "genes.gtf file not found in $reference/genes directory"
   exit 1
@@ -433,6 +434,7 @@ echo "Generating calling intervals bed file"
 if [ $modality = "atac" ]; then
   grep -v @ $gatk_bundle/resources_broad_hg38_v0_wgs_calling_regions.hg38.interval_list |pv| cut -f1-3 > /tmp/calling_intervals.bed
 elif [ $modality = "rna" ]; then
+# TODO: make compatible with genes.gtf.gz file as seen in cellranger-arc reference
   cat $reference/genes/genes.gtf| grep -v "#" |pv| awk -F'\t' 'BEGIN { OFS="\t" } $3=="exon" {print $1,$4-1,$5}' > /tmp/calling_intervals.bed
 fi
 
