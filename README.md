@@ -2,13 +2,13 @@
 
 Here you will find a workflow to analyze single cell allele-specific expression and chromatin accessibility obtained from 10X Genomics Single Cell Gene Expression and Single Cell ATAC datasets. To get started follow along with one of our [tutorials](https://github.com/p4rkerw/SALSA/tree/main/Tutorials). 
 
-If you use 🌶️SALSA please cite the following [manuscript](https://pubmed.ncbi.nlm.nih.gov/33850129/)
+If you use 🌶️SALSA please cite the following [manuscript](https://pubmed.ncbi.nlm.nih.gov/36068241/)
 ```
-Muto Y, Wilson PC, Ledru N, Wu H, Dimke H, Waikar SS, Humphreys BD.
-Single cell transcriptional and chromatin accessibility profiling redefine cellular heterogeneity in the adult human kidney. 
-Nat Commun. 2021 Apr 13;12(1):2190. 
-doi: 10.1038/s41467-021-22368-w. 
-PMID: 33850129.
+Wilson PC, Muto Y, Wu H, Karihaloo A, Waikar SS, Humphreys BD.
+Multimodal single cell sequencing implicates chromatin accessibility and genetic background in diabetic kidney disease progression
+Nat Commun 13, 5253 (2022). 
+https://doi.org/10.1038/s41467-022-32972-z
+PMID: 36068241
 ```
 Thanks!  
 Parker
