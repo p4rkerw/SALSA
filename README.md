@@ -16,7 +16,7 @@ Parker
 Visit the Wilson lab website:<br/>
 www.parkerwilsonlab.com
 
-Visit the Humphrey's lab website:<br/>
+Visit the Humphreys lab website:<br/>
 www.humphreyslab.com  
 <br/>
 Check out our interactive datasets with Kidney Interactive mulTiomics (KIT):  
