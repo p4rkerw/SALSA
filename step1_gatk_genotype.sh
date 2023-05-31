@@ -308,7 +308,7 @@ function interval_atac_germline_workflow {
   # cnnscorevariants may have better performance than vqsr for single sample genotyping. VQSR recommends >30 exomes
   # see discussion: https://gatk.broadinstitute.org/hc/en-us/community/posts/360056186812-Using-VQSR-for-small-scale-experiments
   if [ -f /tmp/cnnvcf.list ]; then rm /tmp/cnnvcf.list; fi
-  echo "Runnning CNNScoreVariants on $interval"
+  echo "Running CNNScoreVariants on $interval"
   for scatter_interval in ${scatter_intervals[@]}; do
     echo "$intervaldir/annotated.$scatter_interval.vcf.gz" >> /tmp/cnnvcf.list
     gatk CNNScoreVariants --java-options "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap" \
