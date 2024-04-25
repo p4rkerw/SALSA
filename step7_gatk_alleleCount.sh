@@ -262,7 +262,7 @@ if [ $celltype_pseudobulk_counts = "true" ]; then
     awk '{print $1}' | cut -d ':' -f3 > /tmp/${modality}_barcodes.$library_id.$celltype.txt 
 
     rm $workdir/$library_id.$celltype.${interval}wasp.bam 2> /dev/null
-    TMPDIR=$workdir/TMPDIR  
+    export TMPDIR=$workdir/TMPDIR  
     rm -rf $TMPDIR; mkdir -p $TMPDIR 2> /dev/null
     subset-bam \
       --bam $waspbam \
@@ -344,7 +344,7 @@ if [ $sc_counts = "true" ]; then
 
   # split wasp bam file into cell-specific bams in parallel loop using subset-bam
   echo "Splitting $(echo $(basename $bamsites)) into single cell bam files"
-  TMPDIR=$workdir/TMPDIR
+  export TMPDIR=$workdir/TMPDIR
   rm -rf $TMPDIR; mkdir -p $TMPDIR 2> /dev/null
   for barcode in ${barcodes[*]}; do \
     echo $barcode > /tmp/barcode.txt
