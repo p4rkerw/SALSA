@@ -111,7 +111,7 @@ awk -v a="${library_id}" '{if($2 == a) {print $1"-1"}}' > /tmp/${modality}_barco
 # filter for sample barcodes that pass QC
 echo "Filtering bam file by CB barcode tag"
 rm $outputdir/$outputbam 2> /dev/null
-TMPDIR=$workdir/TMPDIR  
+export TMPDIR=$workdir/TMPDIR  
 rm -rf $TMPDIR; mkdir -p $TMPDIR 2> /dev/null
 cores=$(($threads / 2))
 subset-bam \
